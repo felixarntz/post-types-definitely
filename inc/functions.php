@@ -17,7 +17,7 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 
 		$post_type = \WPDLib\Components\Manager::get( '*.' . get_post_type( $id ), 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 		if ( $post_type ) {
-			foreach ( $post_type->get_children() as $metabox ) {
+			foreach ( $post_type->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				foreach ( $metabox->get_children() as $field ) {
 					$type_hint = $field->validate_meta_value( null, true );
 					$meta_value = null;
@@ -57,7 +57,7 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 
 		$meta_value = null;
 
-		$field = \WPDLib\Components\Manager::get( '*.' . get_post_type( $id ) . '.*.' . $meta_key, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+		$field = \WPDLib\Components\Manager::get( '*.' . get_post_type( $id ) . '.*.' . $meta_key, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 		if ( $field ) {
 			$type_hint = $field->validate_meta_value( null, true );
 			if ( is_array( $type_hint ) ) {

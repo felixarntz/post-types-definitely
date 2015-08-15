@@ -20,21 +20,24 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 	class Taxonomy extends Base {
 
-		protected $post_type_slugs = array();
+		protected $registered = false;
+		protected $added_to_menu = false;
 
 		public function is_already_added() {
 			return taxonomy_exists( $this->slug );
 		}
 
 		public function register() {
+			if ( $this->registered ) {
+				return;
+			}
+
 			if ( ! $this->is_already_added() ) {
 				$_taxonomy_args = $this->args;
 
 				unset( $_taxonomy_args['title'] );
 				unset( $_taxonomy_args['singular_title'] );
 				unset( $_taxonomy_args['messages'] );
-				unset( $_taxonomy_args['post_types'] );
-				unset( $_taxonomy_args['show_add_new_in_menu'] );
 				unset( $_taxonomy_args['help'] );
 
 				$_taxonomy_args['label'] = $this->args['title'];
@@ -50,44 +53,32 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			} else {
 				//TODO: merge several properties into existing taxonomies
 			}
+
+			$this->registered = true;
 		}
 
 		public function add_to_menu() {
-			$menu = $this->get_parent();
-
-			if ( empty( $menu->slug ) ) {
+			if ( $this->added_to_menu ) {
 				return;
 			}
 
-			if ( in_array( $this->slug, array( 'category', 'post_tag', 'post_format' ) ) ) {
+			if ( ! $this->args['show_in_menu'] ) {
 				return;
 			}
 
-			if ( false === $menu->is_already_added( 'edit-tags.php?taxonomy=' . $this->slug ) ) {
-				$taxonomy_obj = get_taxonomy( $this->slug );
+			$taxonomy_obj = get_taxonomy( $this->slug );
 
-				add_menu_page( '', $menu->label, $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug, '', $menu->icon, $menu->position );
-				$menu->added = true;
-				$menu->subslug = 'edit-tags.php?taxonomy=' . $this->slug;
-				$menu->sublabel = $this->args['labels']['menu_name'];
-			} else {
-				if ( false === $menu->subslug ) {
-					return;
-				}
+			foreach ( $this->parents as $post_type ) {
+				$menu = $post_type->get_parent();
 
-				$taxonomy_obj = get_taxonomy( $this->slug );
-
-				add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['menu_name'], $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug );
-
-				if ( $menu->sublabel !== true ) {
-					global $submenu;
-
-					if ( isset( $submenu[ $menu->subslug ] ) ) {
-						$submenu[ $menu->subslug ][0][0] = $menu->sublabel;
-						$menu->sublabel = true;
-					}
+				if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
+					call_user_func( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['menu_name'], $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug . '&post_type=' . $post_type->slug );
+				} else {
+					add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['menu_name'], $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug . '&post_type=' . $post_type->slug );
 				}
 			}
+
+			$this->added_to_menu = true;
 		}
 
 		public function render_help() {
@@ -118,7 +109,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 			if ( $status === true ) {
 
-				if ( in_array( $this->slug, array( 'category', 'post_tag', 'post_format', 'link_category', 'nav_menu' ) ) ) {
+				if ( in_array( $this->slug, array( 'post_format', 'link_category', 'nav_menu' ) ) ) {
 					return new UtilError( 'no_valid_taxonomy', sprintf( __( 'The taxonomy slug %s is forbidden since it would interfere with WordPress Core functionality.', 'wpptd' ), $this->slug ), '', ComponentManager::get_scope() );
 				}
 
@@ -205,16 +196,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				if ( null === $this->args['show_ui'] ) {
 					$this->args['show_ui'] = $this->args['public'];
 				}
-				$menu = $this->get_parent();
-				if ( $this->args['show_in_menu'] && empty( $menu->slug ) ) {
-					$this->args['show_in_menu'] = true;
-				} else {
-					$this->args['show_in_menu'] = false;
-				}
-
-				// handle post types
-				if ( is_array( $this->args['post_types'] ) ) {
-					$this->post_type_slugs = $this->args['post_types'];
+				if ( null === $this->args['show_in_menu'] ) {
+					$this->args['show_in_menu'] = $this->args['show_ui'];
 				}
 
 				// handle help
@@ -258,14 +241,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'public'				=> true,
 				'show_ui'				=> null,
 				'show_in_menu'			=> null,
-				'show_add_new_in_menu'	=> true,
 				'show_in_nav_menus'		=> null,
 				'show_tagcloud'			=> null,
 				'show_in_quick_edit'	=> null,
 				'show_admin_column'		=> false,
 				'capabilities'			=> array(),
 				'hierarchical'			=> false,
-				'post_types'			=> array(),
 				'rewrite'				=> null,
 				'query_var'				=> true,
 				'sort'					=> null,
@@ -291,7 +272,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 * @return bool
 		 */
 		protected function supports_multiparents() {
-			return false;
+			return true;
 		}
 
 		/**

@@ -21,8 +21,6 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 	class PostType extends Base {
 
-		protected $taxonomy_slugs = array();
-
 		public function is_already_added() {
 			return post_type_exists( $this->slug );
 		}
@@ -35,7 +33,6 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				unset( $_post_type_args['singular_title'] );
 				unset( $_post_type_args['messages'] );
 				unset( $_post_type_args['enter_title_here'] );
-				unset( $_post_type_args['taxonomies'] );
 				unset( $_post_type_args['show_add_new_in_menu'] );
 				unset( $_post_type_args['help'] );
 				unset( $_post_type_args['list_help'] );
@@ -83,15 +80,19 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					add_submenu_page( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
 				}
 			} else {
-				if ( false === $menu->subslug ) {
+				if ( false === $menu->sublabel ) {
 					return;
 				}
 
 				$post_type_obj = get_post_type_object( $this->slug );
 
-				add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['all_items'], $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug );
+				if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
+					call_user_func( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['all_items'], $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug );
+				} else {
+					add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['all_items'], $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug );
+				}
 
-				if ( $menu->sublabel !== true ) {
+				if ( true !== $menu->sublabel ) {
 					global $submenu;
 
 					if ( isset( $submenu[ $menu->subslug ] ) ) {
@@ -101,13 +102,17 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				if ( $this->args['show_add_new_in_menu'] ) {
-					add_submenu_page( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
+					if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
+						call_user_func( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
+					} else {
+						add_submenu_page( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
+					}
 				}
 			}
 		}
 
 		public function add_meta_boxes( $post ) {
-			foreach ( $this->get_children() as $metabox ) {
+			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				$metabox->register( $this );
 			}
 		}
@@ -140,7 +145,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 			$changes = false;
 
-			foreach ( $this->get_children() as $metabox ) {
+			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				foreach ( $metabox->get_children() as $field ) {
 					$meta_value_old = wpptd_get_post_meta( $post_id, $field->slug );
 					if ( $meta_value_old === null ) {
@@ -197,7 +202,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 		public function enqueue_assets() {
 			$_fields = array();
-			foreach ( $this->get_children() as $metabox ) {
+			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				foreach ( $metabox->get_children() as $field ) {
 					$_fields[] = $field->_field;
 				}
@@ -367,11 +372,6 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					}
 				}
 
-				// handle taxonomies
-				if ( is_array( $this->args['taxonomies'] ) ) {
-					$this->taxonomy_slugs = $this->args['taxonomies'];
-				}
-
 				// handle help
 				if( ! is_array( $this->args['help'] ) ) {
 					$this->args['help'] = array();
@@ -442,7 +442,6 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'map_meta_cap'			=> null,
 				'hierarchical'			=> false,
 				'supports'				=> array( 'title', 'editor' ),
-				'taxonomies'			=> array(),
 				'has_archive'			=> false,
 				'rewrite'				=> null,
 				'query_var'				=> true,

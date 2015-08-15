@@ -83,7 +83,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				$post_type->add_to_menu();
 			}
 
-			$taxonomies = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\Taxonomy' );
+			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 			foreach ( $taxonomies as $taxonomy ) {
 				$taxonomy->add_to_menu();
 			}
@@ -97,10 +97,25 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 */
 		public function enqueue_assets() {
-			$current = $this->get_current();
+			$screen = get_current_screen();
 
-			if ( $current ) {
-				$current->enqueue_assets();
+			if ( isset( $screen->taxonomy ) && $screen->taxonomy ) {
+				$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+				if ( $taxonomy ) {
+					//TODO: enqueue assets?
+				}
+			} elseif ( isset( $screen->post_type ) && $screen->post_type ) {
+				$post_type = ComponentManager::get( '*.' . $screen->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+				if ( $post_type ) {
+					switch ( $screen->base ) {
+						case 'post':
+							$post_type->enqueue_assets();
+							break;
+						case 'edit':
+							break;
+						default:
+					}
+				}
 			}
 		}
 
@@ -142,7 +157,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function add_term_help() {
 			global $taxnow;
 
-			$taxonomy = \WPDLib\Components\Manager::get( '*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\Taxonomy', true );
+			$taxonomy = \WPDLib\Components\Manager::get( '*.*' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
 				$taxonomy->render_help();
 			}
@@ -180,7 +195,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		public function get_term_updated_messages( $messages ) {
-			$taxonomies = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\Taxonomy' );
+			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 			foreach ( $taxonomies as $taxonomy ) {
 				if ( ! in_array( $taxonomy->slug, array( '_item', 'category', 'post_tag' ) ) ) {
 					$messages[ $taxonomy->slug ] = $taxonomy->get_updated_messages();
@@ -188,43 +203,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 
 			return $messages;
-		}
-
-		/**
-		 * Gets the currently active post type.
-		 *
-		 * The function checks the currently loaded admin screen.
-		 * If it is not created by the plugin, the function will return false.
-		 * Otherwise it will return the plugin's post type or taxonomy object.
-		 *
-		 * @since 0.5.0
-		 * @return WPPTD\Components\Screen|WPPTD\Components\Tab|array|false either the screen or tab object, an array of both objects or false if no plugin component is currently active
-		 */
-		public function get_current() {
-			if ( isset( $_GET['post_type'] ) ) {
-				$post_type = ComponentManager::get( '*.' . $_GET['post_type'], 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-
-				if ( null !== $post_type ) {
-					return $post_type;
-				}
-			}
-
-			return false;
-		}
-
-		/**
-		 * Gets the current URL in the WordPress backend.
-		 *
-		 * @since 0.5.0
-		 * @return string the current URL
-		 */
-		public function get_current_url() {
-			global $pagenow;
-
-			if ( isset( $_GET ) && is_array( $_GET ) ) {
-				return add_query_arg( $_GET, get_admin_url( null, $pagenow ) );
-			}
-			return get_admin_url( null, $pagenow );
 		}
 	}
 }
