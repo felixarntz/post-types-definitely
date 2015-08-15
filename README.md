@@ -1,0 +1,13 @@
+Post Types Definitely
+=====================
+
+This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible. It all works using a single action and an array.
+
+You can download the latest version from the [WordPress plugin repository](http://wordpress.org/plugins/post-types-definitely/). If you prefer to install it from Github, make sure to run `composer install` before using it in order to download the necessary dependencies.
+
+For a detailed guide and reference on how to use this framework, please read the [Wiki on Github](https://github.com/felixarntz/post-types-definitely/wiki). Once you get familiar with the options you have, you will be able to create complex post type interfaces with taxonomies and meta fields in just a few minutes.
+
+Contributions and Bugs
+----------------------
+
+If you have ideas on how to improve the plugin or if you discover a bug, I would appreciate if you shared them with me, right here on Github. In either case, please open a new issue [here](https://github.com/felixarntz/post-types-definitely/issues/new)!

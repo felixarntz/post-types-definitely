@@ -1,0 +1,49 @@
+{
+  "name": "felixarntz/post-types-definitely",
+  "description": "This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible. It all works using a single action and an array.",
+  "version": "0.5.0",
+  "license": "GPL-2.0",
+  "type": "wordpress-plugin",
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "framework",
+    "library",
+    "developer",
+    "post-types",
+    "taxonomies",
+    "meta",
+    "admin",
+    "backend",
+    "ui"
+  ],
+  "homepage": "http://wordpress.org/plugins/post-types-definitely/",
+  "authors": [
+    {
+      "name": "Felix Arntz",
+      "email": "felix-arntz@leaves-and-love.net",
+      "homepage": "http://leaves-and-love.net",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "felix-arntz@leaves-and-love.net",
+    "issues": "https://github.com/felixarntz/post-types-definitely/issues"
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "autoload": {
+    "psr-4": {
+      "WPPTD\\": "inc/WPPTD/"
+    },
+    "files": [
+      "inc/functions.php"
+    ]
+  },
+  "require": {
+    "composer/installers": "~1.0",
+    "felixarntz/wpdlib": "dev-master",
+    "felixarntz/leavesandlove-wp-plugin-util": "~1.6.0"
+  }
+}

@@ -1,0 +1,284 @@
+# Copyright (c) 2015-2015 Felix Arntz
+msgid ""
+msgstr ""
+"Project-Id-Version: post-types-definitely 0.5.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/plugins/post-types-definitely/\n"
+"POT-Creation-Date: 2015-08-15 15:21:05+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2015-08-15 17:40+0100\n"
+"Last-Translator: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
+"Language-Team: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
+"X-Generator: Poedit 1.6.7\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: uft-8\n"
+"X-Poedit-KeywordsList: __;_e;_x:1,2c;_ex:1,2c;_n:1,2; _nx:1,2,4c;_n_noop:1,2;"
+"_nx_noop:1,2,3c;esc_attr__; esc_html__;esc_attr_e; esc_html_e;"
+"esc_attr_x:1,2c; esc_html_x:1,2c\n"
+"X-Poedit-Bookmars: \n"
+"X-Textdomain-Support: yes\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: de_DE\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: inc/WPPTD/App.php:161
+msgid "This function should never be called manually."
+msgstr "Diese Funktion sollte niemals manuell aufgerufen werden."
+
+#: inc/WPPTD/Components/Field.php:102
+msgid "No value was provided for the required field."
+msgstr "Es wurde kein Wert für das erforderliche Feld eingegeben."
+
+#: inc/WPPTD/Components/Field.php:130
+msgid ""
+"The field type %1$s assigned to the field component %2$s is not a valid "
+"field type."
+msgstr ""
+"Der der Feldkomponente %2$s zugewiesene Feldtyp %1$s ist kein gültiger "
+"Feldtyp."
+
+#: inc/WPPTD/Components/Field.php:150
+msgid "Field title"
+msgstr "Feld-Titel"
+
+#: inc/WPPTD/Components/Metabox.php:78
+msgid ""
+"There are no fields to display for metabox %s. Either add some or provide a "
+"valid callback function instead."
+msgstr ""
+"Die Metabox %s enthält keine Felder, die angezeigt werden können. Fügen Sie "
+"entweder welche hinzu oder geben Sie eine vorhandene Callback-Funktion an."
+
+#: inc/WPPTD/Components/Metabox.php:102
+msgid "Metabox title"
+msgstr "Metabox-Titel"
+
+#: inc/WPPTD/Components/PostType.php:170
+msgid "Some errors occurred while trying to save the following post meta:"
+msgstr ""
+"Beim Versuch die folgenden Metadaten zu speichern sind Fehler aufgetreten:"
+
+#: inc/WPPTD/Components/PostType.php:240
+msgid "M j, Y @ H:i"
+msgstr ""
+
+#: inc/WPPTD/Components/PostType.php:261
+msgid ""
+"The post type slug %s is forbidden since it would interfere with WordPress "
+"Core functionality."
+msgstr ""
+"Der Beitragstyp-Slug %s ist verboten, da er mit WordPress Core-"
+"Funktionalität kollidiert."
+
+#: inc/WPPTD/Components/PostType.php:266
+msgid ""
+"The post type slug %s contains dashes which is discouraged. It will still "
+"work for the most part, but we recommend to adjust the slug if possible."
+msgstr ""
+"Der Beitragstyp-Slug %s enthält Bindestriche, wovon abgeraten wird. Er wird "
+"größtenteils zwar funktionieren, wir empfehlen aber den Slug wenn möglich "
+"anzupassen. "
+
+#: inc/WPPTD/Components/PostType.php:292 inc/WPPTD/Components/Taxonomy.php:152
+msgid "All %s"
+msgstr "Alle %s"
+
+#: inc/WPPTD/Components/PostType.php:293
+msgid "Add New"
+msgstr "Neu hinzufügen"
+
+#: inc/WPPTD/Components/PostType.php:294 inc/WPPTD/Components/Taxonomy.php:153
+msgid "Add New %s"
+msgstr "Neue/n/s %s hinzufügen"
+
+#: inc/WPPTD/Components/PostType.php:295 inc/WPPTD/Components/Taxonomy.php:154
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: inc/WPPTD/Components/PostType.php:296
+msgid "New %s"
+msgstr "Neue/r/s %s"
+
+#: inc/WPPTD/Components/PostType.php:297 inc/WPPTD/Components/Taxonomy.php:155
+msgid "View %s"
+msgstr "%s ansehen"
+
+#: inc/WPPTD/Components/PostType.php:298 inc/WPPTD/Components/Taxonomy.php:158
+msgid "Search %s"
+msgstr "%s durchsuchen"
+
+#: inc/WPPTD/Components/PostType.php:299 inc/WPPTD/Components/Taxonomy.php:160
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: inc/WPPTD/Components/PostType.php:300
+msgid "No %s found in Trash"
+msgstr "Keine %s im Papierkorb gefunden"
+
+#: inc/WPPTD/Components/PostType.php:301 inc/WPPTD/Components/Taxonomy.php:165
+msgid "Parent %s:"
+msgstr "Eltern-%s:"
+
+#: inc/WPPTD/Components/PostType.php:315
+msgid "%1$s updated. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s aktualisiert. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:316
+msgid "Custom field updated."
+msgstr "Benutzerdefiniertes Feld aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:317
+msgid "Custom field deleted."
+msgstr "Benutzerdefiniertes Feld gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:318 inc/WPPTD/Components/Taxonomy.php:181
+msgid "%s updated."
+msgstr "%s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:319
+msgid "%s restored to revision from %%s"
+msgstr "%s aus Überarbeitung vom %%s wiederhergestellt"
+
+#: inc/WPPTD/Components/PostType.php:320
+msgid "%1$s published. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s veröffentlicht. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:321
+msgid "%s saved."
+msgstr "%s gespeichert."
+
+#: inc/WPPTD/Components/PostType.php:322
+msgid "%1$s submitted. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s übertragen. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:323
+msgid ""
+"%1$s scheduled for: <strong>%%1\\$s</strong>. <a target=\"_blank\" href=\"%"
+"%2\\$s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Veröffentlichung geplant für: <strong>%%1\\$s</strong>. <a target="
+"\"_blank\" href=\"%%2\\$s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:324
+msgid "%1$s draft updated. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Entwurf aktualisiert. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau "
+"ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:353
+msgid ""
+"A menu position is unnecessarily provided for the post type %s - the menu "
+"position is already specified by its parent menu."
+msgstr ""
+"Für den Beitragstyp %s wurde unnötigerweise eine Menüposition angegeben - "
+"die Menüposition ist bereits durch das Elternmenü festgelegt."
+
+#: inc/WPPTD/Components/PostType.php:357
+msgid ""
+"A menu icon is unnecessarily provided for the post type %s - the menu icon "
+"is already specified by its parent menu."
+msgstr ""
+"Für den Beitragstyp %s wurde unnötigerweise ein Menüicon angegeben - das "
+"Menüicon ist bereits durch das Elternmenü festgelegt."
+
+#: inc/WPPTD/Components/PostType.php:379 inc/WPPTD/Components/PostType.php:398
+#: inc/WPPTD/Components/Taxonomy.php:232
+msgid "Help tab title"
+msgstr "Hilfs-Tab-Titel"
+
+#: inc/WPPTD/Components/Taxonomy.php:122
+msgid ""
+"The taxonomy slug %s is forbidden since it would interfere with WordPress "
+"Core functionality."
+msgstr ""
+"Der Taxonomie-Slug %s ist verboten, da er mit WordPress Core-Funktionalität "
+"kollidiert."
+
+#: inc/WPPTD/Components/Taxonomy.php:127
+msgid ""
+"The taxonomy slug %s contains dashes which is discouraged. It will still "
+"work for the most part, but we recommend to adjust the slug if possible."
+msgstr ""
+"Der Taxonomie-Slug %s enthält Bindestriche, wovon abgeraten wird. Er wird "
+"größtenteils zwar funktionieren, wir empfehlen aber den Slug wenn möglich "
+"anzupassen. "
+
+#: inc/WPPTD/Components/Taxonomy.php:156
+msgid "Update %s"
+msgstr "%s aktualisieren"
+
+#: inc/WPPTD/Components/Taxonomy.php:157
+msgid "New %s Name"
+msgstr "Neuer %s-Name"
+
+#: inc/WPPTD/Components/Taxonomy.php:159
+msgid "Popular %s"
+msgstr "Beliebte %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:161
+msgid "Separate %s with commas"
+msgstr "%s mit Kommas voneinander trennen"
+
+#: inc/WPPTD/Components/Taxonomy.php:162
+msgid "Add or remove %s"
+msgstr "%s hinzufügen oder entfernen"
+
+#: inc/WPPTD/Components/Taxonomy.php:163
+msgid "Choose from the most used %s"
+msgstr "Wähle einen der meistgenutzten %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:164
+msgid "Parent %s"
+msgstr "Eltern-%s"
+
+#: inc/WPPTD/Components/Taxonomy.php:179
+msgid "%s added."
+msgstr "%s hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:180 inc/WPPTD/Components/Taxonomy.php:184
+msgid "%s deleted."
+msgstr "%s gelöscht."
+
+#: inc/WPPTD/Components/Taxonomy.php:182
+msgid "%s not added."
+msgstr "%s nicht hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:183
+msgid "%s not updated."
+msgstr "%s nicht aktualisiert."
+
+#. Plugin Name of the plugin/theme
+msgid "Post Types Definitely"
+msgstr "Post Types Definitely"
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/plugins/post-types-definitely/"
+msgstr "http://wordpress.org/plugins/post-types-definitely/"
+
+#. Description of the plugin/theme
+msgid ""
+"This framework plugin makes adding post types with taxonomies and meta to "
+"WordPress very simple, yet flexible. It all works using a single action and "
+"an array."
+msgstr ""
+"Dieses Framework-Plugin erleichtert das Hinzufügen von Beitragstypen mit "
+"Taxonomien und Metadaten zum WordPress Admin-Bereich und ist dennoch "
+"flexibel. Es funktioniert mithilfe einer einzigen Action und eines Arrays."
+
+#. Author of the plugin/theme
+msgid "Felix Arntz"
+msgstr "Felix Arntz"
+
+#. Author URI of the plugin/theme
+msgid "http://leaves-and-love.net"
+msgstr "http://leaves-and-love.net"
+
+#. Tags of the plugin/theme
+msgid ""
+"wordpress, plugin, framework, library, developer, post-types, taxonomies, "
+"meta, admin, backend, ui"
+msgstr ""
+"wordpress, plugin, framework, library, developer, post-types, taxonomies, "
+"meta, admin, backend, ui"
