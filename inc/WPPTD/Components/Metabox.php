@@ -19,6 +19,11 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 
 	class Metabox extends Base {
 
+		public function __construct( $slug, $args ) {
+			parent::__construct( $slug, $args );
+			$this->validate_filter = 'wpptd_metabox_validated';
+		}
+
 		/**
 		 * Adds the metabox the post type edit screen it belongs to.
 		 *
@@ -30,7 +35,17 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				$parent_post_type = $this->get_parent();
 			}
 
-			add_meta_box( $this->slug, $this->args['title'], array( $this, 'render' ), $parent_post_type->slug, $this->args['context'], $this->args['priority'] );
+			$context = $this->args['box_context'];
+			if ( null === $context ) {
+				$context = 'advanced';
+			}
+
+			$priority = $this->args['box_priority'];
+			if ( null === $priority ) {
+				$priority = 'default';
+			}
+
+			add_meta_box( $this->slug, $this->args['title'], array( $this, 'render' ), $parent_post_type->slug, $context, $priority );
 		}
 
 		/**
@@ -90,6 +105,28 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		}
 
 		/**
+		 * Validates the arguments array.
+		 *
+		 * @since 0.5.0
+		 */
+		public function validate( $parent = null ) {
+			$status = parent::validate( $parent );
+
+			if ( $status === true ) {
+				if ( null !== $this->args['priority'] ) {
+					if ( is_string( $this->args['priority'] ) && ! is_numeric( $this->args['priority'] ) && null === $this->args['box_priority'] ) {
+						$this->args['box_priority'] = $this->args['priority'];
+						$this->args['priority'] = null;
+					} else {
+						$this->args['priority'] = floatval( $this->args['priority'] );
+					}
+				}
+			}
+
+			return $status;
+		}
+
+		/**
 		 * Returns the keys of the arguments array and their default values.
 		 *
 		 * Read the plugin guide for more information about the metabox arguments.
@@ -101,8 +138,9 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			$defaults = array(
 				'title'			=> __( 'Metabox title', 'wpptd' ),
 				'description'	=> '',
-				'context'		=> 'advanced',
-				'priority'		=> 'default',
+				'box_context'	=> null,
+				'box_priority'	=> null,
+				'priority'		=> null,
 				'callback'		=> false, //only used if no fields are attached to this metabox
 			);
 

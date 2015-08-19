@@ -21,6 +21,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 	class PostType extends Base {
 
+		public function __construct( $slug, $args ) {
+			parent::__construct( $slug, $args );
+			$this->validate_filter = 'wpptd_post_type_validated';
+		}
+
 		public function is_already_added() {
 			return post_type_exists( $this->slug );
 		}
@@ -49,66 +54,55 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 				register_post_type( $this->slug, $post_type_args );
 			} else {
-				//TODO: merge several properties into existing post types
+				//TODO: merge several properties into existing post type
 			}
 		}
 
-		public function add_to_menu() {
-			$menu = $this->get_parent();
-
-			if ( empty( $menu->slug ) ) {
-				return;
-			}
-
-			if ( in_array( $this->slug, array( 'post', 'page', 'attachment' ) ) ) {
-				return;
-			}
-
+		public function add_to_menu( $args ) {
 			if ( ! $this->args['show_ui'] ) {
-				return;
+				return false;
 			}
 
-			if ( false === $menu->is_already_added( 'edit.php?post_type=' . $this->slug ) ) {
+			if ( 'submenu' == $args['mode'] && null === $args['menu_slug'] ) {
+				return false;
+			}
+
+			$ret = false;
+
+			$sub_slug = $this->get_menu_slug();
+
+			if ( ! in_array( $this->slug, array( 'post', 'page', 'attachment' ) ) ) {
 				$post_type_obj = get_post_type_object( $this->slug );
-
-				add_menu_page( '', $menu->label, $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug, '', $menu->icon, $menu->position );
-				$menu->added = true;
-				$menu->subslug = 'edit.php?post_type=' . $this->slug;
-				$menu->sublabel = $this->args['labels']['all_items'];
-
-				if ( $this->args['show_add_new_in_menu'] ) {
-					add_submenu_page( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
-				}
-			} else {
-				if ( false === $menu->sublabel ) {
-					return;
-				}
-
-				$post_type_obj = get_post_type_object( $this->slug );
-
-				if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
-					call_user_func( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['all_items'], $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug );
+				if ( 'menu' === $mode ) {
+					add_menu_page( '', $args['menu_label'], $post_type_obj->cap->edit_posts, $this->get_menu_slug(), '', $args['menu_icon'], $args['menu_priority'] );
 				} else {
-					add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['all_items'], $post_type_obj->cap->edit_posts, 'edit.php?post_type=' . $this->slug );
+					add_submenu_page( $args['menu_slug'], $post_type_obj->labels->name, $post_type_obj->labels->all_items, $post_type_obj->cap->edit_posts, $this->get_menu_slug() );
+					$sub_slug = $args['menu_slug'];
 				}
-
-				if ( true !== $menu->sublabel ) {
-					global $submenu;
-
-					if ( isset( $submenu[ $menu->subslug ] ) ) {
-						$submenu[ $menu->subslug ][0][0] = $menu->sublabel;
-						$menu->sublabel = true;
-					}
-				}
+				$ret = $post_type_obj->labels->all_items;
 
 				if ( $this->args['show_add_new_in_menu'] ) {
-					if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
-						call_user_func( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
-					} else {
-						add_submenu_page( $menu->subslug, '', $this->args['labels']['add_new'], $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
-					}
+					add_submenu_page( $sub_slug, '', $post_type_obj->labels->add_new, $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
 				}
 			}
+
+			foreach ( $this->get_children( 'WPPTD\Components\Taxonomy' ) as $taxonomy ) {
+				if ( $taxonomy->show_in_menu ) {
+					$taxonomy_obj = get_taxonomy( $taxonomy->slug );
+					add_submenu_page( $sub_slug, $taxonomy_obj->labels->name, $taxonomy_obj->labels->menu_name, $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $taxonomy->slug . '&post_type=' . $this->slug );
+				}
+			}
+
+			return $ret;
+		}
+
+		public function get_menu_slug() {
+			if ( 'post' == $this->slug ) {
+				return 'edit.php';
+			} elseif ( 'attachment' == $this->slug ) {
+				return 'upload.php';
+			}
+			return 'edit.php?post_type=' . $this->slug;
 		}
 
 		public function add_meta_boxes( $post ) {
@@ -368,8 +362,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					}
 					if ( isset( $this->args['menu_icon'] ) ) {
 						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu icon is unnecessarily provided for the post type %s - the menu icon is already specified by its parent menu.', 'wpptd' ), $this->slug ), '0.5.0' );
-						unset( $this->args['icon'] );
+						unset( $this->args['menu_icon'] );
 					}
+				}
+
+				if ( null !== $this->args['priority'] ) {
+					$this->args['priority'] = floatval( $this->args['priority'] );
 				}
 
 				// handle help
@@ -446,6 +444,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'rewrite'				=> null,
 				'query_var'				=> true,
 				'can_export'			=> true,
+				'priority'				=> null,
 				'help'					=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',

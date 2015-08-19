@@ -15,6 +15,21 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 
 		$meta_values = array();
 
+		if ( doing_action( 'wpptd' ) || ! did_action( 'wpptd' ) ) {
+			if ( $single ) {
+				foreach ( $_meta_values as $key => $_mv ) {
+					if ( count( $_mv ) > 0 ) {
+						$meta_values[ $key ] = $_mv[0];
+					} else {
+						$meta_values[ $key ] = null;
+					}
+				}
+				return $meta_values;
+			} else {
+				return $_meta_values;
+			}
+		}
+
 		$post_type = \WPDLib\Components\Manager::get( '*.' . get_post_type( $id ), 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 		if ( $post_type ) {
 			foreach ( $post_type->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
@@ -54,6 +69,17 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 
 	function wpptd_get_post_meta( $id, $meta_key, $single = null, $formatted = false ) {
 		$_meta_value = get_post_meta( $id, $meta_key, false );
+
+		if ( doing_action( 'wpptd' ) || ! did_action( 'wpptd' ) ) {
+			if ( $single ) {
+				if ( count( $_meta_value ) > 0 ) {
+					return $_meta_value[0];
+				}
+				return null;
+			} else {
+				return $_meta_value;
+			}
+		}
 
 		$meta_value = null;
 

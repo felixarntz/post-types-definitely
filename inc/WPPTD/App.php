@@ -75,7 +75,11 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			}
 
 			// use after_setup_theme action so it is initialized as soon as possible, but also so that both plugins and themes can use the action
-			add_action( 'after_setup_theme', array( $this, 'init' ), 1 );
+			add_action( 'after_setup_theme', array( $this, 'init' ), 5 );
+
+			add_filter( 'wpdlib_menu_validated', array( $this, 'menu_validated' ), 10, 2 );
+			add_filter( 'wpptd_post_type_validated', array( $this, 'post_type_validated' ), 10, 2 );
+			add_filter( 'wpptd_metabox_validated', array( $this, 'metabox_validated' ), 10, 2 );
 		}
 
 		public function set_scope( $scope ) {
@@ -91,72 +95,56 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 
 			if ( is_array( $components ) ) {
 				foreach ( $components as $menu_slug => $menu_args ) {
-					$post_types = array();
-					if ( isset( $menu_args['post_types'] ) ) {
-						$post_types = $menu_args['post_types'];
-						unset( $menu_args['post_types'] );
-					}
 					$menu = ComponentManager::add( new Menu( $menu_slug, $menu_args ) );
 					if ( is_wp_error( $menu ) ) {
 						self::doing_it_wrong( __METHOD__, $menu->get_error_message(), '0.5.0' );
-					} elseif ( is_array( $post_types ) ) {
-						foreach ( $post_types as $post_type_slug => $post_type_args ) {
-							$metaboxes = array();
-							if ( isset( $post_type_args['metaboxes'] ) ) {
-								$metaboxes = $post_type_args['metaboxes'];
-								unset( $post_type_args['metaboxes'] );
-							}
-							$taxonomies = array();
-							if ( isset( $post_type_args['taxonomies'] ) ) {
-								$taxonomies = $post_type_args['taxonomies'];
-								unset( $post_type_args['taxonomies'] );
-							}
-							$post_type = $menu->add( new PostType( $post_type_slug, $post_type_args ) );
-							if ( is_wp_error( $post_type ) ) {
-								self::doing_it_wrong( __METHOD__, $post_type->get_error_message(), '0.5.0' );
-							} else {
-								if ( is_array( $metaboxes ) ) {
-									foreach ( $metaboxes as $metabox_slug => $metabox_args ) {
-										$fields = array();
-										if ( isset( $metabox_args['fields'] ) ) {
-											$fields = $metabox_args['fields'];
-											unset( $metabox_args['fields'] );
-										}
-										$metabox = $post_type->add( new Metabox( $metabox_slug, $metabox_args ) );
-										if ( is_wp_error( $metabox ) ) {
-											self::doing_it_wrong( __METHOD__, $metabox->get_error_message(), '0.5.0' );
-										} elseif ( is_array( $fields ) ) {
-											foreach ( $fields as $field_slug => $field_args ) {
-												$field = $metabox->add( new Field( $field_slug, $field_args ) );
-												if ( is_wp_error( $field ) ) {
-													self::doing_it_wrong( __METHOD__, $field->get_error_message(), '0.5.0' );
+					} else {
+						if ( isset( $menu_args['post_types'] ) && is_array( $menu_args['post_types'] ) ) {
+							foreach ( $menu_args['post_types'] as $post_type_slug => $post_type_args ) {
+								$post_type = $menu->add( new PostType( $post_type_slug, $post_type_args ) );
+								if ( is_wp_error( $post_type ) ) {
+									self::doing_it_wrong( __METHOD__, $post_type->get_error_message(), '0.5.0' );
+								} else {
+									if ( isset( $post_type_args['metaboxes'] ) && is_array( $post_type_args['metaboxes'] ) ) {
+										foreach ( $post_type_args['metaboxes'] as $metabox_slug => $metabox_args ) {
+											$metabox = $post_type->add( new Metabox( $metabox_slug, $metabox_args ) );
+											if ( is_wp_error( $metabox ) ) {
+												self::doing_it_wrong( __METHOD__, $metabox->get_error_message(), '0.5.0' );
+											} else {
+												if ( isset( $metabox_args['fields'] ) && is_array( $fields ) ) {
+													foreach ( $fields as $field_slug => $field_args ) {
+														$field = $metabox->add( new Field( $field_slug, $field_args ) );
+														if ( is_wp_error( $field ) ) {
+															self::doing_it_wrong( __METHOD__, $field->get_error_message(), '0.5.0' );
+														}
+													}
 												}
 											}
 										}
 									}
-								}
-								if ( is_array( $taxonomies ) ) {
-									foreach ( $taxonomies as $taxonomy_slug => $taxonomy_args ) {
-										if ( is_array( $taxonomy_args ) ) {
-											$taxonomy = $post_type->add( new Taxonomy( $taxonomy_slug, $taxonomy_args ) );
-											if ( is_wp_error( $taxonomy ) ) {
-												self::doing_it_wrong( __METHOD__, $taxonomy->get_error_message(), '0.5.0' );
-											} else {
-												if ( isset( $this->taxonomies_temp[ $taxonomy_slug ] ) && is_array( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
-													foreach ( $this->taxonomies_temp[ $taxonomy_slug ] as $_post_type ) {
-														$_post_type->add( $taxonomy );
+									if ( isset( $post_type_args['taxonomies'] ) && is_array( $post_type_args['taxonomies'] ) ) {
+										foreach ( $post_type_args['taxonomies'] as $taxonomy_slug => $taxonomy_args ) {
+											if ( is_array( $taxonomy_args ) ) {
+												$taxonomy = $post_type->add( new Taxonomy( $taxonomy_slug, $taxonomy_args ) );
+												if ( is_wp_error( $taxonomy ) ) {
+													self::doing_it_wrong( __METHOD__, $taxonomy->get_error_message(), '0.5.0' );
+												} else {
+													if ( isset( $this->taxonomies_temp[ $taxonomy_slug ] ) && is_array( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
+														foreach ( $this->taxonomies_temp[ $taxonomy_slug ] as $_post_type ) {
+															$_post_type->add( $taxonomy );
+														}
 													}
+													$this->taxonomies_temp[ $taxonomy_slug ] = $taxonomy;
 												}
-												$this->taxonomies_temp[ $taxonomy_slug ] = $taxonomy;
-											}
-										} else {
-											if ( isset( $this->taxonomies_temp[ $taxonomy_slug ] ) && is_object( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
-												$taxonomy = $post_type->add( $this->taxonomies_temp[ $taxonomy_slug ] );
 											} else {
-												if ( ! isset( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
-													$this->taxonomies_temp[ $taxonomy_slug ] = array();
+												if ( isset( $this->taxonomies_temp[ $taxonomy_slug ] ) && is_object( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
+													$taxonomy = $post_type->add( $this->taxonomies_temp[ $taxonomy_slug ] );
+												} else {
+													if ( ! isset( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
+														$this->taxonomies_temp[ $taxonomy_slug ] = array();
+													}
+													$this->taxonomies_temp[ $taxonomy_slug ][] = $post_type;
 												}
-												$this->taxonomies_temp[ $taxonomy_slug ][] = $post_type;
 											}
 										}
 									}
@@ -183,7 +171,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			if ( ! $this->initialization_triggered ) {
 				$this->initialization_triggered = true;
 
-				ComponentManager::register_hierarchy( array(
+				ComponentManager::register_hierarchy( apply_filters( 'wpptd_class_hierarchy', array(
 					'WPDLib\Components\Menu'		=> array(
 						'WPPTD\Components\PostType'		=> array(
 							'WPPTD\Components\Metabox'		=> array(
@@ -192,7 +180,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 							'WPPTD\Components\Taxonomy'		=> array(),
 						),
 					),
-				) );
+				) ) );
 
 				do_action( 'wpptd', $this );
 
@@ -202,6 +190,30 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			} else {
 				self::doing_it_wrong( __METHOD__, __( 'This function should never be called manually.', 'wpptd' ), '0.5.0' );
 			}
+		}
+
+		public function menu_validated( $args, $menu ) {
+			if ( isset( $args['post_types'] ) ) {
+				unset( $args['post_types'] );
+			}
+			return $args;
+		}
+
+		public function post_type_validated( $args, $post_type ) {
+			if ( isset( $args['metaboxes'] ) ) {
+				unset( $args['metaboxes'] );
+			}
+			if ( isset( $args['taxonomies'] ) ) {
+				unset( $args['taxonomies'] );
+			}
+			return $args;
+		}
+
+		public function metabox_validated( $args, $metabox ) {
+			if ( isset( $args['fields'] ) ) {
+				unset( $args['fields'] );
+			}
+			return $args;
 		}
 	}
 }

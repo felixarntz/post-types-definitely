@@ -52,7 +52,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 */
 		private function __construct() {
-			add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 50 );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
@@ -65,28 +64,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
-		}
-
-		/**
-		 * Adds post types and taxonomies to the WordPress admin menu.
-		 *
-		 * Every post type / taxonomy will be added to the menu it has been assigned to.
-		 * Furthermore the function to add a help tab is hooked into the post type / taxonomy loading action.
-		 *
-		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\Components\Taxonomy
-		 * @since 0.5.0
-		 */
-		public function create_admin_menu() {
-			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
-			foreach ( $post_types as $post_type ) {
-				$post_type->add_to_menu();
-			}
-
-			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
-			foreach ( $taxonomies as $taxonomy ) {
-				$taxonomy->add_to_menu();
-			}
 		}
 
 		/**

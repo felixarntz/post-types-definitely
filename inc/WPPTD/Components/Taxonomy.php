@@ -21,7 +21,11 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 	class Taxonomy extends Base {
 
 		protected $registered = false;
-		protected $added_to_menu = false;
+
+		public function __construct( $slug, $args ) {
+			parent::__construct( $slug, $args );
+			$this->validate_filter = 'wpptd_taxonomy_validated';
+		}
 
 		public function is_already_added() {
 			return taxonomy_exists( $this->slug );
@@ -51,34 +55,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 				register_taxonomy( $this->slug, null, $taxonomy_args );
 			} else {
-				//TODO: merge several properties into existing taxonomies
+				//TODO: merge several properties into existing taxonomy
 			}
 
 			$this->registered = true;
-		}
-
-		public function add_to_menu() {
-			if ( $this->added_to_menu ) {
-				return;
-			}
-
-			if ( ! $this->args['show_in_menu'] ) {
-				return;
-			}
-
-			$taxonomy_obj = get_taxonomy( $this->slug );
-
-			foreach ( $this->parents as $post_type ) {
-				$menu = $post_type->get_parent();
-
-				if ( preg_match( '/^add_[a-z]+_page$/', $menu->subslug ) && function_exists( $menu->subslug ) ) {
-					call_user_func( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['menu_name'], $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug . '&post_type=' . $post_type->slug );
-				} else {
-					add_submenu_page( $menu->subslug, $this->args['labels']['name'], $this->args['labels']['menu_name'], $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $this->slug . '&post_type=' . $post_type->slug );
-				}
-			}
-
-			$this->added_to_menu = true;
 		}
 
 		public function render_help() {
@@ -200,6 +180,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
 				}
 
+				if ( null !== $this->args['priority'] ) {
+					$this->args['priority'] = floatval( $this->args['priority'] );
+				}
+
 				// handle help
 				if( ! is_array( $this->args['help'] ) ) {
 					$this->args['help'] = array();
@@ -250,6 +234,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'rewrite'				=> null,
 				'query_var'				=> true,
 				'sort'					=> null,
+				'priority'				=> null,
 				'help'					=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',

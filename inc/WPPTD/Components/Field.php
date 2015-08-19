@@ -21,6 +21,11 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 
 	class Field extends Base {
 
+		public function __construct( $slug, $args ) {
+			parent::__construct( $slug, $args );
+			$this->validate_filter = 'wpptd_field_validated';
+		}
+
 		/**
 		 * @since 0.5.0
 		 * @var WPDLib\FieldTypes\Base Holds the field type object from WPDLib.
@@ -62,9 +67,9 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			 */
 			do_action( 'wpptd_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
 
-			$option = wpptd_get_post_meta( $post->ID, $this->slug );
+			$meta_value = wpptd_get_post_meta( $post->ID, $this->slug );
 
-			$this->_field->display( $option );
+			$this->_field->display( $meta_value );
 
 			if ( ! empty( $this->args['description'] ) ) {
 				if ( 'checkbox' != $this->args['type'] ) {
@@ -132,6 +137,10 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				if ( null === $this->args['default'] ) {
 					$this->args['default'] = $this->_field->validate();
 				}
+
+				if ( null !== $this->args['priority'] ) {
+					$this->args['priority'] = floatval( $this->args['priority'] );
+				}
 			}
 
 			return $status;
@@ -153,6 +162,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				'class'				=> '',
 				'default'			=> null,
 				'required'			=> false,
+				'priority'			=> null,
 			);
 
 			/**
