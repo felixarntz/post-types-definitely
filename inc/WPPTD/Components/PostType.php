@@ -73,7 +73,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 			if ( ! in_array( $this->slug, array( 'post', 'page', 'attachment' ) ) ) {
 				$post_type_obj = get_post_type_object( $this->slug );
-				if ( 'menu' === $mode ) {
+				if ( 'menu' === $args['mode'] ) {
 					add_menu_page( '', $args['menu_label'], $post_type_obj->cap->edit_posts, $this->get_menu_slug(), '', $args['menu_icon'], $args['menu_priority'] );
 				} else {
 					add_submenu_page( $args['menu_slug'], $post_type_obj->labels->name, $post_type_obj->labels->all_items, $post_type_obj->cap->edit_posts, $this->get_menu_slug() );

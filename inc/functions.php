@@ -19,7 +19,7 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 			if ( $single ) {
 				foreach ( $_meta_values as $key => $_mv ) {
 					if ( count( $_mv ) > 0 ) {
-						$meta_values[ $key ] = $_mv[0];
+						$meta_values[ $key ] = $_mv[0];
 					} else {
 						$meta_values[ $key ] = null;
 					}
