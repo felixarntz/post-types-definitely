@@ -111,8 +111,8 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 											if ( is_wp_error( $metabox ) ) {
 												self::doing_it_wrong( __METHOD__, $metabox->get_error_message(), '0.5.0' );
 											} else {
-												if ( isset( $metabox_args['fields'] ) && is_array( $fields ) ) {
-													foreach ( $fields as $field_slug => $field_args ) {
+												if ( isset( $metabox_args['fields'] ) && is_array( $metabox_args['fields'] ) ) {
+													foreach ( $metabox_args['fields'] as $field_slug => $field_args ) {
 														$field = $metabox->add( new Field( $field_slug, $field_args ) );
 														if ( is_wp_error( $field ) ) {
 															self::doing_it_wrong( __METHOD__, $field->get_error_message(), '0.5.0' );
