@@ -180,8 +180,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
 				}
 
-				if ( null !== $this->args['priority'] ) {
-					$this->args['priority'] = floatval( $this->args['priority'] );
+				if ( null !== $this->args['position'] ) {
+					$this->args['position'] = floatval( $this->args['position'] );
 				}
 
 				// handle help
@@ -234,7 +234,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'rewrite'				=> null,
 				'query_var'				=> true,
 				'sort'					=> null,
-				'priority'				=> null,
+				'position'				=> null,
 				'help'					=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',

@@ -72,10 +72,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			$this->_field->display( $meta_value );
 
 			if ( ! empty( $this->args['description'] ) ) {
-				if ( 'checkbox' != $this->args['type'] ) {
-					echo '<br/>';
-				}
-				echo '<span class="description">' . $this->args['description'] . '</span>';
+				echo '<br/><span class="description">' . $this->args['description'] . '</span>';
 			}
 
 			/**
@@ -138,8 +135,8 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 					$this->args['default'] = $this->_field->validate();
 				}
 
-				if ( null !== $this->args['priority'] ) {
-					$this->args['priority'] = floatval( $this->args['priority'] );
+				if ( null !== $this->args['position'] ) {
+					$this->args['position'] = floatval( $this->args['position'] );
 				}
 			}
 
@@ -162,7 +159,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				'class'				=> '',
 				'default'			=> null,
 				'required'			=> false,
-				'priority'			=> null,
+				'position'			=> null,
 			);
 
 			/**

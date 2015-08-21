@@ -31,18 +31,6 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 	 */
 	class App extends Plugin {
 
-		/**
-		 * @since 0.5.0
-		 * @var boolean Holds the status whether the initialization function has been called yet.
-		 */
-		private $initialization_triggered = false;
-
-		/**
-		 * @since 0.5.0
-		 * @var boolean Holds the status whether the app has been initialized yet.
-		 */
-		private $initialized = false;
-
 		private $taxonomies_temp = array();
 
 		/**
@@ -159,7 +147,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		/**
 		 * Initializes the plugin framework.
 		 *
-		 * This function adds all components to the plugin. It is executed on the 'after_setup_theme' hook with priority 1.
+		 * This function adds all components to the plugin. It is executed on the 'after_setup_theme' hook with priority 5.
 		 * The action 'wpptd' should be used to add all the components.
 		 *
 		 * @internal
@@ -168,9 +156,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.5.0
 		 */
 		public function init() {
-			if ( ! $this->initialization_triggered ) {
-				$this->initialization_triggered = true;
-
+			if ( ! did_action( 'wpptd' ) ) {
 				ComponentManager::register_hierarchy( apply_filters( 'wpptd_class_hierarchy', array(
 					'WPDLib\Components\Menu'		=> array(
 						'WPPTD\Components\PostType'		=> array(
@@ -185,8 +171,6 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 				do_action( 'wpptd', $this );
 
 				$this->taxonomies_temp = array();
-
-				$this->initialized = true;
 			} else {
 				self::doing_it_wrong( __METHOD__, __( 'This function should never be called manually.', 'wpptd' ), '0.5.0' );
 			}

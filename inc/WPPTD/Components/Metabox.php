@@ -35,12 +35,12 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				$parent_post_type = $this->get_parent();
 			}
 
-			$context = $this->args['box_context'];
+			$context = $this->args['context'];
 			if ( null === $context ) {
 				$context = 'advanced';
 			}
 
-			$priority = $this->args['box_priority'];
+			$priority = $this->args['priority'];
 			if ( null === $priority ) {
 				$priority = 'default';
 			}
@@ -59,6 +59,10 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		 */
 		public function render( $post ) {
 			$parent_post_type = $this->get_parent();
+
+			if ( 'side' == $this->args['context'] ) {
+				echo '<div class="wpdlib-narrow">';
+			}
 
 			/**
 			 * This action can be used to display additional content on top of this metabox.
@@ -102,6 +106,10 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			 * @param string the slug of the current tab
 			 */
 			do_action( 'wpptd_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
+
+			if ( 'side' == $this->args['context'] ) {
+				echo '</div>';
+			}
 		}
 
 		/**
@@ -113,13 +121,8 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			$status = parent::validate( $parent );
 
 			if ( $status === true ) {
-				if ( null !== $this->args['priority'] ) {
-					if ( is_string( $this->args['priority'] ) && ! is_numeric( $this->args['priority'] ) && null === $this->args['box_priority'] ) {
-						$this->args['box_priority'] = $this->args['priority'];
-						$this->args['priority'] = null;
-					} else {
-						$this->args['priority'] = floatval( $this->args['priority'] );
-					}
+				if ( null !== $this->args['position'] ) {
+					$this->args['position'] = floatval( $this->args['position'] );
 				}
 			}
 
@@ -138,9 +141,9 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			$defaults = array(
 				'title'			=> __( 'Metabox title', 'wpptd' ),
 				'description'	=> '',
-				'box_context'	=> null,
-				'box_priority'	=> null,
+				'context'		=> null,
 				'priority'		=> null,
+				'position'		=> null,
 				'callback'		=> false, //only used if no fields are attached to this metabox
 			);
 
