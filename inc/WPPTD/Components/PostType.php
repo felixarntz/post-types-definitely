@@ -306,6 +306,13 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					'not_found'				=> sprintf( __( 'No %s found', 'wpptd' ), $this->args['title'] ),
 					'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'wpptd' ), $this->args['title'] ),
 					'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'wpptd' ), $this->args['singular_title'] ),
+					'featured_image'		=> sprintf( __( 'Featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
+					'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
+					'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
+					'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
+					// additional labels for media library
+					'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'wpptd' ), $this->args['singular_title'] ),
+					'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'wpptd' ), $this->args['singular_title'] ),
 				);
 				foreach ( $default_labels as $type => $default_label ) {
 					if ( ! isset( $this->args['labels'][ $type ] ) ) {

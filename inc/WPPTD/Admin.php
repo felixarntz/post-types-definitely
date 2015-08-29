@@ -61,6 +61,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			add_action( 'load-edit.php', array( $this, 'add_post_list_help' ) );
 			add_filter( 'enter_title_here', array( $this, 'get_post_enter_title_here' ), 10, 2 );
 			add_filter( 'post_updated_messages', array( $this, 'get_post_updated_messages' ) );
+			add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
 
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
@@ -169,6 +170,21 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 
 			return $messages;
+		}
+
+		public function get_media_view_strings( $strings, $post ) {
+			if ( $post ) {
+				$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+				$labels = $post_type->labels;
+				if ( $labels['insert_into_item'] ) {
+					$strings['insertIntoPost'] = $labels['insert_into_item'];
+				}
+				if ( $labels['uploaded_to_this_item'] ) {
+					$strings['uploadedToThisPost'] = $labels['uploaded_to_this_item'];
+				}
+			}
+
+			return $strings;
 		}
 
 		public function get_term_updated_messages( $messages ) {
