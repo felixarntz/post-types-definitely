@@ -75,14 +75,17 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				$post_type_obj = get_post_type_object( $this->slug );
 				if ( 'menu' === $args['mode'] ) {
 					add_menu_page( '', $args['menu_label'], $post_type_obj->cap->edit_posts, $this->get_menu_slug(), '', $args['menu_icon'], $args['menu_position'] );
+					$ret = $post_type_obj->labels->all_items;
+					$add_new_label = $post_type_obj->labels->add_new;
 				} else {
-					add_submenu_page( $args['menu_slug'], $post_type_obj->labels->name, $post_type_obj->labels->all_items, $post_type_obj->cap->edit_posts, $this->get_menu_slug() );
+					add_submenu_page( $args['menu_slug'], $post_type_obj->labels->name, $post_type_obj->labels->menu_name, $post_type_obj->cap->edit_posts, $this->get_menu_slug() );
+					$ret = $post_type_obj->labels->menu_name;
+					$add_new_label = $post_type_obj->labels->add_new_item;
 					$sub_slug = $args['menu_slug'];
 				}
-				$ret = $post_type_obj->labels->all_items;
 
 				if ( $this->args['show_add_new_in_menu'] ) {
-					add_submenu_page( $sub_slug, '', $post_type_obj->labels->add_new, $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
+					add_submenu_page( $sub_slug, '', $add_new_label, $post_type_obj->cap->create_posts, 'post-new.php?post_type=' . $this->slug );
 				}
 			}
 
@@ -101,6 +104,8 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				return 'edit.php';
 			} elseif ( 'attachment' == $this->slug ) {
 				return 'upload.php';
+			} elseif ( 'link' == $this->slug ) {
+				return 'link-manager.php';
 			}
 			return 'edit.php?post_type=' . $this->slug;
 		}
