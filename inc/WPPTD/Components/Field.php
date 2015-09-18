@@ -90,6 +90,10 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			echo '</tr>';
 		}
 
+		public function render_table_column( $post_id ) {
+			//TODO
+		}
+
 		/**
 		 * Validates the meta value for this field.
 		 *

@@ -47,11 +47,20 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		/**
 		 * Class constructor.
 		 *
-		 * This will hook functions into the 'admin_menu' and 'admin_enqueue_scripts' actions.
-		 *
 		 * @since 0.5.0
 		 */
 		private function __construct() {
+			add_action( 'after_setup_theme', array( $this, 'add_hooks' ) );
+		}
+
+		/**
+		 * Hooks in all the necessary actions and filters.
+		 *
+		 * This function should be executed after the plugin has been initialized.
+		 *
+		 * @since 0.5.0
+		 */
+		public function add_hooks() {
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
@@ -65,6 +74,25 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
+
+			$post_types = \WPDLib\Components\Manager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
+			foreach ( $post_types as $post_type ) {
+				add_filter( 'manage_taxonomies_for_' . $post_type->slug . '_columns', array( $post_type, 'get_table_taxonomies' ) );
+				add_filter( 'manage_' . $post_type->slug . '_posts_columns', array( $post_type, 'filter_table_columns' ) );
+				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type, 'filter_table_sortable_columns' ) );
+				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type, 'render_table_column' ), 10, 2 );
+			}
+
+			add_filter( 'page_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+		}
+
+		public function get_row_actions( $actions, $post ) {
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				$actions = $post_type->filter_row_actions( $actions );
+			}
+			return $actions;
 		}
 
 		/**

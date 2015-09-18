@@ -180,6 +180,9 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
 				}
 
+				// this is handled per post type
+				$this->args['show_admin_column'] = false;
+
 				if ( null !== $this->args['position'] ) {
 					$this->args['position'] = floatval( $this->args['position'] );
 				}
@@ -228,7 +231,6 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'show_in_nav_menus'		=> null,
 				'show_tagcloud'			=> null,
 				'show_in_quick_edit'	=> null,
-				'show_admin_column'		=> false,
 				'capabilities'			=> array(),
 				'hierarchical'			=> false,
 				'rewrite'				=> null,

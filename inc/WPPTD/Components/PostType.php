@@ -39,6 +39,9 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				unset( $_post_type_args['messages'] );
 				unset( $_post_type_args['enter_title_here'] );
 				unset( $_post_type_args['show_add_new_in_menu'] );
+				unset( $_post_type_args['table_columns'] );
+				unset( $_post_type_args['row_actions'] );
+				unset( $_post_type_args['bulk_actions'] );
 				unset( $_post_type_args['help'] );
 				unset( $_post_type_args['list_help'] );
 
@@ -259,6 +262,73 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $this->args['enter_title_here'];
 		}
 
+		public function get_table_taxonomies( $taxonomies ) {
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( $column_args && ! empty( $column_args['taxonomy_slug'] ) && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
+					if ( ! in_array( $column_args['taxonomy_slug'], $taxonomies ) ) {
+						$taxonomies[] = $column_args['taxonomy_slug'];
+					}
+				}
+			}
+
+			return $taxonomies;
+		}
+
+		public function filter_table_columns( $columns ) {
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( ! $column_args ) {
+					if ( isset( $columns[ $column_slug ] ) ) {
+						unset( $columns[ $column_slug ] );
+					}
+				} elseif ( ! empty( $column_args['meta_key'] ) ) {
+					$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+					if ( $field ) {
+						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
+					}
+				} elseif ( ! empty( $column_args['callback'] ) ) {
+					$columns[ $column_slug ] = $column_args['title'];
+				}
+			}
+
+			return $columns;
+		}
+
+		public function filter_table_sortable_columns( $columns ) {
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( ! $column_args ) {
+					if ( isset( $columns[ $column_slug ] ) ) {
+						unset( $columns[ $column_slug ] );
+					}
+				} elseif ( ! empty( $column_args['meta_key'] ) ) {
+					if ( $column_args['sortable'] ) {
+						$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+						if ( $field ) {
+							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $field->slug, true ) : array( $field->slug, false );
+						}
+					}
+				}
+			}
+
+			return $columns;
+		}
+
+		public function render_table_column( $column_name, $post_id ) {
+			if ( isset( $this->args['table_columns'][ $column_name ] ) ) {
+				if ( ! empty( $this->args['table_columns'][ $column_name ]['meta_key'] ) ) {
+					$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $this->args['table_columns'][ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+					if ( $field ) {
+						$field->render_table_column( $post_id );
+					}
+				} elseif ( $this->args['callback'] && is_callable( $this->args['callback'] ) ) {
+					call_user_func( $this->args['callback'], $post_id );
+				}
+			}
+		}
+
+		public function filter_row_actions( $row_actions ) {
+			return $row_actions;
+		}
+
 		/**
 		 * Validates the arguments array.
 		 *
@@ -382,6 +452,36 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					$this->args['position'] = floatval( $this->args['position'] );
 				}
 
+				// handle admin table columns
+				if ( ! $this->args['show_ui'] || ! is_array( $this->args['table_columns'] ) ) {
+					$this->args['table_columns'] = array();
+				}
+				foreach ( $this->args['table_columns'] as $column_slug => &$column_args ) {
+					if ( null !== $column_args ) {
+						if ( ! is_array( $column_args ) ) {
+							$column_args = array();
+						}
+						$column_args = wp_parse_args( $column_args, array(
+							'meta_key'		=> '',
+							'taxonomy_slug'	=> '',
+							'callback'		=> '',
+							'title'			=> '',
+							'sortable'		=> false,
+						) );
+					}
+				}
+				unset( $column_args );
+
+				// handle row actions
+				if ( ! $this->args['show_ui'] || ! is_array( $this->args['row_actions'] ) ) {
+					$this->args['row_actions'] = array();
+				}
+
+				// handle bulk actions
+				if ( ! $this->args['show_ui'] || ! is_array( $this->args['bulk_actions'] ) ) {
+					$this->args['bulk_actions'] = array();
+				}
+
 				// handle help
 				if( ! is_array( $this->args['help'] ) ) {
 					$this->args['help'] = array();
@@ -457,6 +557,9 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'query_var'				=> true,
 				'can_export'			=> true,
 				'position'				=> null,
+				'table_columns'			=> array(),
+				'row_actions'			=> array(),
+				'bulk_actions'			=> array(),
 				'help'					=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',
