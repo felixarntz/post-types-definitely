@@ -88,29 +88,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
 		}
 
-		public function handle_table_filtering_and_sorting() {
-			global $typenow;
-
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-			if ( $post_type ) {
-				$post_type->maybe_sort_default();
-
-				add_action( 'restrict_manage_posts', array( $post_type, 'render_table_column_filters' ) );
-				add_filter( 'query_vars', array( $post_type, 'register_table_filter_query_vars' ) );
-				add_action( 'pre_get_posts', array( $post_type, 'maybe_filter_by_table_columns' ), 10, 1 );
-				add_action( 'pre_get_posts', array( $post_type, 'maybe_sort_by_meta_table_column' ), 10, 1 );
-				add_filter( 'posts_clauses', array( $post_type, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
-			}
-		}
-
-		public function get_row_actions( $actions, $post ) {
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-			if ( $post_type ) {
-				$actions = $post_type->filter_row_actions( $actions );
-			}
-			return $actions;
-		}
-
 		/**
 		 * Enqueues necessary stylesheets and scripts.
 		 *
@@ -219,12 +196,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function get_media_view_strings( $strings, $post ) {
 			if ( $post ) {
 				$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-				$labels = $post_type->labels;
-				if ( $labels['insert_into_item'] ) {
-					$strings['insertIntoPost'] = $labels['insert_into_item'];
-				}
-				if ( $labels['uploaded_to_this_item'] ) {
-					$strings['uploadedToThisPost'] = $labels['uploaded_to_this_item'];
+				if ( $post_type ) {
+					$labels = $post_type->labels;
+					if ( $labels['insert_into_item'] ) {
+						$strings['insertIntoPost'] = $labels['insert_into_item'];
+					}
+					if ( $labels['uploaded_to_this_item'] ) {
+						$strings['uploadedToThisPost'] = $labels['uploaded_to_this_item'];
+					}
 				}
 			}
 
@@ -240,6 +219,29 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 
 			return $messages;
+		}
+
+		public function handle_table_filtering_and_sorting() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				$post_type->maybe_sort_default();
+
+				add_action( 'restrict_manage_posts', array( $post_type, 'render_table_column_filters' ) );
+				add_filter( 'query_vars', array( $post_type, 'register_table_filter_query_vars' ) );
+				add_action( 'pre_get_posts', array( $post_type, 'maybe_filter_by_table_columns' ), 10, 1 );
+				add_action( 'pre_get_posts', array( $post_type, 'maybe_sort_by_meta_table_column' ), 10, 1 );
+				add_filter( 'posts_clauses', array( $post_type, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
+			}
+		}
+
+		public function get_row_actions( $actions, $post ) {
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				$actions = $post_type->filter_row_actions( $actions );
+			}
+			return $actions;
 		}
 	}
 }
