@@ -21,6 +21,8 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 	class PostType extends Base {
 
+		protected $active_filters = array();
+
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_post_type_validated';
@@ -267,25 +269,38 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				if ( $column_args && ! empty( $column_args['taxonomy_slug'] ) && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
 					if ( ! in_array( $column_args['taxonomy_slug'], $taxonomies ) ) {
 						$taxonomies[] = $column_args['taxonomy_slug'];
+					} elseif ( ! $column_args ) {
+						if ( strpos( $column_slug, 'taxonomy-' ) === 0 ) {
+							$taxonomy_slug = substr( $column_slug, 9 );
+							$column_key = 'taxonomy-' . $taxonomy_slug;
+							if ( 'category' === $taxonomy_slug ) {
+								$column_key = 'categories';
+							} elseif ( 'post_tag' === $taxonomy_slug || 'tag' === $taxonomy_slug ) {
+								$column_key = 'tags';
+							}
+							if ( false !== ( $key = array_search( $column_key, $taxonomies ) ) ) {
+								unset( $taxonomies[ $key ] );
+							}
+						}
 					}
 				}
 			}
 
-			return $taxonomies;
+			return array_values( $taxonomies );
 		}
 
 		public function filter_table_columns( $columns ) {
 			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
-				if ( ! $column_args ) {
+				if ( false === $column_args ) {
 					if ( isset( $columns[ $column_slug ] ) ) {
 						unset( $columns[ $column_slug ] );
 					}
-				} elseif ( ! empty( $column_args['meta_key'] ) ) {
+				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
 					$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 					if ( $field ) {
 						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
 					}
-				} elseif ( ! empty( $column_args['callback'] ) ) {
+				} elseif ( isset( $column_args['custom_callback'] ) && ! empty( $column_args['custom_callback'] ) ) {
 					$columns[ $column_slug ] = $column_args['title'];
 				}
 			}
@@ -295,16 +310,20 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 		public function filter_table_sortable_columns( $columns ) {
 			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
-				if ( ! $column_args ) {
+				if ( false === $column_args ) {
 					if ( isset( $columns[ $column_slug ] ) ) {
 						unset( $columns[ $column_slug ] );
 					}
-				} elseif ( ! empty( $column_args['meta_key'] ) ) {
+				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
 					if ( $column_args['sortable'] ) {
 						$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 						if ( $field ) {
-							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $field->slug, true ) : array( $field->slug, false );
+							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
 						}
+					}
+				} elseif ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
+					if ( $column_args['sortable'] && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
+						$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
 					}
 				}
 			}
@@ -314,15 +333,254 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 		public function render_table_column( $column_name, $post_id ) {
 			if ( isset( $this->args['table_columns'][ $column_name ] ) ) {
-				if ( ! empty( $this->args['table_columns'][ $column_name ]['meta_key'] ) ) {
+				if ( isset( $this->args['table_columns'][ $column_name ]['meta_key'] ) && ! empty( $this->args['table_columns'][ $column_name ]['meta_key'] ) ) {
 					$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $this->args['table_columns'][ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 					if ( $field ) {
 						$field->render_table_column( $post_id );
 					}
-				} elseif ( $this->args['callback'] && is_callable( $this->args['callback'] ) ) {
-					call_user_func( $this->args['callback'], $post_id );
+				} elseif ( $this->args['custom_callback'] && is_callable( $this->args['custom_callback'] ) ) {
+					call_user_func( $this->args['custom_callback'], $post_id );
 				}
 			}
+		}
+
+		public function render_table_column_filters() {
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( is_array( $column_args ) && $column_args['filterable'] ) {
+					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
+						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
+							$taxonomy = ComponentManager::get( '*.' . $this->slug . '.' . $column_args['taxonomy_slug'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+							if ( $taxonomy ) {
+								$labels = $taxonomy->labels;
+								echo '<label class="screen-reader-text" for="' . $column_slug . '">' . $labels['filter_by_item'] . '</label>';
+								wp_dropdown_categories( array(
+									'taxonomy'			=> $taxonomy->slug,
+									'name'				=> $column_slug,
+									'show_option_all'	=> $labels['all_items'],
+									'hide_empty'		=> 0,
+									'hierarchical'		=> $taxonomy->hierarchical ? 1 : 0,
+									'show_count'		=> 0,
+									'orderby'			=> 'name',
+									'selected'			=> ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] ) ? absint( $this->active_filters[ $column_slug ] ) : 0,
+								) );
+							}
+						}
+					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
+						$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+						if ( $field ) {
+							switch ( $field->type ) {
+								case 'select':
+								case 'multiselect':
+								case 'radio':
+								case 'multibox':
+									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+									foreach ( $field->options as $value => $label ) {
+										echo $value;
+										echo $this->active_filters[ $column_slug ];
+										echo '<option value="' . esc_attr( $value ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $value ) ? ' selected="selected"' : '' ) . '>';
+										if ( is_array( $label ) ) {
+											if ( isset( $label['label'] ) && ! empty( $label['label'] ) ) {
+												echo esc_html( $label['label'] );
+											} elseif ( isset( $label['image'] ) ) {
+												echo esc_html( $label['image'] );
+											} elseif ( isset( $label['color'] ) ) {
+												echo esc_html( $label['color'] );
+											}
+										} else {
+											echo esc_html( $label );
+										}
+										echo '</option>';
+									}
+									echo '</select>';
+									break;
+								case 'checkbox':
+									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+									echo '<option value="bool:true"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
+									_e( 'Yes', 'wpptd' );
+									echo '</option>';
+									echo '<option value="bool:false"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
+									_e( 'No', 'wpptd' );
+									echo '</option>';
+									echo '</select>';
+									break;
+								case 'text':
+								case 'email':
+								case 'url':
+								case 'datetime':
+								case 'date':
+								case 'time':
+								case 'color':
+								case 'media':
+									$options = $this->get_all_meta_values( $column_args['meta_key'] );
+									if ( count( $options ) > 0 ) {
+										echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+										echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+										foreach ( $options as $option ) {
+											echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
+											echo $field->_field->parse( $option, true );
+											echo '</option>';
+										}
+										echo '</select>';
+									}
+									break;
+								default:
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public function register_table_filter_query_vars( $vars ) {
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( is_array( $column_args ) && $column_args['filterable'] ) {
+					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
+						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
+							$vars[] = $column_slug;
+						}
+					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
+						$vars[] = $column_slug;
+					}
+				}
+			}
+
+			return $vars;
+		}
+
+		public function maybe_filter_by_table_columns( $wp_query ) {
+			$tax_query = array();
+			$meta_query = array();
+			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
+				if ( is_array( $column_args ) && $column_args['filterable'] && isset( $wp_query->query[ $column_slug ] ) ) {
+					$this->active_filters[ $column_slug ] = false;
+					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) && 'category' !== $column_args['taxonomy_slug'] ) {
+						$term_id = absint( $wp_query->query[ $column_slug ] );
+						if ( $term_id > 0 ) {
+							$this->active_filters[ $column_slug ] = $term_id;
+							$tax_query[] = array(
+								'taxonomy'	=> $column_args['taxonomy_slug'],
+								'field'		=> 'term_id',
+								'terms'		=> $term_id,
+							);
+						}
+					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
+						$meta_value = stripslashes( $wp_query->query[ $column_slug ] );
+						if ( $meta_value ) {
+							$this->active_filters[ $column_slug ] = $meta_value;
+							if ( 'bool:true' === $meta_value ) {
+								$meta_query[] = array(
+									'key'		=> $column_args['meta_key'],
+									'value'		=> array( '', '0', 'false', 'null' ),
+									'compare'	=> 'NOT IN',
+								);
+							} elseif ( 'bool:false' === $meta_value ) {
+								$meta_query[] = array(
+									'key'		=> $column_args['meta_key'],
+									'value'		=> array( '', '0', 'false', 'null' ),
+									'compare'	=> 'IN',
+								);
+							} else {
+								$meta_query[] = array(
+									'key'		=> $column_args['meta_key'],
+									'value'		=> $meta_value,
+									'compare'	=> '=',
+								);
+							}
+						}
+					}
+				}
+			}
+
+			if ( $tax_query ) {
+				$orig_tax_query = $wp_query->get( 'tax_query' );
+				if ( ! $orig_tax_query ) {
+					$orig_tax_query = array();
+				}
+				$tax_query = array_merge( $orig_tax_query, $tax_query );
+				$wp_query->set( 'tax_query', $tax_query );
+			}
+
+			if ( $meta_query ) {
+				$orig_meta_query = $wp_query->get( 'meta_query' );
+				if ( ! $orig_meta_query ) {
+					$orig_meta_query = array();
+				}
+				$meta_query = array_merge( $orig_meta_query, $meta_query );
+				$wp_query->set( 'meta_query', $meta_query );
+			}
+		}
+
+		public function maybe_sort_by_meta_table_column( $wp_query ) {
+			if ( ! isset( $wp_query->query['orderby'] ) ) {
+				return;
+			}
+
+			$orderby = $wp_query->query['orderby'];
+
+			if ( ! isset( $this->args['table_columns'][ $orderby ] ) ) {
+				return;
+			}
+
+			if ( ! $this->args['table_columns'][ $orderby ]['sortable'] ) {
+				return;
+			}
+
+			if ( ! isset( $this->args['table_columns'][ $orderby ]['meta_key'] ) || empty( $this->args['table_columns'][ $orderby ]['meta_key'] ) ) {
+				return;
+			}
+
+			$wp_query->set( 'meta_key', $this->args['table_columns'][ $orderby ]['meta_key'] );
+			$wp_query->set( 'orderby', 'meta_value' );
+		}
+
+		public function maybe_sort_by_taxonomy_table_column( $clauses, $wp_query ) {
+			global $wpdb;
+
+			if ( ! isset( $wp_query->query['orderby'] ) ) {
+				return $clauses;
+			}
+
+			$orderby = $wp_query->query['orderby'];
+
+			if ( ! isset( $this->args['table_columns'][ $orderby ] ) ) {
+				return $clauses;
+			}
+
+			if ( ! $this->args['table_columns'][ $orderby ]['sortable'] ) {
+				return $clauses;
+			}
+
+			if ( ! isset( $this->args['table_columns'][ $orderby ]['taxonomy_slug'] ) || empty( $this->args['table_columns'][ $orderby ]['taxonomy_slug'] ) ) {
+				return $clauses;
+			}
+
+			$clauses['join'] .= " LEFT OUTER JOIN " . $wpdb->term_relationships . " AS wpptd_tr ON ( " . $wpdb->posts . ".ID = wpptd_tr.object_id )";
+			$clauses['join'] .= " LEFT OUTER JOIN " . $wpdb->term_taxonomy . " AS wpptd_tt ON ( wpptd_tr.term_taxonomy_id = wpptd_tt.term_taxonomy_id )";
+			$clauses['join'] .= " LEFT OUTER JOIN " . $wpdb->terms . " AS wpptd_t ON ( wpptd_tt.term_id = wpptd_t.term_id )";
+			$clauses['where'] .= $wpdb->prepare( " AND ( taxonomy = %s OR taxonomy IS NULL )", $this->args['table_columns'][ $orderby ]['taxonomy_slug'] );
+			$clauses['groupby'] = 'wpptd_tr.object_id';
+			$clauses['orderby'] = "GROUP_CONCAT( wpptd_t.name ORDER BY name ASC ) " . ( ( 'asc' === strtolower( $wp_query->query['order'] ) ) ? 'ASC' : 'DESC' );
+
+			return $clauses;
+		}
+
+		public function maybe_sort_default() {
+			if ( isset( $_GET['orderby'] ) ) {
+				return;
+			}
+
+			if ( ! isset( $this->args['table_columns']['date'] ) || $this->args['table_columns']['date'] ) {
+				return;
+			}
+
+			// remove month dropdown if the date is irrelevant
+			add_filter( 'disable_months_dropdown', '__return_true' );
+
+			// sort by title if the date is irrelevant
+			$_GET['orderby'] = 'title';
+			$_GET['order'] = 'asc';
 		}
 
 		public function filter_row_actions( $row_actions ) {
@@ -456,21 +714,39 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				if ( ! $this->args['show_ui'] || ! is_array( $this->args['table_columns'] ) ) {
 					$this->args['table_columns'] = array();
 				}
-				foreach ( $this->args['table_columns'] as $column_slug => &$column_args ) {
-					if ( null !== $column_args ) {
-						if ( ! is_array( $column_args ) ) {
-							$column_args = array();
+				$_table_columns = $this->args['table_columns'];
+				$this->args['table_columns'] = array();
+				$core_column_slugs = array( 'title', 'author', 'comments', 'date' );
+				foreach ( $_table_columns as $column_slug => $column_args ) {
+					if ( strpos( $column_slug, 'meta-' ) === 0 || strpos( $column_slug, 'taxonomy-' ) === 0 || strpos( $column_slug, 'custom-' ) === 0 || in_array( $column_slug, $core_column_slugs ) ) {
+						if ( false !== $column_args ) {
+							if ( ! is_array( $column_args ) ) {
+								$column_args = array();
+							}
+							$column_args = wp_parse_args( $column_args, array(
+								'title'			=> '',
+								'filterable'	=> false,
+								'sortable'		=> false,
+							) );
+							if ( strpos( $column_slug, 'meta-' ) === 0 ) {
+								if ( ! isset( $column_args['meta_key'] ) || empty( $column_args['meta_key'] ) ) {
+									$column_args['meta_key'] = substr( $column_slug, strlen( 'meta-' ) );
+								}
+							} elseif ( strpos( $column_slug, 'taxonomy-' ) === 0 ) {
+								if ( ! isset( $column_args['taxonomy_slug'] ) || empty( $column_args['taxonomy_slug'] ) ) {
+									$column_args['taxonomy_slug'] = substr( $column_slug, strlen( 'taxonomy-' ) );
+								}
+							} elseif ( strpos( $column_slug, 'custom-' ) === 0 ) {
+								if ( ! isset( $column_args['custom_callback'] ) || empty( $column_args['custom_callback'] ) ) {
+									$column_args['custom_callback'] = substr( $column_slug, strlen( 'custom-' ) );
+								}
+							}
 						}
-						$column_args = wp_parse_args( $column_args, array(
-							'meta_key'		=> '',
-							'taxonomy_slug'	=> '',
-							'callback'		=> '',
-							'title'			=> '',
-							'sortable'		=> false,
-						) );
+						$this->args['table_columns'][ $column_slug ] = $column_args;
+					} else {
+						App::doing_it_wrong( __METHOD__, sprintf( __( 'The admin table column slug %1$s (for post type %2$s) is invalid. It must be prefix with either &quot;meta-&quot;, &quot;taxonomy-&quot; or &quot;custom-&quot;.', 'wpptd' ), $column_slug, $this->slug ), '0.5.0' );
 					}
 				}
-				unset( $column_args );
 
 				// handle row actions
 				if ( ! $this->args['show_ui'] || ! is_array( $this->args['row_actions'] ) ) {
@@ -600,6 +876,15 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 */
 		protected function supports_globalslug() {
 			return false;
+		}
+
+		protected function get_all_meta_values( $meta_key ) {
+			global $wpdb;
+
+			$query = "SELECT DISTINCT meta_value FROM " . $wpdb->postmeta . " AS m JOIN " . $wpdb->posts . " as p ON ( p.ID = m.post_id )";
+			$query .= " WHERE m.meta_key = %s AND m.meta_value != '' AND p.post_type = %s ORDER BY m.meta_value ASC;";
+
+			return $wpdb->get_col( $wpdb->prepare( $query, $meta_key, $this->slug ) );
 		}
 
 	}

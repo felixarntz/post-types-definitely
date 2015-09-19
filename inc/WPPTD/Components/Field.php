@@ -91,7 +91,30 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		}
 
 		public function render_table_column( $post_id ) {
-			//TODO
+			$formatted = true;
+			switch ( $this->type ) {
+				case 'checkbox':
+					$formatted = array( 'mode' => 'tick' );
+					break;
+				case 'color':
+					$formatted = array( 'mode' => 'color' );
+					break;
+				case 'media':
+					$formatted = array( 'mode' => 'link' );
+					break;
+				case 'multibox':
+				case 'multiselect':
+					$formatted = array( 'mode' => 'html', 'list' => true );
+					break;
+				case 'radio':
+				case 'select':
+					$formatted = array( 'mode' => 'html' );
+					break;
+				default:
+					$formatted = true;
+			}
+
+			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta( $post_id, $this->slug, null, $formatted ), $post_id );
 		}
 
 		/**

@@ -87,11 +87,7 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 		if ( $field ) {
 			$type_hint = $field->validate_meta_value( null, true );
 			if ( is_array( $type_hint ) ) {
-				if ( count( $_meta_value ) > 0 ) {
-					$meta_value = $field->_field->parse( $_meta_value, $formatted );
-				} else {
-					$meta_value = array();
-				}
+				$meta_value = $field->_field->parse( $_meta_value, $formatted );
 				if ( $single !== null && $single ) {
 					if ( count( $meta_value > 0 ) ) {
 						$meta_value = $meta_value[0];
@@ -103,7 +99,7 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 				if ( count( $_meta_value ) > 0 ) {
 					$meta_value = $field->_field->parse( $_meta_value[0], $formatted );
 				} else {
-					$meta_value = $field->default;
+					$meta_value = $field->_field->parse( $field->default, $formatted );
 				}
 				if ( $single !== null && ! $single ) {
 					$meta_value = array( $meta_value );

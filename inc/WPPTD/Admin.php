@@ -82,9 +82,25 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type, 'filter_table_sortable_columns' ) );
 				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type, 'render_table_column' ), 10, 2 );
 			}
+			add_action( 'load-edit.php', array( $this, 'handle_table_filtering_and_sorting' ) );
 
 			add_filter( 'page_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
 			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+		}
+
+		public function handle_table_filtering_and_sorting() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				$post_type->maybe_sort_default();
+
+				add_action( 'restrict_manage_posts', array( $post_type, 'render_table_column_filters' ) );
+				add_filter( 'query_vars', array( $post_type, 'register_table_filter_query_vars' ) );
+				add_action( 'pre_get_posts', array( $post_type, 'maybe_filter_by_table_columns' ), 10, 1 );
+				add_action( 'pre_get_posts', array( $post_type, 'maybe_sort_by_meta_table_column' ), 10, 1 );
+				add_filter( 'posts_clauses', array( $post_type, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
+			}
 		}
 
 		public function get_row_actions( $actions, $post ) {

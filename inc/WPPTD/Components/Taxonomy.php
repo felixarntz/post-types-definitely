@@ -134,6 +134,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'wpptd' ), $this->args['title'] ),
 					'parent_item'					=> sprintf( __( 'Parent %s', 'wpptd' ), $this->args['singular_title'] ),
 					'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'wpptd' ), $this->args['singular_title'] ),
+					// additional label for post listings
+					'filter_by_item'				=> sprintf( __( 'Filter by %s', 'wpptd' ), $this->args['singular_title'] ),
 				);
 				foreach ( $default_labels as $type => $default_label ) {
 					if ( ! isset( $this->args['labels'][ $type ] ) ) {
@@ -179,9 +181,6 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				if ( null === $this->args['show_in_menu'] ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
 				}
-
-				// this is handled per post type
-				$this->args['show_admin_column'] = false;
 
 				if ( null !== $this->args['position'] ) {
 					$this->args['position'] = floatval( $this->args['position'] );
@@ -230,6 +229,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'show_in_menu'			=> null,
 				'show_in_nav_menus'		=> null,
 				'show_tagcloud'			=> null,
+				'show_admin_column'		=> null,
 				'show_in_quick_edit'	=> null,
 				'capabilities'			=> array(),
 				'hierarchical'			=> false,
