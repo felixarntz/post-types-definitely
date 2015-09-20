@@ -260,6 +260,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $messages;
 		}
 
+		public function get_bulk_updated_messages( $counts ) {
+			$messages = array();
+			foreach ( $this->args['bulk_messages'] as $type => $_messages ) {
+				list( $singular, $plural ) = $_messages;
+				$messages[ $type ] = ( 1 === $counts[ $type ] ) ? $singular : $plural;
+			}
+
+			return $messages;
+		}
+
 		public function get_enter_title_here( $post ) {
 			return $this->args['enter_title_here'];
 		}
@@ -583,8 +593,188 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			$_GET['order'] = 'asc';
 		}
 
-		public function filter_row_actions( $row_actions ) {
+		public function filter_row_actions( $row_actions, $post ) {
+			if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+				return $row_actions;
+			}
+
+			foreach ( $this->args['row_actions'] as $action_slug => $action_args ) {
+				// do not allow overriding of existing actions
+				if ( isset( $row_actions[ $action_slug ] ) ) {
+					continue;
+				}
+
+				$base_url = get_edit_post_link( $post->ID, 'raw' );
+				if ( ! $base_url ) {
+					continue;
+				}
+
+				$row_actions[ $action_slug ] = '<a href="' . esc_url( wp_nonce_url( add_query_arg( 'action', $action_slug, $base_url ), $action_slug . '-post_' . $post->ID ) ) . '" title="' . esc_attr( $action_args['title'] ) . '">' . esc_html( $action_args['title'] ) . '</a>';
+			}
+
 			return $row_actions;
+		}
+
+		public function maybe_run_row_action() {
+			$row_action = substr( current_action(), strlen( 'admin_action_' ) );
+			if ( ! isset( $this->args['row_actions'][ $row_action ] ) ) {
+				return;
+			}
+
+			$post_id = 0;
+			if ( isset( $_GET['post'] ) ) {
+				$post_id = (int) $_GET['post'];
+			} elseif ( isset( $_POST['post_ID'] ) ) {
+				$post_id = (int) $_POST['post_ID'];
+			}
+
+			if ( ! $post_id ) {
+				return;
+			}
+
+			$sendback = '';
+			if ( 'attachment' === $this->slug ) {
+				$sendback = admin_url( 'upload.php' );
+			} else {
+				$sendback = admin_url( 'edit.php' );
+				if ( 'post' !== $this->slug ) {
+					$sendback = add_query_arg( 'post_type', $this->slug, $sendback );
+				}
+			}
+
+			check_admin_referer( $row_action . '-post_' . $post_id );
+
+			$action_message = false;
+			$error = false;
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'wpptd' ), $this->args['singular_title'] );
+				$error = true;
+			} elseif ( empty( $this->args['row_actions'][ $row_action ]['callback'] ) || ! is_callable( $this->args['row_actions'][ $row_action ]['callback'] ) ) {
+				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'wpptd' ), $this->args['singular_title'] );
+				$error = true;
+			} else {
+				$action_message = call_user_func( $this->args['row_actions'][ $row_action ]['callback'], $post_id );
+				if ( is_wp_error( $action_message ) ) {
+					$action_message = $action_message->get_error_message();
+					$error = true;
+				}
+			}
+
+			if ( $action_message && is_string( $action_message ) ) {
+				if ( $error ) {
+					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
+				}
+				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+			}
+
+			wp_redirect( add_query_arg( 'updated', 1, $sendback ) );
+			exit();
+		}
+
+		public function maybe_run_bulk_action() {
+			$bulk_action = substr( current_action(), strlen( 'admin_action_' ) );
+			if ( ! isset( $this->args['bulk_actions'][ $bulk_action ] ) ) {
+				return;
+			}
+
+			$post_ids = array();
+			if ( isset( $_REQUEST['media'] ) ) {
+				$post_ids = (array) $_REQUEST['media'];
+			} elseif ( isset( $_REQUEST['ids'] ) ) {
+				$post_ids = explode( ',', $_REQUEST['ids'] );
+			} elseif ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
+				$post_ids = (array) $_REQUEST['post'];
+			}
+
+			if ( ! $post_ids ) {
+				return;
+			}
+
+			$post_ids = array_map( 'intval', $post_ids );
+
+			$sendback = wp_get_referer();
+			if ( ! $sendback ) {
+				if ( 'attachment' === $this->slug ) {
+					$sendback = admin_url( 'upload.php' );
+				} else {
+					$sendback = admin_url( 'edit.php' );
+					if ( 'post' !== $this->slug ) {
+						$sendback = add_query_arg( 'post_type', $this->slug, $sendback );
+					}
+				}
+			} else {
+				$sendback = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids' ), $sendback );
+			}
+
+			check_admin_referer( 'bulk-posts' );
+
+			$action_message = false;
+			$error = false;
+			if ( empty( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) || ! is_callable( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) ) {
+				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'wpptd' ), $this->args['title'] );
+				$error = true;
+			} else {
+				$action_message = call_user_func( $this->args['bulk_actions'][ $bulk_action ]['callback'], $post_ids );
+				if ( is_wp_error( $action_message ) ) {
+					$action_message = $action_message->get_error_message();
+					$error = true;
+				}
+			}
+
+			if ( $action_message && is_string( $action_message ) ) {
+				if ( $error ) {
+					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
+				}
+				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+			}
+
+			$sendback = remove_query_arg( array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), $sendback );
+
+			wp_redirect( add_query_arg( 'updated', count( $post_ids ), $sendback ) );
+			exit();
+		}
+
+		public function hack_bulk_actions() {
+			?>
+			<script type="text/javascript">
+				if ( typeof jQuery !== 'undefined' ) {
+					jQuery( document ).ready( function( $ ) {
+						if ( $( '#message .wpptd-error-hack' ).length > 0 ) {
+							$( '#message' ).addClass( 'error' ).removeClass( 'updated' );
+							$( '#message .wpptd-error-hack' ).remove();
+						}
+
+						var options = '';
+						<?php if ( ! isset( $_REQUEST['post_status'] ) || 'trash' != $_REQUEST['post_status'] ) : ?>
+						<?php foreach ( $this->args['bulk_actions'] as $action_slug => $action_args ) : ?>
+						options += '<option value="<?php echo $action_slug; ?>"><?php echo $action_args['title']; ?></option>';
+						<?php endforeach; ?>
+						<?php endif; ?>
+
+						if ( options ) {
+							$( '#bulk-action-selector-top' ).append( options );
+							$( '#bulk-action-selector-bottom' ).append( options );
+						}
+					});
+				}
+			</script>
+			<?php
+		}
+
+		public function maybe_hack_bulk_message( $bulk_messages, $bulk_counts ) {
+			if ( $bulk_counts['updated'] > 0 ) {
+				$action_message = get_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message' );
+				if ( $action_message ) {
+					delete_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message' );
+
+					if ( ! isset( $bulk_messages[ $this->slug ] ) ) {
+						$bulk_messages[ $this->slug ] = array();
+					}
+					$bulk_messages[ $this->slug ]['updated'] = $action_message;
+				}
+			}
+
+			return $bulk_messages;
 		}
 
 		/**
@@ -676,6 +866,45 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					}
 				}
 
+				// generate post type bulk action messages
+				if ( ! is_array( $this->args['bulk_messages'] ) ) {
+					$this->args['bulk_messages'] = array();
+				}
+				$default_messages = array(
+					'updated'	=> array(
+						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+					),
+					'locked'	=> array(
+						sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+					),
+					'deleted'	=> array(
+						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+					),
+					'trashed'	=> array(
+						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+					),
+					'untrashed'	=> array(
+						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+					),
+				);
+				foreach ( $default_messages as $type => $defaults ) {
+					if ( ! isset( $this->args['bulk_messages'][ $type ] ) ) {
+						$this->args['bulk_messages'][ $type ] = $defaults;
+					} else {
+						if ( ! is_array( $this->args['bulk_messages'][ $type ] ) ) {
+							$this->args['bulk_messages'][ $type ] = array( $this->args['bulk_messages'][ $type ] );
+						}
+						if ( count( $this->args['bulk_messages'][ $type ] ) < 2 ) {
+							$this->args['bulk_messages'][ $type ][] = $defaults[1];
+						}
+					}
+				}
+
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
 					if ( $this->args['public'] ) {
@@ -752,10 +981,28 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				if ( ! $this->args['show_ui'] || ! is_array( $this->args['row_actions'] ) ) {
 					$this->args['row_actions'] = array();
 				}
+				foreach ( $this->args['row_actions'] as $action_slug => &$action_args ) {
+					if ( ! is_array( $action_args ) ) {
+						$action_args = array();
+					}
+					$action_args = wp_parse_args( $action_args, array(
+						'title'				=> '',
+						'callback'			=> '',
+					) );
+				}
 
 				// handle bulk actions
 				if ( ! $this->args['show_ui'] || ! is_array( $this->args['bulk_actions'] ) ) {
 					$this->args['bulk_actions'] = array();
+				}
+				foreach ( $this->args['bulk_actions'] as $action_slug => &$action_args ) {
+					if ( ! is_array( $action_args ) ) {
+						$action_args = array();
+					}
+					$action_args = wp_parse_args( $action_args, array(
+						'title'				=> '',
+						'callback'			=> '',
+					) );
 				}
 
 				// handle help
@@ -814,6 +1061,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'singular_title'		=> '',
 				'labels'				=> array(),
 				'messages'				=> array(),
+				'bulk_messages'			=> array(),
 				'enter_title_here'		=> '',
 				'description'			=> '',
 				'public'				=> false,

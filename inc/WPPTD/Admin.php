@@ -70,6 +70,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			add_action( 'load-edit.php', array( $this, 'add_post_list_help' ) );
 			add_filter( 'enter_title_here', array( $this, 'get_post_enter_title_here' ), 10, 2 );
 			add_filter( 'post_updated_messages', array( $this, 'get_post_updated_messages' ) );
+			add_filter( 'bulk_post_updated_messages', array( $this, 'get_bulk_post_updated_messages' ), 10, 2 );
 			add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
 
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
@@ -86,6 +87,35 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			add_filter( 'page_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
 			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+			add_action( 'load-post.php', array( $this, 'handle_row_actions' ) );
+			add_action( 'load-edit.php', array( $this, 'handle_bulk_actions' ) );
+		}
+
+		public function handle_row_actions() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_row_action' ) );
+				}
+			}
+		}
+
+		public function handle_bulk_actions() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
+					$_REQUEST['action'] = $_REQUEST['action2'];
+				}
+				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_bulk_action' ) );
+				}
+				add_action( 'admin_head', array( $post_type, 'hack_bulk_actions' ), 100 );
+				add_filter( 'bulk_post_updated_messages', array( $post_type, 'maybe_hack_bulk_message' ), 100, 2 );
+			}
 		}
 
 		/**
@@ -119,6 +149,11 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		public function save_post_meta( $post_id, $post, $update = false ) {
+			$nonce = isset( $_POST[ 'wpptd_edit_' . $post->post_type ] ) ? sanitize_key( $_POST[ 'wpptd_edit_' . $post->post_type ] ) : '';
+			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-' . $post->post_type ) ) {
+				return;
+			}
+
 			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type->save_meta( $post_id, $post, $update );
@@ -126,6 +161,8 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		public function display_meta_errors( $post ) {
+			wp_nonce_field( 'wpptd-save-' . $post->post_type, 'wpptd_edit_' . $post->post_type );
+
 			$errors = get_transient( 'wpptd_meta_error_' . $post->post_type . '_' . $post->ID );
 			if ( $errors ) {
 				echo '<div id="wpptd-post-meta-errors" class="notice notice-error is-dismissible"><p>';
@@ -193,6 +230,17 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $messages;
 		}
 
+		public function get_bulk_post_updated_messages( $messages, $counts ) {
+			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
+			foreach ( $post_types as $post_type ) {
+				if ( ! in_array( $post_type->slug, array( 'post', 'page', 'attachment' ) ) ) {
+					$messages[ $post_type->slug ] = $post_type->get_bulk_updated_messages( $counts );
+				}
+			}
+
+			return $messages;
+		}
+
 		public function get_media_view_strings( $strings, $post ) {
 			if ( $post ) {
 				$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
@@ -239,7 +287,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function get_row_actions( $actions, $post ) {
 			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$actions = $post_type->filter_row_actions( $actions );
+				$actions = $post_type->filter_row_actions( $actions, $post );
 			}
 			return $actions;
 		}
