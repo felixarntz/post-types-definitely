@@ -184,7 +184,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
 
 			if ( count( $errors ) > 0 ) {
-				$error_text = __( 'Some errors occurred while trying to save the following post meta:', 'wpptd' );
+				$error_text = __( 'Some errors occurred while trying to save the following post meta:', 'post-types-definitely' );
 				foreach ( $errors as $field_slug => $error ) {
 					$error_text .= '<br/><em>' . $field_slug . '</em>: ' . $error->get_error_message();
 				}
@@ -384,7 +384,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 								case 'radio':
 								case 'multibox':
 									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
 									foreach ( $field->options as $value => $label ) {
 										echo $value;
 										echo $this->active_filters[ $column_slug ];
@@ -406,12 +406,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 									break;
 								case 'checkbox':
 									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
 									echo '<option value="bool:true"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
-									_e( 'Yes', 'wpptd' );
+									_e( 'Yes', 'post-types-definitely' );
 									echo '</option>';
 									echo '<option value="bool:false"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
-									_e( 'No', 'wpptd' );
+									_e( 'No', 'post-types-definitely' );
 									echo '</option>';
 									echo '</select>';
 									break;
@@ -426,7 +426,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 									$options = $this->get_all_meta_values( $column_args['meta_key'] );
 									if ( count( $options ) > 0 ) {
 										echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-										echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'wpptd' ) . '</option>';
+										echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
 										foreach ( $options as $option ) {
 											echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
 											echo $field->_field->parse( $option, true );
@@ -647,10 +647,10 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			$action_message = false;
 			$error = false;
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'wpptd' ), $this->args['singular_title'] );
+				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'post-types-definitely' ), $this->args['singular_title'] );
 				$error = true;
 			} elseif ( empty( $this->args['row_actions'][ $row_action ]['callback'] ) || ! is_callable( $this->args['row_actions'][ $row_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'wpptd' ), $this->args['singular_title'] );
+				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['singular_title'] );
 				$error = true;
 			} else {
 				$action_message = call_user_func( $this->args['row_actions'][ $row_action ]['callback'], $post_id );
@@ -711,7 +711,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			$action_message = false;
 			$error = false;
 			if ( empty( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) || ! is_callable( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'wpptd' ), $this->args['title'] );
+				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['title'] );
 				$error = true;
 			} else {
 				$action_message = call_user_func( $this->args['bulk_actions'][ $bulk_action ]['callback'], $post_ids );
@@ -788,12 +788,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			if ( $status === true ) {
 
 				if ( in_array( $this->slug, array( 'revision', 'nav_menu_item', 'action', 'author', 'order', 'plugin', 'theme' ) ) ) {
-					return new UtilError( 'no_valid_post_type', sprintf( __( 'The post type slug %s is forbidden since it would interfere with WordPress Core functionality.', 'wpptd' ), $this->slug ), '', ComponentManager::get_scope() );
+					return new UtilError( 'no_valid_post_type', sprintf( __( 'The post type slug %s is forbidden since it would interfere with WordPress Core functionality.', 'post-types-definitely' ), $this->slug ), '', ComponentManager::get_scope() );
 				}
 
 				// show notice if slug contains dashes
 				if ( strpos( $this->slug, '-' ) !== false ) {
-					App::doing_it_wrong( __METHOD__, sprintf( __( 'The post type slug %s contains dashes which is discouraged. It will still work for the most part, but we recommend to adjust the slug if possible.', 'wpptd' ), $this->slug ), '0.5.0' );
+					App::doing_it_wrong( __METHOD__, sprintf( __( 'The post type slug %s contains dashes which is discouraged. It will still work for the most part, but we recommend to adjust the slug if possible.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 				}
 
 				// generate titles if not provided
@@ -819,23 +819,23 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					'singular_name'			=> $this->args['singular_title'],
 					'menu_name'				=> $this->args['title'],
 					'name_admin_bar'		=> $this->args['singular_title'],
-					'all_items'				=> sprintf( __( 'All %s', 'wpptd' ), $this->args['title'] ),
-					'add_new'				=> __( 'Add New', 'wpptd' ),
-					'add_new_item'			=> sprintf( __( 'Add New %s', 'wpptd' ), $this->args['singular_title'] ),
-					'edit_item'				=> sprintf( __( 'Edit %s', 'wpptd' ), $this->args['singular_title'] ),
-					'new_item'				=> sprintf( __( 'New %s', 'wpptd' ), $this->args['singular_title'] ),
-					'view_item'				=> sprintf( __( 'View %s', 'wpptd' ), $this->args['singular_title'] ),
-					'search_items'			=> sprintf( __( 'Search %s', 'wpptd' ), $this->args['title'] ),
-					'not_found'				=> sprintf( __( 'No %s found', 'wpptd' ), $this->args['title'] ),
-					'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'wpptd' ), $this->args['title'] ),
-					'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'wpptd' ), $this->args['singular_title'] ),
-					'featured_image'		=> sprintf( __( 'Featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
-					'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
-					'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
-					'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'wpptd' ), $this->args['singular_title'] ),
+					'all_items'				=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
+					'add_new'				=> __( 'Add New', 'post-types-definitely' ),
+					'add_new_item'			=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'edit_item'				=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'new_item'				=> sprintf( __( 'New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'view_item'				=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'search_items'			=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
+					'not_found'				=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
+					'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'post-types-definitely' ), $this->args['title'] ),
+					'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'featured_image'		=> sprintf( __( 'Featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
 					// additional labels for media library
-					'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'wpptd' ), $this->args['singular_title'] ),
-					'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'wpptd' ), $this->args['singular_title'] ),
+					'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'post-types-definitely' ), $this->args['singular_title'] ),
 				);
 				foreach ( $default_labels as $type => $default_label ) {
 					if ( ! isset( $this->args['labels'][ $type ] ) ) {
@@ -849,16 +849,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 				$default_messages = array(
 					 0 => '',
-					 1 => sprintf( __( '%1$s updated. <a href="%%s">View %1$s</a>', 'wpptd' ), $this->args['singular_title'] ),
-					 2 => __( 'Custom field updated.', 'wpptd' ),
-					 3 => __( 'Custom field deleted.', 'wpptd' ),
-					 4 => sprintf( __( '%s updated.', 'wpptd' ), $this->args['singular_title'] ),
-					 5 => sprintf( __( '%s restored to revision from %%s', 'wpptd' ), $this->args['singular_title'] ),
-					 6 => sprintf( __( '%1$s published. <a href="%%s">View %1$s</a>', 'wpptd' ), $this->args['singular_title'] ),
-					 7 => sprintf( __( '%s saved.', 'wpptd' ), $this->args['singular_title'] ),
-					 8 => sprintf( __( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'wpptd' ), $this->args['singular_title'] ),
-					 9 => sprintf( __( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'wpptd' ), $this->args['singular_title'] ),
-					10 => sprintf( __( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'wpptd' ), $this->args['singular_title'] ),
+					 1 => sprintf( __( '%1$s updated. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 2 => __( 'Custom field updated.', 'post-types-definitely' ),
+					 3 => __( 'Custom field deleted.', 'post-types-definitely' ),
+					 4 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 5 => sprintf( __( '%s restored to revision from %%s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 6 => sprintf( __( '%1$s published. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 7 => sprintf( __( '%s saved.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 8 => sprintf( __( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 9 => sprintf( __( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+					10 => sprintf( __( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
 				);
 				foreach ( $default_messages as $i => $default_message ) {
 					if ( ! isset( $this->args['messages'][ $i ] ) ) {
@@ -872,24 +872,24 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 				$default_messages = array(
 					'updated'	=> array(
-						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
 					),
 					'locked'	=> array(
-						sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+						sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
 					),
 					'deleted'	=> array(
-						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
 					),
 					'trashed'	=> array(
-						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
 					),
 					'untrashed'	=> array(
-						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'wpptd' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'wpptd' ), $this->args['title'] ),
+						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
 					),
 				);
 				foreach ( $default_messages as $type => $defaults ) {
@@ -926,11 +926,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				} else {
 					$this->args['show_in_menu'] = false;
 					if ( isset( $this->args['menu_position'] ) ) {
-						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu position is unnecessarily provided for the post type %s - the menu position is already specified by its parent menu.', 'wpptd' ), $this->slug ), '0.5.0' );
+						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu position is unnecessarily provided for the post type %s - the menu position is already specified by its parent menu.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 						unset( $this->args['menu_position'] );
 					}
 					if ( isset( $this->args['menu_icon'] ) ) {
-						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu icon is unnecessarily provided for the post type %s - the menu icon is already specified by its parent menu.', 'wpptd' ), $this->slug ), '0.5.0' );
+						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu icon is unnecessarily provided for the post type %s - the menu icon is already specified by its parent menu.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 						unset( $this->args['menu_icon'] );
 					}
 				}
@@ -973,7 +973,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 						}
 						$this->args['table_columns'][ $column_slug ] = $column_args;
 					} else {
-						App::doing_it_wrong( __METHOD__, sprintf( __( 'The admin table column slug %1$s (for post type %2$s) is invalid. It must be prefix with either &quot;meta-&quot;, &quot;taxonomy-&quot; or &quot;custom-&quot;.', 'wpptd' ), $column_slug, $this->slug ), '0.5.0' );
+						App::doing_it_wrong( __METHOD__, sprintf( __( 'The admin table column slug %1$s (for post type %2$s) is invalid. It must be prefix with either &quot;meta-&quot;, &quot;taxonomy-&quot; or &quot;custom-&quot;.', 'post-types-definitely' ), $column_slug, $this->slug ), '0.5.0' );
 					}
 				}
 
@@ -1017,7 +1017,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 				foreach ( $this->args['help']['tabs'] as &$tab ) {
 					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'wpptd' ),
+						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
 						'content'		=> '',
 						'callback'		=> false,
 					) );
@@ -1036,7 +1036,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 				foreach ( $this->args['list_help']['tabs'] as &$tab ) {
 					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'wpptd' ),
+						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
 						'content'		=> '',
 						'callback'		=> false,
 					) );

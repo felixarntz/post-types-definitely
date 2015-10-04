@@ -128,7 +128,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		public function validate_meta_value( $meta_value = null, $skip_required = false ) {
 			if ( $this->args['required'] && ! $skip_required ) {
 				if ( $meta_value === null || $this->_field->is_empty( $meta_value ) ) {
-					return new WPError( 'invalid_empty_value', __( 'No value was provided for the required field.', 'wpptd' ) );
+					return new WPError( 'invalid_empty_value', __( 'No value was provided for the required field.', 'post-types-definitely' ) );
 				}
 			}
 			return $this->_field->validate( $meta_value );
@@ -156,7 +156,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 
 				$this->_field = FieldManager::get_instance( $this->args );
 				if ( $this->_field === null ) {
-					return new UtilError( 'no_valid_field_type', sprintf( __( 'The field type %1$s assigned to the field component %2$s is not a valid field type.', 'wpptd' ), $this->args['type'], $this->slug ), '', ComponentManager::get_scope() );
+					return new UtilError( 'no_valid_field_type', sprintf( __( 'The field type %1$s assigned to the field component %2$s is not a valid field type.', 'post-types-definitely' ), $this->args['type'], $this->slug ), '', ComponentManager::get_scope() );
 				}
 				if ( null === $this->args['default'] ) {
 					$this->args['default'] = $this->_field->validate();
@@ -180,7 +180,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'				=> __( 'Field title', 'wpptd' ),
+				'title'				=> __( 'Field title', 'post-types-definitely' ),
 				'description'		=> '',
 				'type'				=> 'text',
 				'class'				=> '',

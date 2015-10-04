@@ -172,7 +172,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 
 				$this->taxonomies_temp = array();
 			} else {
-				self::doing_it_wrong( __METHOD__, __( 'This function should never be called manually.', 'wpptd' ), '0.5.0' );
+				self::doing_it_wrong( __METHOD__, __( 'This function should never be called manually.', 'post-types-definitely' ), '0.5.0' );
 			}
 		}
 

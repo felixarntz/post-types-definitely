@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
-		pluginheader: 	'/*\n' +
+		pluginheader:	'/*\n' +
 						'Plugin Name: Post Types Definitely\n' +
 						'Plugin URI: <%= pkg.homepage %>\n' +
 						'Description: <%= pkg.description %>\n' +
@@ -11,19 +11,19 @@ module.exports = function(grunt) {
 						'Author URI: <%= pkg.author.url %>\n' +
 						'License: <%= pkg.license.name %>\n' +
 						'License URI: <%= pkg.license.url %>\n' +
-						'Text Domain: wpptd\n' +
+						'Text Domain: post-types-definitely\n' +
 						'Domain Path: /languages/\n' +
 						'Tags: wordpress, plugin, framework, library, developer, post-types, taxonomies, meta, admin, backend, ui\n' +
 						'*/',
-		fileheader: '/**\n' +
-					' * @package WPPTD\n' +
-					' * @version <%= pkg.version %>\n' +
-					' * @author <%= pkg.author.name %> <<%= pkg.author.email %>>\n' +
-					' */',
+		fileheader:		'/**\n' +
+						' * @package WPPTD\n' +
+						' * @version <%= pkg.version %>\n' +
+						' * @author <%= pkg.author.name %> <<%= pkg.author.email %>>\n' +
+						' */',
 
 		clean: {
 			translation: [
-				'languages/wpptd.pot'
+				'languages/post-types-definitely.pot'
 			]
 		},
 
@@ -58,7 +58,7 @@ module.exports = function(grunt) {
 					domainPath: '/languages',
 					exclude: [ 'vendor/.*' ],
 					potComments: 'Copyright (c) 2015-<%= grunt.template.today("yyyy") %> <%= pkg.author.name %>',
-					potFilename: 'wpptd.pot',
+					potFilename: 'post-types-definitely.pot',
 					potHeaders: {
 						'language-team': '<%= pkg.author.name %> <<%= pkg.author.email %>>',
 						'last-translator': '<%= pkg.author.name %> <<%= pkg.author.email %>>',

@@ -90,12 +90,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			if ( $status === true ) {
 
 				if ( in_array( $this->slug, array( 'post_format', 'link_category', 'nav_menu' ) ) ) {
-					return new UtilError( 'no_valid_taxonomy', sprintf( __( 'The taxonomy slug %s is forbidden since it would interfere with WordPress Core functionality.', 'wpptd' ), $this->slug ), '', ComponentManager::get_scope() );
+					return new UtilError( 'no_valid_taxonomy', sprintf( __( 'The taxonomy slug %s is forbidden since it would interfere with WordPress Core functionality.', 'post-types-definitely' ), $this->slug ), '', ComponentManager::get_scope() );
 				}
 
 				// show notice if slug contains dashes
 				if ( strpos( $this->slug, '-' ) !== false ) {
-					App::doing_it_wrong( __METHOD__, sprintf( __( 'The taxonomy slug %s contains dashes which is discouraged. It will still work for the most part, but we recommend to adjust the slug if possible.', 'wpptd' ), $this->slug ), '0.5.0' );
+					App::doing_it_wrong( __METHOD__, sprintf( __( 'The taxonomy slug %s contains dashes which is discouraged. It will still work for the most part, but we recommend to adjust the slug if possible.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 				}
 
 				// generate titles if not provided
@@ -120,22 +120,22 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					'name'							=> $this->args['title'],
 					'singular_name'					=> $this->args['singular_title'],
 					'menu_name'						=> $this->args['title'],
-					'all_items'						=> sprintf( __( 'All %s', 'wpptd' ), $this->args['title'] ),
-					'add_new_item'					=> sprintf( __( 'Add New %s', 'wpptd' ), $this->args['singular_title'] ),
-					'edit_item'						=> sprintf( __( 'Edit %s', 'wpptd' ), $this->args['singular_title'] ),
-					'view_item'						=> sprintf( __( 'View %s', 'wpptd' ), $this->args['singular_title'] ),
-					'update_item'					=> sprintf( __( 'Update %s', 'wpptd' ), $this->args['singular_title'] ),
-					'new_item_name'					=> sprintf( __( 'New %s Name', 'wpptd' ), $this->args['singular_title'] ),
-					'search_items'					=> sprintf( __( 'Search %s', 'wpptd' ), $this->args['title'] ),
-					'popular_items'					=> sprintf( __( 'Popular %s', 'wpptd' ), $this->args['title'] ),
-					'not_found'						=> sprintf( __( 'No %s found', 'wpptd' ), $this->args['title'] ),
-					'separate_items_with_commas'	=> sprintf( __( 'Separate %s with commas', 'wpptd' ), $this->args['title'] ),
-					'add_or_remove_items'			=> sprintf( __( 'Add or remove %s', 'wpptd' ), $this->args['title'] ),
-					'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'wpptd' ), $this->args['title'] ),
-					'parent_item'					=> sprintf( __( 'Parent %s', 'wpptd' ), $this->args['singular_title'] ),
-					'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'wpptd' ), $this->args['singular_title'] ),
+					'all_items'						=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
+					'add_new_item'					=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'edit_item'						=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'view_item'						=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'update_item'					=> sprintf( __( 'Update %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'new_item_name'					=> sprintf( __( 'New %s Name', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'search_items'					=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
+					'popular_items'					=> sprintf( __( 'Popular %s', 'post-types-definitely' ), $this->args['title'] ),
+					'not_found'						=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
+					'separate_items_with_commas'	=> sprintf( __( 'Separate %s with commas', 'post-types-definitely' ), $this->args['title'] ),
+					'add_or_remove_items'			=> sprintf( __( 'Add or remove %s', 'post-types-definitely' ), $this->args['title'] ),
+					'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'post-types-definitely' ), $this->args['title'] ),
+					'parent_item'					=> sprintf( __( 'Parent %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
 					// additional label for post listings
-					'filter_by_item'				=> sprintf( __( 'Filter by %s', 'wpptd' ), $this->args['singular_title'] ),
+					'filter_by_item'				=> sprintf( __( 'Filter by %s', 'post-types-definitely' ), $this->args['singular_title'] ),
 				);
 				foreach ( $default_labels as $type => $default_label ) {
 					if ( ! isset( $this->args['labels'][ $type ] ) ) {
@@ -149,12 +149,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 				$default_messages = array(
 					 0 => '',
-					 1 => sprintf( __( '%s added.', 'wpptd' ), $this->args['singular_title'] ),
-					 2 => sprintf( __( '%s deleted.', 'wpptd' ), $this->args['singular_title'] ),
-					 3 => sprintf( __( '%s updated.', 'wpptd' ), $this->args['singular_title'] ),
-					 4 => sprintf( __( '%s not added.', 'wpptd' ), $this->args['singular_title'] ),
-					 5 => sprintf( __( '%s not updated.', 'wpptd' ), $this->args['singular_title'] ),
-					 6 => sprintf( __( '%s deleted.', 'wpptd' ), $this->args['title'] ),
+					 1 => sprintf( __( '%s added.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 2 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 3 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 4 => sprintf( __( '%s not added.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 5 => sprintf( __( '%s not updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+					 6 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['title'] ),
 				);
 				foreach ( $default_messages as $i => $default_message ) {
 					if ( ! isset( $this->args['messages'][ $i ] ) ) {
@@ -198,7 +198,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 				foreach ( $this->args['help']['tabs'] as &$tab ) {
 					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'wpptd' ),
+						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
 						'content'		=> '',
 						'callback'		=> false,
 					) );

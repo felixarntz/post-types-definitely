@@ -94,7 +94,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			} elseif ( $this->args['callback'] && is_callable( $this->args['callback'] ) ) {
 				call_user_func( $this->args['callback'], $post );
 			} else {
-				App::doing_it_wrong( __METHOD__, sprintf( __( 'There are no fields to display for metabox %s. Either add some or provide a valid callback function instead.', 'wpptd' ), $this->slug ), '0.5.0' );
+				App::doing_it_wrong( __METHOD__, sprintf( __( 'There are no fields to display for metabox %s. Either add some or provide a valid callback function instead.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 			}
 
 			/**
@@ -139,7 +139,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'			=> __( 'Metabox title', 'wpptd' ),
+				'title'			=> __( 'Metabox title', 'post-types-definitely' ),
 				'description'	=> '',
 				'context'		=> null,
 				'priority'		=> null,
