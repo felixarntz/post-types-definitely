@@ -109,4 +109,70 @@ if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
 
 		return $meta_value;
 	}
+
+	function wpptd_get_term_meta( $id, $meta_key, $single = null, $formatted = false ) {
+		if ( ! wpptd_supports_termmeta() ) {
+			if ( $single ) {
+				return null;
+			}
+			return array();
+		}
+
+		$_meta_value = get_term_meta( $id, $meta_key, false );
+
+		if ( doing_action( 'wpptd' ) || ! did_action( 'wpptd' ) ) {
+			if ( $single ) {
+				if ( count( $_meta_value ) > 0 ) {
+					return $_meta_value[0];
+				}
+				return null;
+			} else {
+				return $_meta_value;
+			}
+		}
+
+		$meta_value = null;
+
+		$field = \WPDLib\Components\Manager::get( '*.*.' . wpptd_get_taxonomy( $id ) . '.*.' . $meta_key, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
+		if ( $field ) {
+			$type_hint = $field->validate_meta_value( null, true );
+			if ( is_array( $type_hint ) ) {
+				$meta_value = $field->_field->parse( $_meta_value, $formatted );
+				if ( $single !== null && $single ) {
+					if ( count( $meta_value > 0 ) ) {
+						$meta_value = $meta_value[0];
+					} else {
+						$meta_value = null;
+					}
+				}
+			} else {
+				if ( count( $_meta_value ) > 0 ) {
+					$meta_value = $field->_field->parse( $_meta_value[0], $formatted );
+				} else {
+					$meta_value = $field->_field->parse( $field->default, $formatted );
+				}
+				if ( $single !== null && ! $single ) {
+					$meta_value = array( $meta_value );
+				}
+			}
+		}
+
+		return $meta_value;
+	}
+
+	function wpptd_supports_termmeta() {
+		return version_compare( get_bloginfo( 'version' ), '4.4' ) >= 0 && function_exists( 'get_term_meta' );
+	}
+
+	function wpptd_get_taxonomy( $term ) {
+		if ( ! wpptd_supports_termmeta() ) {
+			return false;
+		}
+
+		if ( $term = get_term( $term ) ) {
+			return $term->taxonomy;
+		}
+
+		return false;
+	}
 }

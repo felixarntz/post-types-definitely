@@ -68,6 +68,8 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			add_filter( 'wpdlib_menu_validated', array( $this, 'menu_validated' ), 10, 2 );
 			add_filter( 'wpptd_post_type_validated', array( $this, 'post_type_validated' ), 10, 2 );
 			add_filter( 'wpptd_metabox_validated', array( $this, 'metabox_validated' ), 10, 2 );
+			add_filter( 'wpptd_taxonomy_validated', array( $this, 'taxonomy_validated' ), 10, 2 );
+			add_filter( 'wpptd_term_metabox_validated', array( $this, 'term_metabox_validated' ), 10, 2 );
 		}
 
 		public function set_scope( $scope ) {
@@ -117,6 +119,26 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 												if ( is_wp_error( $taxonomy ) ) {
 													self::doing_it_wrong( __METHOD__, $taxonomy->get_error_message(), '0.5.0' );
 												} else {
+													if ( wpptd_supports_termmeta() ) {
+														//TODO: check version numbers here
+														if ( isset( $taxonomy_args['metaboxes'] ) && is_array( $taxonomy_args['metaboxes'] ) ) {
+															foreach ( $taxonomy_args['metaboxes'] as $metabox_slug => $metabox_args ) {
+																$metabox = $taxonomy->add( new TermMetabox( $metabox_slug, $metabox_args ) );
+																if ( is_wp_error( $metabox ) ) {
+																	self::doing_it_wrong( __METHOD__, $metabox->get_error_message(), '0.5.0' );
+																} else {
+																	if ( isset( $metabox_args['fields'] ) && is_array( $metabox_args['fields'] ) ) {
+																		foreach ( $metabox_args['fields'] as $field_slug => $field_args ) {
+																			$field = $metabox->add( new TermField( $field_slug, $field_args ) );
+																			if ( is_wp_error( $field ) ) {
+																				self::doing_it_wrong( __METHOD__, $field->get_error_message(), '0.5.0' );
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
 													if ( isset( $this->taxonomies_temp[ $taxonomy_slug ] ) && is_array( $this->taxonomies_temp[ $taxonomy_slug ] ) ) {
 														foreach ( $this->taxonomies_temp[ $taxonomy_slug ] as $_post_type ) {
 															$_post_type->add( $taxonomy );
@@ -157,7 +179,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 */
 		public function init() {
 			if ( ! did_action( 'wpptd' ) ) {
-				ComponentManager::register_hierarchy( apply_filters( 'wpptd_class_hierarchy', array(
+				$hierarchy = array(
 					'WPDLib\Components\Menu'		=> array(
 						'WPPTD\Components\PostType'		=> array(
 							'WPPTD\Components\Metabox'		=> array(
@@ -166,7 +188,17 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 							'WPPTD\Components\Taxonomy'		=> array(),
 						),
 					),
-				) ) );
+				);
+
+				if ( wpptd_supports_termmeta() ) {
+					$hierarchy['WPDLib\Components\Menu']['WPPTD\Components\PostType']['WPPTD\Components\Taxonomy'] = array(
+						'WPPTD\Components\TermMetabox'	=> array(
+							'WPPTD\Components\TermField'	=> array(),
+						),
+					);
+				}
+
+				ComponentManager::register_hierarchy( apply_filters( 'wpptd_class_hierarchy', $hierarchy ) );
 
 				do_action( 'wpptd', $this );
 
@@ -198,6 +230,17 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 				unset( $args['fields'] );
 			}
 			return $args;
+		}
+
+		public function taxonomy_validated( $args, $taxonomy ) {
+			if ( isset( $args['metaboxes'] ) ) {
+				unset( $args['metaboxes'] );
+			}
+			return $args;
+		}
+
+		public function term_metabox_validated( $args, $term_metabox ) {
+			return $this->metabox_validated( $args, $term_metabox );
 		}
 	}
 }
