@@ -59,7 +59,21 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 				register_post_type( $this->slug, $post_type_args );
 			} else {
-				//TODO: merge several properties into existing post type
+				// merge several properties into existing post type
+				global $wp_post_types;
+
+				if ( is_array( $this->args['supports'] ) ) {
+					foreach ( $this->args['supports'] as $feature ) {
+						add_post_type_support( $this->slug, $feature );
+					}
+				}
+
+				if ( $this->args['labels'] ) {
+					$wp_post_types[ $this->slug ]->labels = get_post_type_labels( (object) $this->args );
+					$wp_post_types[ $this->slug ]->label = $wp_post_types[ $this->slug ]->labels->name;
+				}
+
+				add_action( 'add_meta_boxes_' . $this->slug, array( $this, 'add_meta_boxes' ), 10, 1 );
 			}
 		}
 
@@ -244,23 +258,43 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		public function get_updated_messages( $post, $permalink = '', $revision = false ) {
+			if ( ! $this->args['messages'] ) {
+				return array();
+			}
+
 			$messages = $this->args['messages'];
 
-			$messages[1] = sprintf( $messages[1], $permalink );
-			if ( $revision ) {
-				$messages[5] = sprintf( $messages[5], wp_post_revision_title( $revision, false ) );
-			} else {
-				$messages[5] = false;
+			if ( isset( $messages[1] ) ) {
+				$messages[1] = sprintf( $messages[1], $permalink );
 			}
-			$messages[6] = sprintf( $messages[6], $permalink );
-			$messages[8] = sprintf( $messages[8], esc_url( add_query_arg( 'preview', 'true', $permalink ) ) );
-			$messages[9] = sprintf( $messages[9], date_i18n( __( 'M j, Y @ H:i' ), strtotime( $post->post_date ) ), esc_url( $permalink ) );
-			$messages[10] = sprintf( $messages[10], esc_url( add_query_arg( 'preview', 'true', $permalink ) ) );
+			if ( isset( $messages[5] ) ) {
+				if ( $revision ) {
+					$messages[5] = sprintf( $messages[5], wp_post_revision_title( $revision, false ) );
+				} else {
+					$messages[5] = false;
+				}
+			}
+			if ( isset( $messages[6] ) ) {
+				$messages[6] = sprintf( $messages[6], $permalink );
+			}
+			if ( isset( $messages[8] ) ) {
+				$messages[8] = sprintf( $messages[8], esc_url( add_query_arg( 'preview', 'true', $permalink ) ) );
+			}
+			if ( isset( $messages[9] ) ) {
+				$messages[9] = sprintf( $messages[9], date_i18n( __( 'M j, Y @ H:i' ), strtotime( $post->post_date ) ), esc_url( $permalink ) );
+			}
+			if ( isset( $messages[10] ) ) {
+				$messages[10] = sprintf( $messages[10], esc_url( add_query_arg( 'preview', 'true', $permalink ) ) );
+			}
 
 			return $messages;
 		}
 
 		public function get_bulk_updated_messages( $counts ) {
+			if ( ! $this->args['bulk_messages'] ) {
+				return array();
+			}
+
 			$messages = array();
 			foreach ( $this->args['bulk_messages'] as $type => $_messages ) {
 				list( $singular, $plural ) = $_messages;
@@ -811,98 +845,110 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				// generate post type labels
-				if ( ! is_array( $this->args['labels'] ) ) {
-					$this->args['labels'] = array();
-				}
-				$default_labels = array(
-					'name'					=> $this->args['title'],
-					'singular_name'			=> $this->args['singular_title'],
-					'menu_name'				=> $this->args['title'],
-					'name_admin_bar'		=> $this->args['singular_title'],
-					'all_items'				=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
-					'add_new'				=> __( 'Add New', 'post-types-definitely' ),
-					'add_new_item'			=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'edit_item'				=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'new_item'				=> sprintf( __( 'New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'view_item'				=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'search_items'			=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
-					'not_found'				=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
-					'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'post-types-definitely' ), $this->args['title'] ),
-					'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'featured_image'		=> sprintf( __( 'Featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-					// additional labels for media library
-					'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-				);
-				foreach ( $default_labels as $type => $default_label ) {
-					if ( ! isset( $this->args['labels'][ $type ] ) ) {
-						$this->args['labels'][ $type ] = $default_label;
+				if ( false !== $this->args['labels'] ) {
+					if ( ! is_array( $this->args['labels'] ) ) {
+						$this->args['labels'] = array();
 					}
+					$default_labels = array(
+						'name'					=> $this->args['title'],
+						'singular_name'			=> $this->args['singular_title'],
+						'menu_name'				=> $this->args['title'],
+						'name_admin_bar'		=> $this->args['singular_title'],
+						'all_items'				=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
+						'add_new'				=> __( 'Add New', 'post-types-definitely' ),
+						'add_new_item'			=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'edit_item'				=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'new_item'				=> sprintf( __( 'New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'view_item'				=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'search_items'			=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
+						'not_found'				=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
+						'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'post-types-definitely' ), $this->args['title'] ),
+						'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'featured_image'		=> sprintf( __( 'Featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
+						// additional labels for media library
+						'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					);
+					foreach ( $default_labels as $type => $default_label ) {
+						if ( ! isset( $this->args['labels'][ $type ] ) ) {
+							$this->args['labels'][ $type ] = $default_label;
+						}
+					}
+				} else {
+					$this->args['labels'] = array();
 				}
 
 				// generate post type updated messages
-				if ( ! is_array( $this->args['messages'] ) ) {
-					$this->args['messages'] = array();
-				}
-				$default_messages = array(
-					 0 => '',
-					 1 => sprintf( __( '%1$s updated. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 2 => __( 'Custom field updated.', 'post-types-definitely' ),
-					 3 => __( 'Custom field deleted.', 'post-types-definitely' ),
-					 4 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 5 => sprintf( __( '%s restored to revision from %%s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 6 => sprintf( __( '%1$s published. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 7 => sprintf( __( '%s saved.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 8 => sprintf( __( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 9 => sprintf( __( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-					10 => sprintf( __( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-				);
-				foreach ( $default_messages as $i => $default_message ) {
-					if ( ! isset( $this->args['messages'][ $i ] ) ) {
-						$this->args['messages'][ $i ] = $default_message;
+				if ( false !== $this->args['messages'] ) {
+					if ( ! is_array( $this->args['messages'] ) ) {
+						$this->args['messages'] = array();
 					}
+					$default_messages = array(
+						 0 => '',
+						 1 => sprintf( __( '%1$s updated. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 2 => __( 'Custom field updated.', 'post-types-definitely' ),
+						 3 => __( 'Custom field deleted.', 'post-types-definitely' ),
+						 4 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 5 => sprintf( __( '%s restored to revision from %%s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 6 => sprintf( __( '%1$s published. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 7 => sprintf( __( '%s saved.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 8 => sprintf( __( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 9 => sprintf( __( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+						10 => sprintf( __( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
+					);
+					foreach ( $default_messages as $i => $default_message ) {
+						if ( ! isset( $this->args['messages'][ $i ] ) ) {
+							$this->args['messages'][ $i ] = $default_message;
+						}
+					}
+				} else {
+					$this->args['messages'] = array();
 				}
 
 				// generate post type bulk action messages
-				if ( ! is_array( $this->args['bulk_messages'] ) ) {
-					$this->args['bulk_messages'] = array();
-				}
-				$default_messages = array(
-					'updated'	=> array(
-						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-					),
-					'locked'	=> array(
-						sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-					),
-					'deleted'	=> array(
-						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-					),
-					'trashed'	=> array(
-						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-					),
-					'untrashed'	=> array(
-						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-						sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-					),
-				);
-				foreach ( $default_messages as $type => $defaults ) {
-					if ( ! isset( $this->args['bulk_messages'][ $type ] ) ) {
-						$this->args['bulk_messages'][ $type ] = $defaults;
-					} else {
-						if ( ! is_array( $this->args['bulk_messages'][ $type ] ) ) {
-							$this->args['bulk_messages'][ $type ] = array( $this->args['bulk_messages'][ $type ] );
-						}
-						if ( count( $this->args['bulk_messages'][ $type ] ) < 2 ) {
-							$this->args['bulk_messages'][ $type ][] = $defaults[1];
+				if ( false !== $this->args['bulk_messages'] ) {
+					if ( ! is_array( $this->args['bulk_messages'] ) ) {
+						$this->args['bulk_messages'] = array();
+					}
+					$default_messages = array(
+						'updated'	=> array(
+							sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+							sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+						),
+						'locked'	=> array(
+							sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+							sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+						),
+						'deleted'	=> array(
+							sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+							sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+						),
+						'trashed'	=> array(
+							sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+							sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+						),
+						'untrashed'	=> array(
+							sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+							sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+						),
+					);
+					foreach ( $default_messages as $type => $defaults ) {
+						if ( ! isset( $this->args['bulk_messages'][ $type ] ) ) {
+							$this->args['bulk_messages'][ $type ] = $defaults;
+						} else {
+							if ( ! is_array( $this->args['bulk_messages'][ $type ] ) ) {
+								$this->args['bulk_messages'][ $type ] = array( $this->args['bulk_messages'][ $type ] );
+							}
+							if ( count( $this->args['bulk_messages'][ $type ] ) < 2 ) {
+								$this->args['bulk_messages'][ $type ][] = $defaults[1];
+							}
 						}
 					}
+				} else {
+					$this->args['bulk_messages'] = array();
 				}
 
 				// set some defaults

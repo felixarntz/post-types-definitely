@@ -61,6 +61,8 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 */
 		public function add_hooks() {
+			global $wp_version;
+
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
@@ -71,7 +73,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			add_filter( 'enter_title_here', array( $this, 'get_post_enter_title_here' ), 10, 2 );
 			add_filter( 'post_updated_messages', array( $this, 'get_post_updated_messages' ) );
 			add_filter( 'bulk_post_updated_messages', array( $this, 'get_bulk_post_updated_messages' ), 10, 2 );
-			add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
+			if ( version_compare( get_bloginfo( 'version' ), '4.4' ) < 0 ) {
+				add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
+			}
 
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
@@ -223,7 +227,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {
 				if ( ! in_array( $post_type->slug, array( 'post', 'page', 'attachment' ) ) ) {
-					$messages[ $post_type->slug ] = $post_type->get_updated_messages( $post, $permalink, $revision );
+					$post_type_messages = $post_type->get_updated_messages( $post, $permalink, $revision );
+					if ( $post_type_messages ) {
+						$messages[ $post_type->slug ] = $post_type_messages;
+					}
 				}
 			}
 
@@ -234,7 +241,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {
 				if ( ! in_array( $post_type->slug, array( 'post', 'page', 'attachment' ) ) ) {
-					$messages[ $post_type->slug ] = $post_type->get_bulk_updated_messages( $counts );
+					$post_type_messages = $post_type->get_bulk_updated_messages( $counts );
+					if ( $post_type_messages ) {
+						$messages[ $post_type->slug ] = $post_type_messages;
+					}
 				}
 			}
 
@@ -262,7 +272,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 			foreach ( $taxonomies as $taxonomy ) {
 				if ( ! in_array( $taxonomy->slug, array( '_item', 'category', 'post_tag' ) ) ) {
-					$messages[ $taxonomy->slug ] = $taxonomy->get_updated_messages();
+					$taxonomy_messages = $taxonomy->get_updated_messages();
+					if ( $taxonomy_messages ) {
+						$messages[ $taxonomy->slug ] = $taxonomy_messages;
+					}
 				}
 			}
 

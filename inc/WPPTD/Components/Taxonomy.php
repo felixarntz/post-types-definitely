@@ -55,7 +55,13 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 				register_taxonomy( $this->slug, null, $taxonomy_args );
 			} else {
-				//TODO: merge several properties into existing taxonomy
+				// merge several properties into existing taxonomy
+				global $wp_taxonomies;
+
+				if ( $this->args['labels'] ) {
+					$wp_taxonomies[ $this->slug ]->labels = get_taxonomy_labels( (object) $this->args );
+					$wp_taxonomies[ $this->slug ]->label = $wp_taxonomies[ $this->slug ]->labels->name;
+				}
 			}
 
 			$this->registered = true;
@@ -113,53 +119,61 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 
 				// generate taxonomy labels
-				if ( ! is_array( $this->args['labels'] ) ) {
-					$this->args['labels'] = array();
-				}
-				$default_labels = array(
-					'name'							=> $this->args['title'],
-					'singular_name'					=> $this->args['singular_title'],
-					'menu_name'						=> $this->args['title'],
-					'all_items'						=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
-					'add_new_item'					=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'edit_item'						=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'view_item'						=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'update_item'					=> sprintf( __( 'Update %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'new_item_name'					=> sprintf( __( 'New %s Name', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'search_items'					=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
-					'popular_items'					=> sprintf( __( 'Popular %s', 'post-types-definitely' ), $this->args['title'] ),
-					'not_found'						=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
-					'separate_items_with_commas'	=> sprintf( __( 'Separate %s with commas', 'post-types-definitely' ), $this->args['title'] ),
-					'add_or_remove_items'			=> sprintf( __( 'Add or remove %s', 'post-types-definitely' ), $this->args['title'] ),
-					'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'post-types-definitely' ), $this->args['title'] ),
-					'parent_item'					=> sprintf( __( 'Parent %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
-					// additional label for post listings
-					'filter_by_item'				=> sprintf( __( 'Filter by %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-				);
-				foreach ( $default_labels as $type => $default_label ) {
-					if ( ! isset( $this->args['labels'][ $type ] ) ) {
-						$this->args['labels'][ $type ] = $default_label;
+				if ( false !== $this->args['labels'] ) {
+					if ( ! is_array( $this->args['labels'] ) ) {
+						$this->args['labels'] = array();
 					}
+					$default_labels = array(
+						'name'							=> $this->args['title'],
+						'singular_name'					=> $this->args['singular_title'],
+						'menu_name'						=> $this->args['title'],
+						'all_items'						=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
+						'add_new_item'					=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'edit_item'						=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'view_item'						=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'update_item'					=> sprintf( __( 'Update %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'new_item_name'					=> sprintf( __( 'New %s Name', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'search_items'					=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
+						'popular_items'					=> sprintf( __( 'Popular %s', 'post-types-definitely' ), $this->args['title'] ),
+						'not_found'						=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
+						'separate_items_with_commas'	=> sprintf( __( 'Separate %s with commas', 'post-types-definitely' ), $this->args['title'] ),
+						'add_or_remove_items'			=> sprintf( __( 'Add or remove %s', 'post-types-definitely' ), $this->args['title'] ),
+						'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'post-types-definitely' ), $this->args['title'] ),
+						'parent_item'					=> sprintf( __( 'Parent %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+						'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
+						// additional label for post listings
+						'filter_by_item'				=> sprintf( __( 'Filter by %s', 'post-types-definitely' ), $this->args['singular_title'] ),
+					);
+					foreach ( $default_labels as $type => $default_label ) {
+						if ( ! isset( $this->args['labels'][ $type ] ) ) {
+							$this->args['labels'][ $type ] = $default_label;
+						}
+					}
+				} else {
+					$this->args['labels'] = array();
 				}
 
 				// generate post type updated messages
-				if ( ! is_array( $this->args['messages'] ) ) {
-					$this->args['messages'] = array();
-				}
-				$default_messages = array(
-					 0 => '',
-					 1 => sprintf( __( '%s added.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 2 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 3 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 4 => sprintf( __( '%s not added.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 5 => sprintf( __( '%s not updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-					 6 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['title'] ),
-				);
-				foreach ( $default_messages as $i => $default_message ) {
-					if ( ! isset( $this->args['messages'][ $i ] ) ) {
-						$this->args['messages'][ $i ] = $default_message;
+				if ( false !== $this->args['messages'] ) {
+					if ( ! is_array( $this->args['messages'] ) ) {
+						$this->args['messages'] = array();
 					}
+					$default_messages = array(
+						 0 => '',
+						 1 => sprintf( __( '%s added.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 2 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 3 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 4 => sprintf( __( '%s not added.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 5 => sprintf( __( '%s not updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
+						 6 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['title'] ),
+					);
+					foreach ( $default_messages as $i => $default_message ) {
+						if ( ! isset( $this->args['messages'][ $i ] ) ) {
+							$this->args['messages'][ $i ] = $default_message;
+						}
+					}
+				} else {
+					$this->args['messages'] = array();
 				}
 
 				// set some defaults
