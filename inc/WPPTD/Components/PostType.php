@@ -8,6 +8,7 @@
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
+use WPPTD\General as General;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
@@ -136,75 +137,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		public function save_meta( $post_id, $post, $update = false ) {
-			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			if ( ! $this->can_save_meta( $post_id, $post ) ) {
 				return;
 			}
 
-			if ( get_post_type( $post_id ) != $this->slug ) {
-				return;
-			}
-
-			if ( wp_is_post_revision( $post ) ) {
-				return;
-			}
-
-			$post_type_obj = get_post_type_object( $this->slug );
-			if ( ! current_user_can( $post_type_obj->cap->edit_post, $post_id ) ) {
-				return;
-			}
-
-			$meta_values = $_POST;
-
-			$meta_values_validated = array();
-
-			$meta_values_old = array();
-
-			$errors = array();
-
-			$changes = false;
-
-			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
-				foreach ( $metabox->get_children() as $field ) {
-					$meta_value_old = wpptd_get_post_meta( $post_id, $field->slug );
-					if ( $meta_value_old === null ) {
-						$meta_value_old = $field->default;
-					}
-					$meta_values_old[ $field->slug ] = $meta_value_old;
-
-					$meta_value = null;
-					if ( isset( $meta_values[ $field->slug ] ) ) {
-						$meta_value = $meta_values[ $field->slug ];
-					}
-
-					$meta_value = $field->validate_meta_value( $meta_value );
-					if ( is_wp_error( $meta_value ) ) {
-						$errors[ $field->slug ] = $meta_value;
-						$meta_value = $meta_value_old;
-					}
-
-					$meta_values_validated[ $field->slug ] = $meta_value;
-
-					if ( $meta_value != $meta_value_old ) {
-						do_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
-						$changes = true;
-					}
-				}
-			}
-
-			if ( $changes ) {
-				do_action( 'wpptd_update_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
-			}
-
-			$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
-
-			if ( count( $errors ) > 0 ) {
-				$error_text = __( 'Some errors occurred while trying to save the following post meta:', 'post-types-definitely' );
-				foreach ( $errors as $field_slug => $error ) {
-					$error_text .= '<br/><em>' . $field_slug . '</em>: ' . $error->get_error_message();
-				}
-
-				set_transient( 'wpptd_meta_error_' . $this->slug . '_' . $post_id, $error_text, 120 );
-			}
+			$meta_values_validated = $this->validate_meta_values( $_POST, $post_id );
 
 			foreach ( $meta_values_validated as $field_slug => $meta_value_validated ) {
 				if ( is_array( $meta_value_validated ) ) {
@@ -230,31 +167,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		public function render_help() {
-			$screen = get_current_screen();
-
-			foreach ( $this->args['help']['tabs'] as $slug => $tab ) {
-				$args = array_merge( array( 'id' => $slug ), $tab );
-
-				$screen->add_help_tab( $args );
-			}
-
-			if ( ! empty( $this->args['help']['sidebar'] ) ) {
-				$screen->set_help_sidebar( $this->args['help']['sidebar'] );
-			}
+			General::render_help( get_current_screen(), $this->args['help'] );
 		}
 
 		public function render_list_help() {
-			$screen = get_current_screen();
-
-			foreach ( $this->args['list_help']['tabs'] as $slug => $tab ) {
-				$args = array_merge( array( 'id' => $slug ), $tab );
-
-				$screen->add_help_tab( $args );
-			}
-
-			if ( ! empty( $this->args['list_help']['sidebar'] ) ) {
-				$screen->set_help_sidebar( $this->args['list_help']['sidebar'] );
-			}
+			General::render_help( get_current_screen(), $this->args['list_help'] );
 		}
 
 		public function get_updated_messages( $post, $permalink = '', $revision = false ) {
@@ -395,82 +312,13 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->slug, $column_args['taxonomy_slug'] ) ) {
 							$taxonomy = ComponentManager::get( '*.' . $this->slug . '.' . $column_args['taxonomy_slug'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 							if ( $taxonomy ) {
-								$labels = $taxonomy->labels;
-								echo '<label class="screen-reader-text" for="' . $column_slug . '">' . $labels['filter_by_item'] . '</label>';
-								wp_dropdown_categories( array(
-									'taxonomy'			=> $taxonomy->slug,
-									'name'				=> $column_slug,
-									'show_option_all'	=> $labels['all_items'],
-									'hide_empty'		=> 0,
-									'hierarchical'		=> $taxonomy->hierarchical ? 1 : 0,
-									'show_count'		=> 0,
-									'orderby'			=> 'name',
-									'selected'			=> ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] ) ? absint( $this->active_filters[ $column_slug ] ) : 0,
-								) );
+								$this->render_taxonomy_column_filter( $column_slug, $taxonomy );
 							}
 						}
 					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
 						$field = ComponentManager::get( '*.' . $this->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 						if ( $field ) {
-							switch ( $field->type ) {
-								case 'select':
-								case 'multiselect':
-								case 'radio':
-								case 'multibox':
-									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-									foreach ( $field->options as $value => $label ) {
-										echo $value;
-										echo $this->active_filters[ $column_slug ];
-										echo '<option value="' . esc_attr( $value ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $value ) ? ' selected="selected"' : '' ) . '>';
-										if ( is_array( $label ) ) {
-											if ( isset( $label['label'] ) && ! empty( $label['label'] ) ) {
-												echo esc_html( $label['label'] );
-											} elseif ( isset( $label['image'] ) ) {
-												echo esc_html( $label['image'] );
-											} elseif ( isset( $label['color'] ) ) {
-												echo esc_html( $label['color'] );
-											}
-										} else {
-											echo esc_html( $label );
-										}
-										echo '</option>';
-									}
-									echo '</select>';
-									break;
-								case 'checkbox':
-									echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-									echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-									echo '<option value="bool:true"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
-									_e( 'Yes', 'post-types-definitely' );
-									echo '</option>';
-									echo '<option value="bool:false"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
-									_e( 'No', 'post-types-definitely' );
-									echo '</option>';
-									echo '</select>';
-									break;
-								case 'text':
-								case 'email':
-								case 'url':
-								case 'datetime':
-								case 'date':
-								case 'time':
-								case 'color':
-								case 'media':
-									$options = $this->get_all_meta_values( $column_args['meta_key'] );
-									if ( count( $options ) > 0 ) {
-										echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-										echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-										foreach ( $options as $option ) {
-											echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
-											echo $field->_field->parse( $option, true );
-											echo '</option>';
-										}
-										echo '</select>';
-									}
-									break;
-								default:
-							}
+							$this->render_meta_column_filter( $column_slug, $field );
 						}
 					}
 				}
@@ -496,42 +344,19 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		public function maybe_filter_by_table_columns( $wp_query ) {
 			$tax_query = array();
 			$meta_query = array();
+
 			foreach ( $this->args['table_columns'] as $column_slug => $column_args ) {
 				if ( is_array( $column_args ) && $column_args['filterable'] && isset( $wp_query->query[ $column_slug ] ) ) {
 					$this->active_filters[ $column_slug ] = false;
 					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) && 'category' !== $column_args['taxonomy_slug'] ) {
-						$term_id = absint( $wp_query->query[ $column_slug ] );
-						if ( $term_id > 0 ) {
-							$this->active_filters[ $column_slug ] = $term_id;
-							$tax_query[] = array(
-								'taxonomy'	=> $column_args['taxonomy_slug'],
-								'field'		=> 'term_id',
-								'terms'		=> $term_id,
-							);
+						$query_item = $this->filter_by_taxonomy( $wp_query->query[ $column_slug ], $column_slug, $column_args['taxonomy_slug'] );
+						if ( $query_item ) {
+							$tax_query[] = $query_item;
 						}
 					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-						$meta_value = stripslashes( $wp_query->query[ $column_slug ] );
-						if ( $meta_value ) {
-							$this->active_filters[ $column_slug ] = $meta_value;
-							if ( 'bool:true' === $meta_value ) {
-								$meta_query[] = array(
-									'key'		=> $column_args['meta_key'],
-									'value'		=> array( '', '0', 'false', 'null' ),
-									'compare'	=> 'NOT IN',
-								);
-							} elseif ( 'bool:false' === $meta_value ) {
-								$meta_query[] = array(
-									'key'		=> $column_args['meta_key'],
-									'value'		=> array( '', '0', 'false', 'null' ),
-									'compare'	=> 'IN',
-								);
-							} else {
-								$meta_query[] = array(
-									'key'		=> $column_args['meta_key'],
-									'value'		=> $meta_value,
-									'compare'	=> '=',
-								);
-							}
+						$query_item = $this->filter_by_meta( $wp_query->query[ $column_slug ], $column_slug, $column_args['meta_key'] );
+						if ( $query_item ) {
+							$meta_query[] = $query_item;
 						}
 					}
 				}
@@ -666,43 +491,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				return;
 			}
 
-			$sendback = '';
-			if ( 'attachment' === $this->slug ) {
-				$sendback = admin_url( 'upload.php' );
-			} else {
-				$sendback = admin_url( 'edit.php' );
-				if ( 'post' !== $this->slug ) {
-					$sendback = add_query_arg( 'post_type', $this->slug, $sendback );
-				}
-			}
-
-			check_admin_referer( $row_action . '-post_' . $post_id );
-
-			$action_message = false;
-			$error = false;
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'post-types-definitely' ), $this->args['singular_title'] );
-				$error = true;
-			} elseif ( empty( $this->args['row_actions'][ $row_action ]['callback'] ) || ! is_callable( $this->args['row_actions'][ $row_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['singular_title'] );
-				$error = true;
-			} else {
-				$action_message = call_user_func( $this->args['row_actions'][ $row_action ]['callback'], $post_id );
-				if ( is_wp_error( $action_message ) ) {
-					$action_message = $action_message->get_error_message();
-					$error = true;
-				}
-			}
-
-			if ( $action_message && is_string( $action_message ) ) {
-				if ( $error ) {
-					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
-				}
-				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
-			}
-
-			wp_redirect( add_query_arg( 'updated', 1, $sendback ) );
-			exit();
+			$this->run_row_action( $row_action, $post_id );
 		}
 
 		public function maybe_run_bulk_action() {
@@ -726,46 +515,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 			$post_ids = array_map( 'intval', $post_ids );
 
-			$sendback = wp_get_referer();
-			if ( ! $sendback ) {
-				if ( 'attachment' === $this->slug ) {
-					$sendback = admin_url( 'upload.php' );
-				} else {
-					$sendback = admin_url( 'edit.php' );
-					if ( 'post' !== $this->slug ) {
-						$sendback = add_query_arg( 'post_type', $this->slug, $sendback );
-					}
-				}
-			} else {
-				$sendback = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids' ), $sendback );
-			}
-
-			check_admin_referer( 'bulk-posts' );
-
-			$action_message = false;
-			$error = false;
-			if ( empty( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) || ! is_callable( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['title'] );
-				$error = true;
-			} else {
-				$action_message = call_user_func( $this->args['bulk_actions'][ $bulk_action ]['callback'], $post_ids );
-				if ( is_wp_error( $action_message ) ) {
-					$action_message = $action_message->get_error_message();
-					$error = true;
-				}
-			}
-
-			if ( $action_message && is_string( $action_message ) ) {
-				if ( $error ) {
-					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
-				}
-				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
-			}
-
-			$sendback = remove_query_arg( array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), $sendback );
-
-			wp_redirect( add_query_arg( 'updated', count( $post_ids ), $sendback ) );
-			exit();
+			$this->run_bulk_action( $bulk_action, $post_ids );
 		}
 
 		public function hack_bulk_actions() {
@@ -831,47 +581,14 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				// generate titles if not provided
-				if ( empty( $this->args['title'] ) && isset( $this->args['label'] ) ) {
-					$this->args['title'] = $this->args['label'];
-					unset( $this->args['label'] );
-				}
-				if ( empty( $this->args['title'] ) ) {
-					if ( empty( $this->args['singular_title'] ) ) {
-						$this->args['singular_title'] = ucwords( str_replace( '_', '', $this->slug ) );
-					}
-					$this->args['title'] = $this->args['singular_title'] . 's';
-				} elseif ( empty( $this->args['singular_title'] ) ) {
-					$this->args['singular_title'] = $this->args['title'];
-				}
+				$this->args = General::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
 
 				// generate post type labels
 				if ( false !== $this->args['labels'] ) {
 					if ( ! is_array( $this->args['labels'] ) ) {
 						$this->args['labels'] = array();
 					}
-					$default_labels = array(
-						'name'					=> $this->args['title'],
-						'singular_name'			=> $this->args['singular_title'],
-						'menu_name'				=> $this->args['title'],
-						'name_admin_bar'		=> $this->args['singular_title'],
-						'all_items'				=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new'				=> __( 'Add New', 'post-types-definitely' ),
-						'add_new_item'			=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'				=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item'				=> sprintf( __( 'New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'				=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'			=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'				=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found_in_trash'	=> sprintf( __( 'No %s found in Trash', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item_colon'		=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'featured_image'		=> sprintf( __( 'Featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'set_featured_image'	=> sprintf( __( 'Set featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'remove_featured_image'	=> sprintf( __( 'Remove featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'use_featured_image'	=> sprintf( __( 'Use as featured %s Image', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// additional labels for media library
-						'insert_into_item'		=> sprintf( __( 'Insert into %s content', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'uploaded_to_this_item'	=> sprintf( __( 'Uploaded to this %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
+					$default_labels = $this->get_default_labels();
 					foreach ( $default_labels as $type => $default_label ) {
 						if ( ! isset( $this->args['labels'][ $type ] ) ) {
 							$this->args['labels'][ $type ] = $default_label;
@@ -886,19 +603,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					if ( ! is_array( $this->args['messages'] ) ) {
 						$this->args['messages'] = array();
 					}
-					$default_messages = array(
-						 0 => '',
-						 1 => sprintf( __( '%1$s updated. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => __( 'Custom field updated.', 'post-types-definitely' ),
-						 3 => __( 'Custom field deleted.', 'post-types-definitely' ),
-						 4 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( __( '%s restored to revision from %%s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( __( '%1$s published. <a href="%%s">View %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 7 => sprintf( __( '%s saved.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 8 => sprintf( __( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 9 => sprintf( __( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-						10 => sprintf( __( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
+					$default_messages = $this->get_default_messages();
 					foreach ( $default_messages as $i => $default_message ) {
 						if ( ! isset( $this->args['messages'][ $i ] ) ) {
 							$this->args['messages'][ $i ] = $default_message;
@@ -913,28 +618,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					if ( ! is_array( $this->args['bulk_messages'] ) ) {
 						$this->args['bulk_messages'] = array();
 					}
-					$default_messages = array(
-						'updated'	=> array(
-							sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s updated.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'locked'	=> array(
-							sprintf( _x( '%%s %s not updated, somebody is editing it.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s not updated, somebody is editing them.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'deleted'	=> array(
-							sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s permanently deleted.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'trashed'	=> array(
-							sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s moved to the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'untrashed'	=> array(
-							sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s restored from the Trash.', 'first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
-						),
-					);
+					$default_messages = $this->get_default_bulk_messages();
 					foreach ( $default_messages as $type => $defaults ) {
 						if ( ! isset( $this->args['bulk_messages'][ $type ] ) ) {
 							$this->args['bulk_messages'][ $type ] = $defaults;
@@ -1052,42 +736,10 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				// handle help
-				if( ! is_array( $this->args['help'] ) ) {
-					$this->args['help'] = array();
-				}
-				if ( ! isset( $this->args['help']['tabs'] ) || ! is_array( $this->args['help']['tabs'] ) ) {
-					$this->args['help']['tabs'] = array();
-				}
-				if ( ! isset( $this->args['help']['sidebar'] ) ) {
-					$this->args['help']['sidebar'] = '';
-				}
-				foreach ( $this->args['help']['tabs'] as &$tab ) {
-					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
-						'content'		=> '',
-						'callback'		=> false,
-					) );
-				}
-				unset( $tab );
+				$this->args = General::validate_help_args( $this->args, 'help' );
 
 				// handle list help
-				if( ! is_array( $this->args['list_help'] ) ) {
-					$this->args['list_help'] = array();
-				}
-				if ( ! isset( $this->args['list_help']['tabs'] ) || ! is_array( $this->args['list_help']['tabs'] ) ) {
-					$this->args['list_help']['tabs'] = array();
-				}
-				if ( ! isset( $this->args['list_help']['sidebar'] ) ) {
-					$this->args['list_help']['sidebar'] = '';
-				}
-				foreach ( $this->args['list_help']['tabs'] as &$tab ) {
-					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
-						'content'		=> '',
-						'callback'		=> false,
-					) );
-				}
-				unset( $tab );
+				$this->args = General::validate_help_args( $this->args, 'list_help' );
 			}
 
 			return $status;
@@ -1172,13 +824,362 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return false;
 		}
 
-		protected function get_all_meta_values( $meta_key ) {
-			global $wpdb;
+		protected function can_save_meta( $post_id, $post ) {
+			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+				return false;
+			}
 
-			$query = "SELECT DISTINCT meta_value FROM " . $wpdb->postmeta . " AS m JOIN " . $wpdb->posts . " as p ON ( p.ID = m.post_id )";
-			$query .= " WHERE m.meta_key = %s AND m.meta_value != '' AND p.post_type = %s ORDER BY m.meta_value ASC;";
+			if ( get_post_type( $post_id ) != $this->slug ) {
+				return false;
+			}
 
-			return $wpdb->get_col( $wpdb->prepare( $query, $meta_key, $this->slug ) );
+			if ( wp_is_post_revision( $post ) ) {
+				return false;
+			}
+
+			$post_type_obj = get_post_type_object( $this->slug );
+			if ( ! current_user_can( $post_type_obj->cap->edit_post, $post_id ) ) {
+				return false;
+			}
+
+			return true;
+		}
+
+		protected function validate_meta_values( $meta_values, $post_id ) {
+			$meta_values_validated = array();
+
+			$meta_values_old = array();
+
+			$errors = array();
+
+			$changes = false;
+
+			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
+				foreach ( $metabox->get_children() as $field ) {
+					$meta_value_old = wpptd_get_post_meta( $post_id, $field->slug );
+					if ( $meta_value_old === null ) {
+						$meta_value_old = $field->default;
+					}
+					$meta_values_old[ $field->slug ] = $meta_value_old;
+
+					$meta_value = null;
+					if ( isset( $meta_values[ $field->slug ] ) ) {
+						$meta_value = $meta_values[ $field->slug ];
+					}
+
+					list( $meta_value_validated, $error, $changed ) = $this->validate_meta_value( $field, $meta_value, $meta_value_old );
+
+					$meta_values_validated[ $field->slug ] = $meta_value_validated;
+					if ( $error ) {
+						$errors[ $field->slug ] = $error;
+					} elseif ( $changed ) {
+						$changes = true;
+					}
+				}
+			}
+
+			if ( $changes ) {
+				do_action( 'wpptd_update_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
+			}
+
+			$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
+
+			$this->add_settings_message( $errors, $post_id );
+
+			return $meta_values_validated;
+		}
+
+		protected function validate_meta_value( $field, $meta_value, $meta_value_old ) {
+			$meta_value = $field->validate_meta_value( $meta_value );
+			$error = false;
+			$changed = false;
+
+			if ( is_wp_error( $meta_value ) ) {
+				$error = $meta_value;
+				$meta_value = $meta_value_old;
+			} elseif ( $meta_value != $meta_value_old ) {
+				do_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
+				$changed = true;
+			}
+
+			return array( $meta_value, $error, $changed );
+		}
+
+		protected function add_settings_message( $errors, $post_id ) {
+			if ( count( $errors ) > 0 ) {
+				$error_text = __( 'Some errors occurred while trying to save the following post meta:', 'post-types-definitely' );
+				foreach ( $errors as $field_slug => $error ) {
+					$error_text .= '<br/><em>' . $field_slug . '</em>: ' . $error->get_error_message();
+				}
+
+				set_transient( 'wpptd_meta_error_' . $this->slug . '_' . $post_id, $error_text, 120 );
+			}
+		}
+
+		protected function render_taxonomy_column_filter( $column_slug, $taxonomy ) {
+			$labels = $taxonomy->labels;
+			echo '<label class="screen-reader-text" for="' . $column_slug . '">' . $labels['filter_by_item'] . '</label>';
+			wp_dropdown_categories( array(
+				'taxonomy'			=> $taxonomy->slug,
+				'name'				=> $column_slug,
+				'show_option_all'	=> $labels['all_items'],
+				'hide_empty'		=> 0,
+				'hierarchical'		=> $taxonomy->hierarchical ? 1 : 0,
+				'show_count'		=> 0,
+				'orderby'			=> 'name',
+				'selected'			=> ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] ) ? absint( $this->active_filters[ $column_slug ] ) : 0,
+			) );
+		}
+
+		protected function render_meta_column_filter( $column_slug, $field ) {
+			switch ( $field->type ) {
+				case 'select':
+				case 'multiselect':
+				case 'radio':
+				case 'multibox':
+					echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+					echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+					foreach ( $field->options as $value => $label ) {
+						echo '<option value="' . esc_attr( $value ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $value ) ? ' selected="selected"' : '' ) . '>';
+						if ( is_array( $label ) ) {
+							if ( isset( $label['label'] ) && ! empty( $label['label'] ) ) {
+								echo esc_html( $label['label'] );
+							} elseif ( isset( $label['image'] ) ) {
+								echo esc_html( $label['image'] );
+							} elseif ( isset( $label['color'] ) ) {
+								echo esc_html( $label['color'] );
+							}
+						} else {
+							echo esc_html( $label );
+						}
+						echo '</option>';
+					}
+					echo '</select>';
+					break;
+				case 'checkbox':
+					echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+					echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+					echo '<option value="bool:true"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
+					_e( 'Yes', 'post-types-definitely' );
+					echo '</option>';
+					echo '<option value="bool:false"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
+					_e( 'No', 'post-types-definitely' );
+					echo '</option>';
+					echo '</select>';
+					break;
+				case 'text':
+				case 'email':
+				case 'url':
+				case 'datetime':
+				case 'date':
+				case 'time':
+				case 'color':
+				case 'media':
+					$options = General::get_all_meta_values( $column_args['meta_key'] );
+					if ( count( $options ) > 0 ) {
+						echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+						echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+						foreach ( $options as $option ) {
+							echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $this->active_filters[ $column_slug ] ) && $this->active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
+							echo $field->_field->parse( $option, true );
+							echo '</option>';
+						}
+						echo '</select>';
+					}
+					break;
+				default:
+			}
+		}
+
+		protected function filter_by_taxonomy( $value, $column_slug, $taxonomy_slug ) {
+			$term_id = absint( $value );
+			if ( $term_id > 0 ) {
+				$this->active_filters[ $column_slug ] = $term_id;
+				return array(
+					'taxonomy'	=> $taxonomy_slug,
+					'field'		=> 'term_id',
+					'terms'		=> $term_id,
+				);
+			}
+
+			return array();
+		}
+
+		protected function filter_by_meta( $value, $column_slug, $meta_key ) {
+			$meta_value = stripslashes( $value);
+			if ( $meta_value ) {
+				$this->active_filters[ $column_slug ] = $meta_value;
+				if ( 'bool:true' === $meta_value ) {
+					return array(
+						'key'		=> $meta_key,
+						'value'		=> array( '', '0', 'false', 'null' ),
+						'compare'	=> 'NOT IN',
+					);
+				} elseif ( 'bool:false' === $meta_value ) {
+					return array(
+						'key'		=> $meta_key,
+						'value'		=> array( '', '0', 'false', 'null' ),
+						'compare'	=> 'IN',
+					);
+				} else {
+					return array(
+						'key'		=> $meta_key,
+						'value'		=> $meta_value,
+						'compare'	=> '=',
+					);
+				}
+			}
+
+			return array();
+		}
+
+		protected function run_row_action( $row_action, $post_id ) {
+			$sendback = $this->get_sendback_url();
+
+			check_admin_referer( $row_action . '-post_' . $post_id );
+
+			$action_message = false;
+			$error = false;
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'post-types-definitely' ), $this->args['singular_title'] );
+				$error = true;
+			} elseif ( empty( $this->args['row_actions'][ $row_action ]['callback'] ) || ! is_callable( $this->args['row_actions'][ $row_action ]['callback'] ) ) {
+				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['singular_title'] );
+				$error = true;
+			} else {
+				$action_message = call_user_func( $this->args['row_actions'][ $row_action ]['callback'], $post_id );
+				if ( is_wp_error( $action_message ) ) {
+					$action_message = $action_message->get_error_message();
+					$error = true;
+				}
+			}
+
+			if ( $action_message && is_string( $action_message ) ) {
+				if ( $error ) {
+					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
+				}
+				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+			}
+
+			wp_redirect( add_query_arg( 'updated', 1, $sendback ) );
+			exit();
+		}
+
+		protected function run_bulk_action( $bulk_action, $post_ids ) {
+			$sendback = wp_get_referer();
+			if ( ! $sendback ) {
+				$sendback = $this->get_sendback_url();
+			} else {
+				$sendback = remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'locked', 'ids' ), $sendback );
+			}
+
+			check_admin_referer( 'bulk-posts' );
+
+			$action_message = false;
+			$error = false;
+			if ( empty( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) || ! is_callable( $this->args['bulk_actions'][ $bulk_action ]['callback'] ) ) {
+				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $this->args['title'] );
+				$error = true;
+			} else {
+				$action_message = call_user_func( $this->args['bulk_actions'][ $bulk_action ]['callback'], $post_ids );
+				if ( is_wp_error( $action_message ) ) {
+					$action_message = $action_message->get_error_message();
+					$error = true;
+				}
+			}
+
+			if ( $action_message && is_string( $action_message ) ) {
+				if ( $error ) {
+					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
+				}
+				set_transient( 'wpptd_' . $this->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+			}
+
+			$sendback = remove_query_arg( array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), $sendback );
+
+			wp_redirect( add_query_arg( 'updated', count( $post_ids ), $sendback ) );
+			exit();
+		}
+
+		protected function get_sendback_url() {
+			$sendback = '';
+			if ( 'attachment' === $this->slug ) {
+				$sendback = admin_url( 'upload.php' );
+			} else {
+				$sendback = admin_url( 'edit.php' );
+				if ( 'post' !== $this->slug ) {
+					$sendback = add_query_arg( 'post_type', $this->slug, $sendback );
+				}
+			}
+
+			return $sendback;
+		}
+
+		protected function get_default_labels() {
+			return array(
+				'name'					=> $this->args['title'],
+				'singular_name'			=> $this->args['singular_title'],
+				'menu_name'				=> $this->args['title'],
+				'name_admin_bar'		=> $this->args['singular_title'],
+				'all_items'				=> sprintf( _x( 'All %s', 'all_items label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'add_new'				=> _x( 'Add New', 'add_new label', 'post-types-definitely' ),
+				'add_new_item'			=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'edit_item'				=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'new_item'				=> sprintf( _x( 'New %s', 'new_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'view_item'				=> sprintf( _x( 'View %s', 'view_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'search_items'			=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'not_found'				=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'not_found_in_trash'	=> sprintf( _x( 'No %s found in Trash', 'not_found_in_trash label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'parent_item_colon'		=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'featured_image'		=> sprintf( _x( 'Featured %s Image', 'featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'set_featured_image'	=> sprintf( _x( 'Set featured %s Image', 'set_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'remove_featured_image'	=> sprintf( _x( 'Remove featured %s Image', 'remove_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'use_featured_image'	=> sprintf( _x( 'Use as featured %s Image', 'use_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				// additional labels for media library
+				'insert_into_item'		=> sprintf( _x( 'Insert into %s content', 'insert_into_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'uploaded_to_this_item'	=> sprintf( _x( 'Uploaded to this %s', 'uploaded_to_this_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+			);
+		}
+
+		protected function get_default_messages() {
+			return array(
+				 0 => '',
+				 1 => sprintf( _x( '%1$s updated. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 2 => _x( 'Custom field updated.', 'post message', 'post-types-definitely' ),
+				 3 => _x( 'Custom field deleted.', 'post message', 'post-types-definitely' ),
+				 4 => sprintf( _x( '%s updated.', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 5 => sprintf( _x( '%s restored to revision from %%s', 'post message: first argument is the singular post type label, second is the revision title', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 6 => sprintf( _x( '%1$s published. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 7 => sprintf( _x( '%s saved.', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 8 => sprintf( _x( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 9 => sprintf( _x( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				10 => sprintf( _x( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+			);
+		}
+
+		protected function get_default_bulk_messages() {
+			return array(
+				'updated'	=> array(
+					sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+					sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				),
+				'locked'	=> array(
+					sprintf( _x( '%%s %s not updated, somebody is editing it.', 'bulk post message: first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+					sprintf( _x( '%%s %s not updated, somebody is editing them.', 'bulk post message: first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				),
+				'deleted'	=> array(
+					sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+					sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				),
+				'trashed'	=> array(
+					sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+					sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				),
+				'untrashed'	=> array(
+					sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
+					sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				),
+			);
 		}
 
 	}

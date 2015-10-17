@@ -61,65 +61,11 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 */
 		public function add_hooks() {
-			global $wp_version;
-
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
-			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
-			add_action( 'edit_form_top', array( $this, 'display_meta_errors' ), 10, 1 );
-			add_action( 'load-post.php', array( $this, 'add_post_help' ) );
-			add_action( 'load-post-new.php', array( $this, 'add_post_help' ) );
-			add_action( 'load-edit.php', array( $this, 'add_post_list_help' ) );
-			add_filter( 'enter_title_here', array( $this, 'get_post_enter_title_here' ), 10, 2 );
-			add_filter( 'post_updated_messages', array( $this, 'get_post_updated_messages' ) );
-			add_filter( 'bulk_post_updated_messages', array( $this, 'get_bulk_post_updated_messages' ), 10, 2 );
-			if ( version_compare( get_bloginfo( 'version' ), '4.4' ) < 0 ) {
-				add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
-			}
-
-			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
-			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
-
-			$post_types = \WPDLib\Components\Manager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
-			foreach ( $post_types as $post_type ) {
-				add_filter( 'manage_taxonomies_for_' . $post_type->slug . '_columns', array( $post_type, 'get_table_taxonomies' ) );
-				add_filter( 'manage_' . $post_type->slug . '_posts_columns', array( $post_type, 'filter_table_columns' ) );
-				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type, 'filter_table_sortable_columns' ) );
-				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type, 'render_table_column' ), 10, 2 );
-			}
-			add_action( 'load-edit.php', array( $this, 'handle_table_filtering_and_sorting' ) );
-
-			add_filter( 'page_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
-			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
-			add_action( 'load-post.php', array( $this, 'handle_row_actions' ) );
-			add_action( 'load-edit.php', array( $this, 'handle_bulk_actions' ) );
-		}
-
-		public function handle_row_actions() {
-			global $typenow;
-
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-			if ( $post_type ) {
-				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_row_action' ) );
-				}
-			}
-		}
-
-		public function handle_bulk_actions() {
-			global $typenow;
-
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
-			if ( $post_type ) {
-				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
-					$_REQUEST['action'] = $_REQUEST['action2'];
-				}
-				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_bulk_action' ) );
-				}
-				add_action( 'admin_head', array( $post_type, 'hack_bulk_actions' ), 100 );
-				add_filter( 'bulk_post_updated_messages', array( $post_type, 'maybe_hack_bulk_message' ), 100, 2 );
-			}
+			$this->add_post_type_hooks();
+			$this->add_taxonomy_hooks();
+			$this->add_posts_table_hooks();
 		}
 
 		/**
@@ -303,6 +249,68 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				$actions = $post_type->filter_row_actions( $actions, $post );
 			}
 			return $actions;
+		}
+
+		public function handle_row_actions() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_row_action' ) );
+				}
+			}
+		}
+
+		public function handle_bulk_actions() {
+			global $typenow;
+
+			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			if ( $post_type ) {
+				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
+					$_REQUEST['action'] = $_REQUEST['action2'];
+				}
+				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_bulk_action' ) );
+				}
+				add_action( 'admin_head', array( $post_type, 'hack_bulk_actions' ), 100 );
+				add_filter( 'bulk_post_updated_messages', array( $post_type, 'maybe_hack_bulk_message' ), 100, 2 );
+			}
+		}
+
+		protected function add_post_type_hooks() {
+			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
+			add_action( 'edit_form_top', array( $this, 'display_meta_errors' ), 10, 1 );
+			add_action( 'load-post.php', array( $this, 'add_post_help' ) );
+			add_action( 'load-post-new.php', array( $this, 'add_post_help' ) );
+			add_action( 'load-edit.php', array( $this, 'add_post_list_help' ) );
+			add_filter( 'enter_title_here', array( $this, 'get_post_enter_title_here' ), 10, 2 );
+			add_filter( 'post_updated_messages', array( $this, 'get_post_updated_messages' ) );
+			add_filter( 'bulk_post_updated_messages', array( $this, 'get_bulk_post_updated_messages' ), 10, 2 );
+			if ( version_compare( get_bloginfo( 'version' ), '4.4' ) < 0 ) {
+				add_filter( 'media_view_strings', array( $this, 'get_media_view_strings' ), 10, 2 );
+			}
+		}
+
+		protected function add_taxonomy_hooks() {
+			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
+			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
+		}
+
+		protected function add_posts_table_hooks() {
+			$post_types = \WPDLib\Components\Manager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
+			foreach ( $post_types as $post_type ) {
+				add_filter( 'manage_taxonomies_for_' . $post_type->slug . '_columns', array( $post_type, 'get_table_taxonomies' ) );
+				add_filter( 'manage_' . $post_type->slug . '_posts_columns', array( $post_type, 'filter_table_columns' ) );
+				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type, 'filter_table_sortable_columns' ) );
+				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type, 'render_table_column' ), 10, 2 );
+			}
+			add_action( 'load-edit.php', array( $this, 'handle_table_filtering_and_sorting' ) );
+
+			add_filter( 'page_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+			add_action( 'load-post.php', array( $this, 'handle_row_actions' ) );
+			add_action( 'load-edit.php', array( $this, 'handle_bulk_actions' ) );
 		}
 	}
 }

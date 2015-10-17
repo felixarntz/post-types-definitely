@@ -288,7 +288,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @param array $metaboxes the metaboxes to add as $metabox_slug => $metabox_args
 		 * @param WPPTD\PostType $post_type the post type to add the metaboxes to
 		 */
-		protected function add_meta_boxes( $metaboxes, $post_type ) {
+		protected function add_metaboxes( $metaboxes, $post_type ) {
 			foreach ( $metaboxes as $metabox_slug => $metabox_args ) {
 				$metabox = $post_type->add( new Metabox( $metabox_slug, $metabox_args ) );
 				if ( is_wp_error( $metabox ) ) {
