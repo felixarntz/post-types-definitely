@@ -107,13 +107,13 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 			return $meta_value;
 		}
 
-		public static function get_all_meta_values( $meta_key ) {
+		public static function get_all_meta_values( $meta_key, $post_type ) {
 			global $wpdb;
 
 			$query = "SELECT DISTINCT meta_value FROM " . $wpdb->postmeta . " AS m JOIN " . $wpdb->posts . " as p ON ( p.ID = m.post_id )";
 			$query .= " WHERE m.meta_key = %s AND m.meta_value != '' AND p.post_type = %s ORDER BY m.meta_value ASC;";
 
-			return $wpdb->get_col( $wpdb->prepare( $query, $meta_key, $this->slug ) );
+			return $wpdb->get_col( $wpdb->prepare( $query, $meta_key, $post_type ) );
 		}
 
 		public static function validate_post_type_and_taxonomy_titles( $args, $slug ) {
@@ -128,6 +128,39 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 				$args['title'] = $args['singular_title'] . 's';
 			} elseif ( empty( $args['singular_title'] ) ) {
 				$args['singular_title'] = $args['title'];
+			}
+
+			return $args;
+		}
+
+		public static function validate_labels( $args, $defaults, $key ) {
+			if ( false !== $args[ $key ] ) {
+				if ( ! is_array( $args[ $key ] ) ) {
+					$args[ $key ] = array();
+				}
+
+				if ( 'bulk_messages' === $key ) {
+					foreach ( $defaults as $type => $default_labels ) {
+						if ( ! isset( $args[ $key ][ $type ] ) ) {
+							$args[ $key ][ $type ] = $default_labels;
+						} else {
+							if ( ! is_array( $args[ $key ][ $type ] ) ) {
+								$args[ $key ][ $type ] = array( $args[ $key ][ $type ] );
+							}
+							if ( count( $args[ $key ][ $type ] ) < 2 ) {
+								$args[ $key ][ $type ][] = $default_labels[1];
+							}
+						}
+					}
+				} else {
+					foreach ( $defaults as $type => $default_label ) {
+						if ( ! isset( $args[ $key ][ $type ] ) ) {
+							$args[ $key ][ $type ] = $default_label;
+						}
+					}
+				}
+			} else {
+				$args[ $key ] = array();
 			}
 
 			return $args;

@@ -584,56 +584,13 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				$this->args = General::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
 
 				// generate post type labels
-				if ( false !== $this->args['labels'] ) {
-					if ( ! is_array( $this->args['labels'] ) ) {
-						$this->args['labels'] = array();
-					}
-					$default_labels = $this->get_default_labels();
-					foreach ( $default_labels as $type => $default_label ) {
-						if ( ! isset( $this->args['labels'][ $type ] ) ) {
-							$this->args['labels'][ $type ] = $default_label;
-						}
-					}
-				} else {
-					$this->args['labels'] = array();
-				}
+				$this->args = General::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
 
 				// generate post type updated messages
-				if ( false !== $this->args['messages'] ) {
-					if ( ! is_array( $this->args['messages'] ) ) {
-						$this->args['messages'] = array();
-					}
-					$default_messages = $this->get_default_messages();
-					foreach ( $default_messages as $i => $default_message ) {
-						if ( ! isset( $this->args['messages'][ $i ] ) ) {
-							$this->args['messages'][ $i ] = $default_message;
-						}
-					}
-				} else {
-					$this->args['messages'] = array();
-				}
+				$this->args = General::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
 
 				// generate post type bulk action messages
-				if ( false !== $this->args['bulk_messages'] ) {
-					if ( ! is_array( $this->args['bulk_messages'] ) ) {
-						$this->args['bulk_messages'] = array();
-					}
-					$default_messages = $this->get_default_bulk_messages();
-					foreach ( $default_messages as $type => $defaults ) {
-						if ( ! isset( $this->args['bulk_messages'][ $type ] ) ) {
-							$this->args['bulk_messages'][ $type ] = $defaults;
-						} else {
-							if ( ! is_array( $this->args['bulk_messages'][ $type ] ) ) {
-								$this->args['bulk_messages'][ $type ] = array( $this->args['bulk_messages'][ $type ] );
-							}
-							if ( count( $this->args['bulk_messages'][ $type ] ) < 2 ) {
-								$this->args['bulk_messages'][ $type ][] = $defaults[1];
-							}
-						}
-					}
-				} else {
-					$this->args['bulk_messages'] = array();
-				}
+				$this->args = General::validate_labels( $this->args, $this->get_default_bulk_messages(), 'bulk_messages' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -975,7 +932,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				case 'time':
 				case 'color':
 				case 'media':
-					$options = General::get_all_meta_values( $column_args['meta_key'] );
+					$options = General::get_all_meta_values( $field->slug, $this->slug );
 					if ( count( $options ) > 0 ) {
 						echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
 						echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
