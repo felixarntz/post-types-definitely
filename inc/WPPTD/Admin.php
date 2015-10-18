@@ -104,7 +104,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				return;
 			}
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type->save_meta( $post_id, $post, $update );
 			}
@@ -125,7 +125,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function add_post_help() {
 			global $typenow;
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type->render_help();
 			}
@@ -134,7 +134,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function add_post_list_help() {
 			global $typenow;
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type->render_list_help();
 			}
@@ -143,14 +143,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function add_term_help() {
 			global $taxnow;
 
-			$taxonomy = \WPDLib\Components\Manager::get( '*.*' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			$taxonomy = ComponentManager::get( '*.*' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
 				$taxonomy->render_help();
 			}
 		}
 
 		public function get_post_enter_title_here( $text, $post ) {
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$_text = $post_type->get_enter_title_here( $post );
 				if ( $_text ) {
@@ -199,7 +199,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 		public function get_media_view_strings( $strings, $post ) {
 			if ( $post ) {
-				$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+				$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 				if ( $post_type ) {
 					$labels = $post_type->labels;
 					if ( $labels['insert_into_item'] ) {
@@ -231,22 +231,26 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function handle_table_filtering_and_sorting() {
 			global $typenow;
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$post_type->maybe_sort_default();
+				$post_type_table_handler = $post_type->get_table_handler();
 
-				add_action( 'restrict_manage_posts', array( $post_type, 'render_table_column_filters' ) );
-				add_filter( 'query_vars', array( $post_type, 'register_table_filter_query_vars' ) );
-				add_action( 'pre_get_posts', array( $post_type, 'maybe_filter_by_table_columns' ), 10, 1 );
-				add_action( 'pre_get_posts', array( $post_type, 'maybe_sort_by_meta_table_column' ), 10, 1 );
-				add_filter( 'posts_clauses', array( $post_type, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
+				$post_type_table_handler->maybe_sort_default();
+
+				add_action( 'restrict_manage_posts', array( $post_type_table_handler, 'render_table_column_filters' ) );
+				add_filter( 'query_vars', array( $post_type_table_handler, 'register_table_filter_query_vars' ) );
+				add_action( 'pre_get_posts', array( $post_type_table_handler, 'maybe_filter_by_table_columns' ), 10, 1 );
+				add_action( 'pre_get_posts', array( $post_type_table_handler, 'maybe_sort_by_meta_table_column' ), 10, 1 );
+				add_filter( 'posts_clauses', array( $post_type_table_handler, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
 			}
 		}
 
 		public function get_row_actions( $actions, $post ) {
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$actions = $post_type->filter_row_actions( $actions, $post );
+				$post_type_table_handler = $post_type->get_table_handler();
+
+				$actions = $post_type_table_handler->filter_row_actions( $actions, $post );
 			}
 			return $actions;
 		}
@@ -254,10 +258,12 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function handle_row_actions() {
 			global $typenow;
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
+				$post_type_table_handler = $post_type->get_table_handler();
+
 				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_row_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_table_handler, 'maybe_run_row_action' ) );
 				}
 			}
 		}
@@ -265,16 +271,18 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function handle_bulk_actions() {
 			global $typenow;
 
-			$post_type = \WPDLib\Components\Manager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
+			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
+				$post_type_table_handler = $post_type->get_table_handler();
+
 				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
 					$_REQUEST['action'] = $_REQUEST['action2'];
 				}
 				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type, 'maybe_run_bulk_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_table_handler, 'maybe_run_bulk_action' ) );
 				}
-				add_action( 'admin_head', array( $post_type, 'hack_bulk_actions' ), 100 );
-				add_filter( 'bulk_post_updated_messages', array( $post_type, 'maybe_hack_bulk_message' ), 100, 2 );
+				add_action( 'admin_head', array( $post_type_table_handler, 'hack_bulk_actions' ), 100 );
+				add_filter( 'bulk_post_updated_messages', array( $post_type_table_handler, 'maybe_hack_bulk_message' ), 100, 2 );
 			}
 		}
 
@@ -298,12 +306,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		protected function add_posts_table_hooks() {
-			$post_types = \WPDLib\Components\Manager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
+			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {
-				add_filter( 'manage_taxonomies_for_' . $post_type->slug . '_columns', array( $post_type, 'get_table_taxonomies' ) );
-				add_filter( 'manage_' . $post_type->slug . '_posts_columns', array( $post_type, 'filter_table_columns' ) );
-				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type, 'filter_table_sortable_columns' ) );
-				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type, 'render_table_column' ), 10, 2 );
+				$post_type_table_handler = $post_type->get_table_handler();
+
+				add_filter( 'manage_taxonomies_for_' . $post_type->slug . '_columns', array( $post_type_table_handler, 'get_table_taxonomies' ) );
+				add_filter( 'manage_' . $post_type->slug . '_posts_columns', array( $post_type_table_handler, 'filter_table_columns' ) );
+				add_filter( 'manage_edit-' . $post_type->slug . '_sortable_columns', array( $post_type_table_handler, 'filter_table_sortable_columns' ) );
+				add_action( 'manage_' . $post_type->slug . '_posts_custom_column', array( $post_type_table_handler, 'render_table_column' ), 10, 2 );
 			}
 			add_action( 'load-edit.php', array( $this, 'handle_table_filtering_and_sorting' ) );
 
