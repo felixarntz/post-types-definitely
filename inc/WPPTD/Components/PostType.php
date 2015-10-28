@@ -280,6 +280,8 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 				if ( null === $this->args['show_in_menu'] ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
+				} elseif ( $this->args['show_in_menu'] && ! $this->args['show_ui'] ) {
+					$this->args['show_in_menu'] = false;
 				}
 				$menu = $this->get_parent();
 				if ( $this->args['show_in_menu'] && empty( $menu->slug ) ) {

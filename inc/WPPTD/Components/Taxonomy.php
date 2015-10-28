@@ -122,6 +122,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 				if ( null === $this->args['show_in_menu'] ) {
 					$this->args['show_in_menu'] = $this->args['show_ui'];
+				} elseif ( $this->args['show_in_menu'] && ! $this->args['show_ui'] ) {
+					$this->args['show_in_menu'] = false;
 				}
 
 				if ( null !== $this->args['position'] ) {
