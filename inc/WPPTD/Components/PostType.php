@@ -340,6 +340,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'exclude_from_search'	=> null,
 				'publicly_queryable'	=> null,
 				'show_ui'				=> null,
+				'show_in_nav_menus'		=> null,
 				'show_in_menu'			=> null,
 				'show_add_new_in_menu'	=> true,
 				'show_in_admin_bar'		=> null,
