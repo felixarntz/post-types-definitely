@@ -143,8 +143,8 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				'description'	=> '',
 				'context'		=> null,
 				'priority'		=> null,
-				'position'		=> null,
 				'callback'		=> false, //only used if no fields are attached to this metabox
+				'position'		=> null,
 			);
 
 			/**
