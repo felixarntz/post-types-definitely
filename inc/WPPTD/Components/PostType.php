@@ -511,7 +511,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				'set_featured_image'	=> sprintf( _x( 'Set featured %s Image', 'set_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
 				'remove_featured_image'	=> sprintf( _x( 'Remove featured %s Image', 'remove_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
 				'use_featured_image'	=> sprintf( _x( 'Use as featured %s Image', 'use_featured_image label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
-				// additional labels for media library
+				// new accessibility labels added in WP 4.4
+				'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				'filter_items_list'		=> sprintf( _x( 'Filter %s list', 'filter_items_list label: argument is the plural post type label', 'post-types-definitely' ), $this->args['title'] ),
+				// additional labels for media library (as of WP 4.4 they are natively supported, in older versions they are handled by the plugin)
 				'insert_into_item'		=> sprintf( _x( 'Insert into %s content', 'insert_into_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
 				'uploaded_to_this_item'	=> sprintf( _x( 'Uploaded to this %s', 'uploaded_to_this_item label: argument is the singular post type label', 'post-types-definitely' ), $this->args['singular_title'] ),
 			);

@@ -233,7 +233,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'parent_item'					=> sprintf( _x( 'Parent %s', 'parent_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
 				'parent_item_colon'				=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
-				// additional label for post listings
+				// new accessibility labels added in WP 4.4
+				'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				// additional label for post listings (handled by the plugin)
 				'filter_by_item'				=> sprintf( _x( 'Filter by %s', 'filter_by_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
 			);
 		}
