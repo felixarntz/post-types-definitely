@@ -24,6 +24,8 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 	class PostType extends Base {
 		protected $table_handler = null;
 
+		protected $show_in_menu_manually = false;
+
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->table_handler = new PostTableHandler( $this );
@@ -84,7 +86,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		public function add_to_menu( $args ) {
-			if ( ! $this->args['show_ui'] ) {
+			if ( ! $this->show_in_menu_manually ) {
 				return false;
 			}
 
@@ -276,11 +278,18 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				if ( null === $this->args['show_ui'] ) {
 					$this->args['show_ui'] = $this->args['public'];
 				}
+				if ( null === $this->args['show_in_menu'] ) {
+					$this->args['show_in_menu'] = $this->args['show_ui'];
+				}
 				$menu = $this->get_parent();
 				if ( $this->args['show_in_menu'] && empty( $menu->slug ) ) {
 					$this->args['show_in_menu'] = true;
-				} else {
+				} elseif ( $this->args['show_in_menu'] ) {
 					$this->args['show_in_menu'] = false;
+					if ( null === $this->args['show_in_admin_bar'] ) {
+						$this->args['show_in_admin_bar'] = true;
+					}
+					$this->show_in_menu_manually = true;
 					if ( isset( $this->args['menu_position'] ) ) {
 						App::doing_it_wrong( __METHOD__, sprintf( __( 'A menu position is unnecessarily provided for the post type %s - the menu position is already specified by its parent menu.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 						unset( $this->args['menu_position'] );
