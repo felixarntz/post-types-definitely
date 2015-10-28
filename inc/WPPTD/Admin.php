@@ -140,12 +140,16 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
-		public function add_term_help() {
+		public function add_term_or_term_list_help() {
 			global $taxnow;
 
-			$taxonomy = ComponentManager::get( '*.*' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
-				$taxonomy->render_help();
+				if ( isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
+					$taxonomy->render_help();
+				} else {
+					$taxonomy->render_list_help();
+				}
 			}
 		}
 
@@ -301,7 +305,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		protected function add_taxonomy_hooks() {
-			add_action( 'load-edit-tags.php', array( $this, 'add_term_help' ) );
+			add_action( 'load-edit-tags.php', array( $this, 'add_term_or_term_list_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
 		}
 

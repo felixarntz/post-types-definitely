@@ -72,6 +72,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			General::render_help( get_current_screen(), $this->args['help'] );
 		}
 
+		public function render_list_help() {
+			General::render_help( get_current_screen(), $this->args['list_help'] );
+		}
+
 		public function get_updated_messages() {
 			return $this->args['messages'];
 		}
@@ -132,6 +136,9 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 				// handle help
 				$this->args = General::validate_help_args( $this->args, 'help' );
+
+				// handle list help
+				$this->args = General::validate_help_args( $this->args, 'list_help' );
 			}
 
 			return $status;
@@ -166,6 +173,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'sort'					=> null,
 				'position'				=> null,
 				'help'					=> array(
+					'tabs'					=> array(),
+					'sidebar'				=> '',
+				),
+				'list_help'				=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',
 				),
