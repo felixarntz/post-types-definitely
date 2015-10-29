@@ -9,9 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-if ( ! function_exists( 'wpptd_get_post_metas' ) ) {
-	function wpptd_get_post_metas( $id, $single = null, $formatted = false ) {
-		$_meta_values = get_post_custom( $id );
+if ( ! function_exists( 'wpptd_get_post_meta_values' ) ) {
+	function wpptd_get_post_meta_values( $id, $single = null, $formatted = false ) {
+		$_meta_values = get_post_meta( $id );
 
 		$meta_values = array();
 
@@ -44,8 +44,8 @@ if ( ! function_exists( 'wpptd_get_post_metas' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wpptd_get_post_meta' ) ) {
-	function wpptd_get_post_meta( $id, $meta_key, $single = null, $formatted = false ) {
+if ( ! function_exists( 'wpptd_get_post_meta_value' ) ) {
+	function wpptd_get_post_meta_value( $id, $meta_key, $single = null, $formatted = false ) {
 		$_meta_value = get_post_meta( $id, $meta_key, false );
 
 		if ( doing_action( 'wpptd' ) || ! did_action( 'wpptd' ) ) {

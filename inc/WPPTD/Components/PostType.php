@@ -431,7 +431,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				foreach ( $metabox->get_children() as $field ) {
-					$meta_value_old = wpptd_get_post_meta( $post_id, $field->slug );
+					$meta_value_old = wpptd_get_post_meta_value( $post_id, $field->slug );
 					if ( $meta_value_old === null ) {
 						$meta_value_old = $field->default;
 					}
