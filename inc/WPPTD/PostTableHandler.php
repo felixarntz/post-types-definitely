@@ -21,22 +21,42 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 	 * @since 0.5.0
 	 */
 	class PostTableHandler {
+		/**
+		 * @since 0.5.0
+		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
+		 */
 		protected $post_type = null;
 
+		/**
+		 * @since 0.5.0
+		 * @var string Holds the slug of the post type component.
+		 */
 		protected $post_type_slug = '';
 
+		/**
+		 * @since 0.5.0
+		 * @var array helper variable to temporarily hold the active filters in the post type list screen
+		 */
 		protected $active_filters = array();
 
 		/**
 		 * Class constructor.
 		 *
 		 * @since 0.5.0
+		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
 		 */
 		public function __construct( $post_type ) {
 			$this->post_type = $post_type;
 			$this->post_type_slug = $this->post_type->slug;
 		}
 
+		/**
+		 * This filter adjusts the taxonomies that should be presented in the list table.
+		 *
+		 * @since 0.5.0
+		 * @param array $taxonomies the original taxonomy slugs
+		 * @return array the adjusted taxonomy slugs
+		 */
 		public function get_table_taxonomies( $taxonomies ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -64,6 +84,15 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return array_values( $taxonomies );
 		}
 
+		/**
+		 * This filter adjusts the list table columns.
+		 *
+		 * Taxonomy columns are not dealt with here since they are handled by the `get_table_taxonomies()` method.
+		 *
+		 * @since 0.5.0
+		 * @param array $columns the original table columns as $column_slug => $title
+		 * @return array the adjusted table columns
+		 */
 		public function filter_table_columns( $columns ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -85,6 +114,15 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $columns;
 		}
 
+		/**
+		 * This filter adjusts the sortable list table columns.
+		 *
+		 * Any column which is `'sortable' => true` will be added to the array.
+		 *
+		 * @since 0.5.0
+		 * @param array $columns the original sortable table columns as $column_slug => array( $sort_by, $desc )
+		 * @return array the adjusted sortable table columns
+		 */
 		public function filter_table_sortable_columns( $columns ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -110,6 +148,17 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $columns;
 		}
 
+		/**
+		 * This function renders a list table column.
+		 *
+		 * For meta value columns, the corresponding field component takes care of rendering.
+		 * For custom columns, the callback to render the column is called.
+		 * Taxonomy columns are not dealt with here since WordPress renders them automatically.
+		 *
+		 * @since 0.5.0
+		 * @param string $column_name the column name of the column that should be rendered
+		 * @param integer $post_id the post ID for the current row
+		 */
 		public function render_table_column( $column_name, $post_id ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -125,6 +174,13 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			}
 		}
 
+		/**
+		 * This function renders the necessary filter dropdowns for taxonomies and meta values.
+		 *
+		 * The taxonomy dropdown for 'category' will never be rendered here because WordPress creates it automatically if needed.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_table_column_filters() {
 			$table_columns = $this->post_type->table_columns;
 
@@ -147,6 +203,13 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			}
 		}
 
+		/**
+		 * This filter registers the necessary query variables in WP_Query to detect whether we should filter by them.
+		 *
+		 * @since 0.5.0
+		 * @param array $vars array of original query vars
+		 * @return array the query vars array including the new ones
+		 */
 		public function register_table_filter_query_vars( $vars ) {
 			$table_columns = $this->post_type->table_columns;
 
