@@ -41,7 +41,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.5.0
 		 * @var array helper variable to temporarily hold taxonomies and their post type names
 		 */
-		private $taxonomies_temp = array();
+		protected $taxonomies_temp = array();
 
 		/**
 		 * Class constructor.
@@ -95,8 +95,8 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * Every component has an `add()` method to add subcomponents to it, however if you want to add toplevel components, use this function.
 		 *
 		 * @since 0.5.0
-		 * @param WPDLib\Component $component the component object to add
-		 * @return WPDLib\Component|WP_Error either the component added or a WP_Error object if an error occurred
+		 * @param WPDLib\Components\Base $component the component object to add
+		 * @return WPDLib\Components\Base|WP_Error either the component added or a WP_Error object if an error occurred
 		 */
 		public function add( $component ) {
 			return ComponentManager::add( $component );
@@ -133,6 +133,13 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 */
 		public function init() {
 			if ( ! did_action( 'wpptd' ) ) {
+				/**
+				 * This filter can be used to alter the component hierarchy of the plugin.
+				 * It must only be used to add more components to the hierarchy, never to change or remove something existing.
+				 *
+				 * @since 0.5.0
+				 * @param array the nested array of component class names
+				 */
 				ComponentManager::register_hierarchy( apply_filters( 'wpptd_class_hierarchy', array(
 					'WPDLib\Components\Menu'		=> array(
 						'WPPTD\Components\PostType'		=> array(
@@ -144,6 +151,14 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 					),
 				) ) );
 
+				/**
+				 * The main API action of the plugin.
+				 *
+				 * Every developer must hook into this action to register components.
+				 *
+				 * @since 0.5.0
+				 * @param WPPTD\App instance of the main plugin class
+				 */
 				do_action( 'wpptd', $this );
 
 				$this->taxonomies_temp = array();
@@ -158,7 +173,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $args the menu arguments
-		 * @param WPDLib\Menu $menu the current menu object
+		 * @param WPDLib\Components\Menu $menu the current menu object
 		 * @return array the adjusted menu arguments
 		 */
 		public function menu_validated( $args, $menu ) {
@@ -174,7 +189,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $args the post type arguments
-		 * @param WPPTD\PostType $menu the current post type object
+		 * @param WPPTD\Components\PostType $menu the current post type object
 		 * @return array the adjusted post type arguments
 		 */
 		public function post_type_validated( $args, $post_type ) {
@@ -193,7 +208,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $args the metabox arguments
-		 * @param WPPTD\Metabox $menu the current metabox object
+		 * @param WPPTD\Components\Metabox $menu the current metabox object
 		 * @return array the adjusted metabox arguments
 		 */
 		public function metabox_validated( $args, $metabox ) {
@@ -227,7 +242,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $post_types the post types to add as $post_type_slug => $post_type_args
-		 * @param WPDLib\Menu $menu the menu to add the post types to
+		 * @param WPDLib\Components\Menu $menu the menu to add the post types to
 		 */
 		protected function add_post_types( $post_types, $menu ) {
 			foreach ( $post_types as $post_type_slug => $post_type_args ) {
@@ -246,12 +261,12 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		}
 
 		/**
-		 * Adds taxonomies and their subcomponents.
+		 * Adds taxonomies.
 		 *
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $taxonomies the taxonomies to add as $taxonomy_slug => $taxonomy_args
-		 * @param WPPTD\PostType $post_type the post type to add the taxonomies to
+		 * @param WPPTD\Components\PostType $post_type the post type to add the taxonomies to
 		 */
 		protected function add_taxonomies( $taxonomies, $post_type ) {
 			foreach ( $taxonomies as $taxonomy_slug => $taxonomy_args ) {
@@ -286,7 +301,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $metaboxes the metaboxes to add as $metabox_slug => $metabox_args
-		 * @param WPPTD\PostType $post_type the post type to add the metaboxes to
+		 * @param WPPTD\Components\PostType $post_type the post type to add the metaboxes to
 		 */
 		protected function add_metaboxes( $metaboxes, $post_type ) {
 			foreach ( $metaboxes as $metabox_slug => $metabox_args ) {
@@ -305,7 +320,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @internal
 		 * @since 0.5.0
 		 * @param array $fields the fields to add as $field_slug => $field_args
-		 * @param WPPTD\Metabox $metabox the metabox to add the fields to
+		 * @param WPPTD\Components\Metabox $metabox the metabox to add the fields to
 		 */
 		protected function add_fields( $fields, $metabox ) {
 			foreach ( $fields as $field_slug => $field_args ) {

@@ -8,6 +8,7 @@
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
+use WPPTD\Utility as Utility;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
 
@@ -121,9 +122,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			$status = parent::validate( $parent );
 
 			if ( $status === true ) {
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_position_args( $this->args );
 			}
 
 			return $status;

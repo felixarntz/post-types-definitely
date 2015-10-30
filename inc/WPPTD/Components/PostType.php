@@ -8,7 +8,7 @@
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
-use WPPTD\General as General;
+use WPPTD\Utility as Utility;
 use WPPTD\PostTableHandler as PostTableHandler;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
@@ -174,11 +174,11 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		public function render_help() {
-			General::render_help( get_current_screen(), $this->args['help'] );
+			Utility::render_help( get_current_screen(), $this->args['help'] );
 		}
 
 		public function render_list_help() {
-			General::render_help( get_current_screen(), $this->args['list_help'] );
+			Utility::render_help( get_current_screen(), $this->args['list_help'] );
 		}
 
 		public function get_updated_messages( $post, $permalink = '', $revision = false ) {
@@ -252,16 +252,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				// generate titles if not provided
-				$this->args = General::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
+				$this->args = Utility::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
 
 				// generate post type labels
-				$this->args = General::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
 
 				// generate post type updated messages
-				$this->args = General::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
 
 				// generate post type bulk action messages
-				$this->args = General::validate_labels( $this->args, $this->get_default_bulk_messages(), 'bulk_messages' );
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_bulk_messages(), 'bulk_messages' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -275,14 +275,9 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 						$this->args['rewrite'] = false;
 					}
 				}
-				if ( null === $this->args['show_ui'] ) {
-					$this->args['show_ui'] = $this->args['public'];
-				}
-				if ( null === $this->args['show_in_menu'] ) {
-					$this->args['show_in_menu'] = $this->args['show_ui'];
-				} elseif ( $this->args['show_in_menu'] && ! $this->args['show_ui'] ) {
-					$this->args['show_in_menu'] = false;
-				}
+
+				$this->args = Utility::validate_ui_args( $this->args );
+
 				$menu = $this->get_parent();
 				if ( $this->args['show_in_menu'] && empty( $menu->slug ) ) {
 					$this->args['show_in_menu'] = true;
@@ -302,18 +297,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					}
 				}
 
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_position_args( $this->args );
 
 				// handle post table
 				$this->args = $this->table_handler->validate_post_type_args( $this->args );
 
 				// handle help
-				$this->args = General::validate_help_args( $this->args, 'help' );
+				$this->args = Utility::validate_help_args( $this->args, 'help' );
 
 				// handle list help
-				$this->args = General::validate_help_args( $this->args, 'list_help' );
+				$this->args = Utility::validate_help_args( $this->args, 'list_help' );
 			}
 
 			return $status;

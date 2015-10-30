@@ -79,10 +79,11 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$screen = get_current_screen();
 
 			if ( isset( $screen->taxonomy ) && $screen->taxonomy ) {
-				$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+				// we don't need any additional assets for taxonomy screens
+				/*$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 				if ( $taxonomy ) {
-					//TODO: enqueue assets?
-				}
+
+				}*/
 			} elseif ( isset( $screen->post_type ) && $screen->post_type ) {
 				$post_type = ComponentManager::get( '*.' . $screen->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 				if ( $post_type ) {
@@ -98,6 +99,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Wrapper function to control saving meta values for a post type registered with the plugin.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 * @param integer $post_id post ID of the post to be saved
+		 * @param WP_Post $post the post object to be saved
+		 * @param boolean $update whether this will create a new post or update an existing one
+		 */
 		public function save_post_meta( $post_id, $post, $update = false ) {
 			$nonce = isset( $_POST[ 'wpptd_edit_' . $post->post_type ] ) ? sanitize_key( $_POST[ 'wpptd_edit_' . $post->post_type ] ) : '';
 			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-' . $post->post_type ) ) {
@@ -110,6 +120,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Displays validation errors for meta fields if any occurred.
+		 *
+		 * If there was a WordPress function like `add_meta_error()`, it would do something like this.
+		 *
+		 * @since 0.5.0
+		 * @param WP_Post $post the current post
+		 */
 		public function display_meta_errors( $post ) {
 			wp_nonce_field( 'wpptd-save-' . $post->post_type, 'wpptd_edit_' . $post->post_type );
 
@@ -122,6 +140,12 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Wrapper function to control the addition of help tabs to a post editing screen.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 */
 		public function add_post_help() {
 			global $typenow;
 
@@ -131,6 +155,12 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Wrapper function to control the addition of help tabs to a post list screen.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 */
 		public function add_post_list_help() {
 			global $typenow;
 
@@ -140,6 +170,12 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Wrapper function to control the addition of help tabs to a taxonomy editing or list screen.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 */
 		public function add_term_or_term_list_help() {
 			global $taxnow;
 
@@ -153,6 +189,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * This filter returns the custom 'enter_title_here' string for a post type if available.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 * @param string $text the original text
+		 * @param WP_Post $post the current post
+		 * @return string the custom text to use (if available) or the original text
+		 */
 		public function get_post_enter_title_here( $text, $post ) {
 			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
@@ -164,6 +209,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $text;
 		}
 
+		/**
+		 * This filter returns the custom messages array for when a post of a certain post type has been modified.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 * @param array $messages the original messages
+		 * @return array the custom messages to use
+		 */
 		public function get_post_updated_messages( $messages ) {
 			global $post;
 
@@ -178,7 +231,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			foreach ( $post_types as $post_type ) {
 				if ( ! in_array( $post_type->slug, array( 'post', 'page', 'attachment' ) ) ) {
 					$post_type_messages = $post_type->get_updated_messages( $post, $permalink, $revision );
-					if ( $post_type_messages ) {
+					if ( $post_type_messages && is_array( $post_type_messages ) ) {
 						$messages[ $post_type->slug ] = $post_type_messages;
 					}
 				}
@@ -187,12 +240,20 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $messages;
 		}
 
+		/**
+		 * This filter returns the custom bulk messages array for when posts of a certain post type have been modified.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 * @param array $messages the original messages
+		 * @return array the custom messages to use
+		 */
 		public function get_bulk_post_updated_messages( $messages, $counts ) {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {
 				if ( ! in_array( $post_type->slug, array( 'post', 'page', 'attachment' ) ) ) {
 					$post_type_messages = $post_type->get_bulk_updated_messages( $counts );
-					if ( $post_type_messages ) {
+					if ( $post_type_messages && is_array( $post_type_messages ) ) {
 						$messages[ $post_type->slug ] = $post_type_messages;
 					}
 				}
@@ -201,6 +262,17 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $messages;
 		}
 
+		/**
+		 * This filter returns the custom media post type labels.
+		 *
+		 * As of WordPress 4.4, those strings are automatically included, so this filter is not used there.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 * @param array $strings the original media strings
+		 * @param WP_Post $post the current post
+		 * @return array the media strings including the custom media post type labels
+		 */
 		public function get_media_view_strings( $strings, $post ) {
 			if ( $post ) {
 				$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
@@ -218,6 +290,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $strings;
 		}
 
+		/**
+		 * This filter returns the custom messages array for when a term of a certain taxonomy has been modified.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 * @param array $messages the original messages
+		 * @return array the custom messages to use
+		 */
 		public function get_term_updated_messages( $messages ) {
 			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 			foreach ( $taxonomies as $taxonomy ) {
@@ -232,6 +312,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $messages;
 		}
 
+		/**
+		 * Hooks in the functions to handle filtering and sorting in the post type list table.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\PostTableHandler
+		 * @since 0.5.0
+		 */
 		public function handle_table_filtering_and_sorting() {
 			global $typenow;
 
@@ -249,6 +336,16 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * This filter adds the custom row actions for a post type to the row actions array.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\PostTableHandler
+		 * @since 0.5.0
+		 * @param array $actions the original row actions
+		 * @param WP_Post $post the current post
+		 * @return array the row actions including the custom ones
+		 */
 		public function get_row_actions( $actions, $post ) {
 			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
@@ -259,6 +356,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			return $actions;
 		}
 
+		/**
+		 * Hooks in the function to handle a certain row action if that row action should be run.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\PostTableHandler
+		 * @since 0.5.0
+		 */
 		public function handle_row_actions() {
 			global $typenow;
 
@@ -272,6 +376,18 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Hooks in the function to handle a certain bulk action if that bulk action should be run.
+		 *
+		 * The function furthermore hooks in functions to add the custom bulk actions to the dropdown (hacky)
+		 * and to correctly displayed messages for bulk and row actions (hacky too).
+		 *
+		 * It has to be hacky because WordPress natively does not support it :(
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\PostTableHandler
+		 * @since 0.5.0
+		 */
 		public function handle_bulk_actions() {
 			global $typenow;
 
@@ -290,6 +406,11 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Hooks in all functions related to a post type.
+		 *
+		 * @since 0.5.0
+		 */
 		protected function add_post_type_hooks() {
 			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
 			add_action( 'edit_form_top', array( $this, 'display_meta_errors' ), 10, 1 );
@@ -304,11 +425,21 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Hooks in all functions related to a taxonomy.
+		 *
+		 * @since 0.5.0
+		 */
 		protected function add_taxonomy_hooks() {
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_or_term_list_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
 		}
 
+		/**
+		 * Hooks in all functions related to a post type list table.
+		 *
+		 * @since 0.5.0
+		 */
 		protected function add_posts_table_hooks() {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {

@@ -8,7 +8,7 @@
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
-use WPPTD\General as General;
+use WPPTD\Utility as Utility;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\Util\Error as UtilError;
@@ -69,11 +69,11 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		}
 
 		public function render_help() {
-			General::render_help( get_current_screen(), $this->args['help'] );
+			Utility::render_help( get_current_screen(), $this->args['help'] );
 		}
 
 		public function render_list_help() {
-			General::render_help( get_current_screen(), $this->args['list_help'] );
+			Utility::render_help( get_current_screen(), $this->args['list_help'] );
 		}
 
 		public function get_updated_messages() {
@@ -100,13 +100,13 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 
 				// generate titles if not provided
-				$this->args = General::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
+				$this->args = Utility::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
 
 				// generate taxonomy labels
-				$this->args = General::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
 
 				// generate taxonomy updated messages
-				$this->args = General::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -121,24 +121,16 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 						$this->args['rewrite'] = false;
 					}
 				}
-				if ( null === $this->args['show_ui'] ) {
-					$this->args['show_ui'] = $this->args['public'];
-				}
-				if ( null === $this->args['show_in_menu'] ) {
-					$this->args['show_in_menu'] = $this->args['show_ui'];
-				} elseif ( $this->args['show_in_menu'] && ! $this->args['show_ui'] ) {
-					$this->args['show_in_menu'] = false;
-				}
 
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_ui_args( $this->args );
+
+				$this->args = Utility::validate_position_args( $this->args );
 
 				// handle help
-				$this->args = General::validate_help_args( $this->args, 'help' );
+				$this->args = Utility::validate_help_args( $this->args, 'help' );
 
 				// handle list help
-				$this->args = General::validate_help_args( $this->args, 'list_help' );
+				$this->args = Utility::validate_help_args( $this->args, 'list_help' );
 			}
 
 			return $status;
