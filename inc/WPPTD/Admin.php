@@ -278,11 +278,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 				if ( $post_type ) {
 					$labels = $post_type->labels;
-					if ( $labels['insert_into_item'] ) {
-						$strings['insertIntoPost'] = $labels['insert_into_item'];
-					}
-					if ( $labels['uploaded_to_this_item'] ) {
-						$strings['uploadedToThisPost'] = $labels['uploaded_to_this_item'];
+					if ( is_array( $labels ) ) {
+						if ( isset( $labels['insert_into_item'] ) && $labels['insert_into_item'] ) {
+							$strings['insertIntoPost'] = $labels['insert_into_item'];
+						}
+						if ( isset( $labels['uploaded_to_this_item'] ) && $labels['uploaded_to_this_item'] ) {
+							$strings['uploadedToThisPost'] = $labels['uploaded_to_this_item'];
+						}
 					}
 				}
 			}

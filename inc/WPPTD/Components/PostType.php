@@ -77,7 +77,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				if ( $this->args['labels'] ) {
-					$wp_post_types[ $this->slug ]->labels = get_post_type_labels( (object) $this->args );
+					$wp_post_types[ $this->slug ]->labels = get_post_type_labels( (object) array_merge( $this->args, array( 'name' => $this->slug ) ) );
 					$wp_post_types[ $this->slug ]->label = $wp_post_types[ $this->slug ]->labels->name;
 				}
 
