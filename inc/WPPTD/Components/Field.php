@@ -115,7 +115,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 					$formatted = true;
 			}
 
-			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta( $post_id, $this->slug, null, $formatted ), $post_id );
+			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted ), $post_id );
 		}
 
 		/**

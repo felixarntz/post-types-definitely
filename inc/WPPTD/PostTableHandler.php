@@ -592,7 +592,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 				case 'time':
 				case 'color':
 				case 'media':
-					$options = General::get_all_meta_values( $field->slug, $this->post_type_slug );
+					$options = Utility::get_all_meta_values( $field->slug, $this->post_type_slug );
 					if ( count( $options ) > 0 ) {
 						echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
 						echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
