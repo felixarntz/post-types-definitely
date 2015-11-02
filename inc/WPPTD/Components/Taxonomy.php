@@ -60,7 +60,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				global $wp_taxonomies;
 
 				if ( $this->args['labels'] ) {
-					$wp_taxonomies[ $this->slug ]->labels = get_taxonomy_labels( (object) $this->args );
+					// merge the slug as $name into the arguments (required for `get_taxonomy_labels()`)
+					$wp_taxonomies[ $this->slug ]->labels = get_taxonomy_labels( (object) array_merge( $this->args, array( 'name' => $this->slug ) ) );
 					$wp_taxonomies[ $this->slug ]->label = $wp_taxonomies[ $this->slug ]->labels->name;
 				}
 			}
@@ -220,6 +221,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'search_items'					=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'popular_items'					=> sprintf( _x( 'Popular %s', 'popular_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'not_found'						=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'no_terms'						=> sprintf( _x( 'No %s', 'no_terms label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'separate_items_with_commas'	=> sprintf( _x( 'Separate %s with commas', 'separate_items_with_commas label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'add_or_remove_items'			=> sprintf( _x( 'Add or remove %s', 'add_or_remove_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
 				'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
