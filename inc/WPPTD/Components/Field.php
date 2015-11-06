@@ -31,6 +31,12 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 	class Field extends Base {
 
 		/**
+		 * @since 0.5.0
+		 * @var WPDLib\FieldTypes\Base Holds the field type object from WPDLib.
+		 */
+		protected $_field = null;
+
+		/**
 		 * Class constructor.
 		 *
 		 * @since 0.5.0
@@ -41,12 +47,6 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_field_validated';
 		}
-
-		/**
-		 * @since 0.5.0
-		 * @var WPDLib\FieldTypes\Base Holds the field type object from WPDLib.
-		 */
-		protected $_field = null;
 
 		/**
 		 * Magic get method.
@@ -177,6 +177,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 *
 		 * @since 0.5.0
 		 * @param WPPTD\Components\Metabox $parent the parent component
+		 * @return bool|WPDLib\Util\Error an error object if an error occurred during validation, true if it was validated, false if it did not need to be validated
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
