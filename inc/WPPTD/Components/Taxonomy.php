@@ -18,20 +18,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
-
+	/**
+	 * Class for a taxonomy component.
+	 *
+	 * This denotes a taxonomy within WordPress.
+	 *
+	 * @internal
+	 * @since 0.5.0
+	 */
 	class Taxonomy extends Base {
 
+		/**
+		 * @since 0.5.0
+		 * @var bool Stores whether this taxonomy has already been registered.
+		 */
 		protected $registered = false;
 
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.5.0
+		 * @param string $slug the taxonomy slug
+		 * @param array $args array of taxonomy properties
+		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_taxonomy_validated';
 		}
 
+		/**
+		 * Checks whether this taxonomy already exists in WordPress.
+		 *
+		 * @since 0.5.0
+		 * @return bool true if the taxonomy exists, otherwise false
+		 */
 		public function is_already_added() {
 			return taxonomy_exists( $this->slug );
 		}
 
+		/**
+		 * Registers the taxonomy.
+		 *
+		 * If the taxonomy already exists, some of the arguments will be merged into the existing taxonomy object.
+		 *
+		 * @since 0.5.0
+		 */
 		public function register() {
 			if ( $this->registered ) {
 				return;
@@ -69,14 +100,30 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			$this->registered = true;
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the term editing screen of the taxonomy.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_help() {
 			Utility::render_help( get_current_screen(), $this->args['help'] );
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the terms list screen of the taxonomy.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_list_help() {
 			Utility::render_help( get_current_screen(), $this->args['list_help'] );
 		}
 
+		/**
+		 * Returns the custom term updated messages for this taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the custom messages
+		 */
 		public function get_updated_messages() {
 			return $this->args['messages'];
 		}
@@ -85,6 +132,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 * Validates the arguments array.
 		 *
 		 * @since 0.5.0
+		 * @param WPPTD\Components\PostType $parent the parent component
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
@@ -207,6 +255,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			return false;
 		}
 
+		/**
+		 * Returns the default labels for the taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the array of taxonomy labels
+		 */
 		protected function get_default_labels() {
 			return array(
 				'name'							=> $this->args['title'],
@@ -235,6 +289,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			);
 		}
 
+		/**
+		 * Returns the default messages for the taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the array of taxonomy messages
+		 */
 		protected function get_default_messages() {
 			return array(
 				 0 => '',

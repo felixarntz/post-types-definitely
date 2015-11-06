@@ -20,26 +20,68 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
-
+	/**
+	 * Class for a post type component.
+	 *
+	 * This denotes a post type within WordPress.
+	 *
+	 * @internal
+	 * @since 0.5.0
+	 */
 	class PostType extends Base {
+
+		/**
+		 * @since 0.5.0
+		 * @var WPPTD\PostTableHandler Holds the list table handler instance for this post type.
+		 */
 		protected $table_handler = null;
 
+		/**
+		 * @since 0.5.0
+		 * @var bool Stores whether this post type should be outputted in the admin menu manually.
+		 */
 		protected $show_in_menu_manually = false;
 
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.5.0
+		 * @param string $slug the post type slug
+		 * @param array $args array of post type properties
+		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->table_handler = new PostTableHandler( $this );
 			$this->validate_filter = 'wpptd_post_type_validated';
 		}
 
+		/**
+		 * Returns the table handler for this post type.
+		 *
+		 * @since 0.5.0
+		 * @return WPPTD\PostTableHandler the list table handler instance for this post type
+		 */
 		public function get_table_handler() {
 			return $this->table_handler;
 		}
 
+		/**
+		 * Checks whether this post type already exists in WordPress.
+		 *
+		 * @since 0.5.0
+		 * @return bool true if the post type exists, otherwise false
+		 */
 		public function is_already_added() {
 			return post_type_exists( $this->slug );
 		}
 
+		/**
+		 * Registers the post type.
+		 *
+		 * If the post type already exists, some of the arguments will be merged into the existing post type object.
+		 *
+		 * @since 0.5.0
+		 */
 		public function register() {
 			if ( ! $this->is_already_added() ) {
 				$_post_type_args = $this->args;
@@ -86,6 +128,18 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			}
 		}
 
+		/**
+		 * Adds the post type to the WordPress admin menu.
+		 *
+		 * The function will append the 'Add New' item and the related taxonomy pages to the menu as submenu items.
+		 * This function is called by the WPDLib\Components\Menu class.
+		 * The function returns the menu label this post type should have. This is then processed by the calling class.
+		 *
+		 * @since 0.5.0
+		 * @see WPDLib\Components\Menu::add_menu_page()
+		 * @param array $args an array with keys 'mode' (either 'menu' or 'submenu'), 'menu_label', 'menu_icon' and 'menu_position'
+		 * @return string the menu label that this post type should have
+		 */
 		public function add_to_menu( $args ) {
 			if ( ! $this->show_in_menu_manually ) {
 				return false;
@@ -127,6 +181,15 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $ret;
 		}
 
+		/**
+		 * Returns the menu slug for this post type.
+		 *
+		 * This function is called by the WPDLib\Components\Menu class.
+		 *
+		 * @since 0.5.0
+		 * @see WPDLib\Components\Menu::add_menu_page()
+		 * @return string the post type's menu slug
+		 */
 		public function get_menu_slug() {
 			if ( 'post' == $this->slug ) {
 				return 'edit.php';
@@ -138,12 +201,29 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return 'edit.php?post_type=' . $this->slug;
 		}
 
+		/**
+		 * Registers the metaboxes for the post type.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\Components\Metabox::register()
+		 * @param WP_Post $post the current post object
+		 */
 		public function add_meta_boxes( $post ) {
 			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
 				$metabox->register( $this );
 			}
 		}
 
+		/**
+		 * Validates and saves all meta field values.
+		 *
+		 * It will only do that if all requirements are met.
+		 *
+		 * @since 0.5.0
+		 * @param integer $post_id the current post ID
+		 * @param WP_Post $post the post object
+		 * @param bool $update whether the post is being updated (true) or generated (false)
+		 */
 		public function save_meta( $post_id, $post, $update = false ) {
 			if ( ! $this->can_save_meta( $post_id, $post ) ) {
 				return;
@@ -163,6 +243,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			}
 		}
 
+		/**
+		 * Enqueues all the assets needed on the post editing screen of the post type.
+		 *
+		 * @since 0.5.0
+		 * @see WPDLib\FieldTypes\Manager::enqueue_assets()
+		 */
 		public function enqueue_assets() {
 			$_fields = array();
 			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
@@ -174,14 +260,33 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			FieldManager::enqueue_assets( $_fields );
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the post editing screen of the post type.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_help() {
 			Utility::render_help( get_current_screen(), $this->args['help'] );
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the posts list screen of the post type.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_list_help() {
 			Utility::render_help( get_current_screen(), $this->args['list_help'] );
 		}
 
+		/**
+		 * Returns the custom post updated messages for this post type.
+		 *
+		 * @since 0.5.0
+		 * @param WP_Post $post the current post object
+		 * @param string $permalink the post's permalink
+		 * @param integer|false $revision the current revision (if applicable)
+		 * @return array the custom messages
+		 */
 		public function get_updated_messages( $post, $permalink = '', $revision = false ) {
 			if ( ! $this->args['messages'] ) {
 				return array();
@@ -215,6 +320,13 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $messages;
 		}
 
+		/**
+		 * Returns the custom bulk posts updated messages for this post type.
+		 *
+		 * @since 0.5.0
+		 * @param array $counts the counts of updated posts
+		 * @return array the custom bulk messages
+		 */
 		public function get_bulk_updated_messages( $counts ) {
 			if ( ! $this->args['bulk_messages'] ) {
 				return array();
@@ -229,6 +341,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $messages;
 		}
 
+		/**
+		 * Returns the custom 'enter_title_here' placeholder text.
+		 *
+		 * @since 0.5.0
+		 * @return string the custom 'enter_title_here' text or an empty string if not specified
+		 */
 		public function get_enter_title_here( $post ) {
 			return $this->args['enter_title_here'];
 		}
@@ -237,6 +355,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 * Validates the arguments array.
 		 *
 		 * @since 0.5.0
+		 * @param WPDLib\Components\Menu $parent the parent component
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
@@ -393,6 +512,14 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return false;
 		}
 
+		/**
+		 * Checks whether all requirements to save meta values for a post are met.
+		 *
+		 * @since 0.5.0
+		 * @param integer $post_id the post ID to save
+		 * @param WP_Post $post the post object
+		 * @return bool whether the meta values can be saved
+		 */
 		protected function can_save_meta( $post_id, $post ) {
 			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 				return false;
@@ -414,6 +541,19 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return true;
 		}
 
+		/**
+		 * Validates a post's meta values for all meta fields of the post type.
+		 *
+		 * It iterates through all the meta fields of the post and validates each one's value.
+		 * If a field is not set for some reason, its default value is saved.
+		 *
+		 * Furthermore this function adds settings errors if any occur.
+		 *
+		 * @since 0.5.0
+		 * @param array $meta_values array of submitted meta values
+		 * @param integer $post_id the current post ID
+		 * @return array the validated meta values
+		 */
 		protected function validate_meta_values( $meta_values, $post_id ) {
 			$meta_values_validated = array();
 
@@ -448,9 +588,22 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			}
 
 			if ( $changes ) {
+				/**
+				 * This action can be used to perform additional steps when the meta values of this post type were updated.
+				 *
+				 * @since 0.5.0
+				 * @param array the updated meta values as $field_slug => $value
+				 * @param array the previous meta values as $field_slug => $value
+				 */
 				do_action( 'wpptd_update_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
 			}
 
+			/**
+			 * This filter can be used by the developer to modify the validated meta values right before they are saved.
+			 *
+			 * @since 0.5.0
+			 * @param array the associative array of meta keys (fields slugs) and their values
+			 */
 			$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
 
 			$this->add_settings_message( $errors, $post_id );
@@ -458,6 +611,15 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return $meta_values_validated;
 		}
 
+		/**
+		 * Validates a meta value.
+		 *
+		 * @since 0.5.0
+		 * @param WPPTD\Components\Field $field field object to validate the meta value for
+		 * @param mixed $meta_value the meta value to validate
+		 * @param mixed $meta_value_old the previous meta value
+		 * @return array an array containing the validated value, a variable possibly containing a WP_Error object and a boolean value whether the meta value has changed
+		 */
 		protected function validate_meta_value( $field, $meta_value, $meta_value_old ) {
 			$meta_value = $field->validate_meta_value( $meta_value );
 			$error = false;
@@ -467,6 +629,13 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				$error = $meta_value;
 				$meta_value = $meta_value_old;
 			} elseif ( $meta_value != $meta_value_old ) {
+				/**
+				 * This action can be used to perform additional steps when the meta value for a specific field of this post type has been updated.
+				 *
+				 * @since 0.5.0
+				 * @param mixed the updated meta value
+				 * @param mixed the previous meta value
+				 */
 				do_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
 				$changed = true;
 			}
@@ -474,6 +643,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			return array( $meta_value, $error, $changed );
 		}
 
+		/**
+		 * Adds settings errors and/or updated messages for the current post of this post type.
+		 *
+		 * @since 0.5.0
+		 * @param array $errors an array (possibly) containing validation errors as $field_slug => $wp_error
+		 */
 		protected function add_settings_message( $errors, $post_id ) {
 			if ( count( $errors ) > 0 ) {
 				$error_text = __( 'Some errors occurred while trying to save the following post meta:', 'post-types-definitely' );
@@ -485,6 +660,12 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			}
 		}
 
+		/**
+		 * Returns the default labels for the post type.
+		 *
+		 * @since 0.5.0
+		 * @return array the array of post type labels
+		 */
 		protected function get_default_labels() {
 			return array(
 				'name'					=> $this->args['title'],
@@ -515,6 +696,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			);
 		}
 
+		/**
+		 * Returns the default messages for the post type.
+		 *
+		 * Note that some of those messages contain placeholders,
+		 * so they need to be processed before printing them.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\Components\PostType::get_updated_messages()
+		 * @return array the array of post type messages
+		 */
 		protected function get_default_messages() {
 			return array(
 				 0 => '',
@@ -531,6 +722,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			);
 		}
 
+		/**
+		 * Returns the default bulk messages for the post type.
+		 *
+		 * Note that each array key contains both the singular and plural bulk messages,
+		 * so they need to be processed before printing them.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\Components\PostType::get_bulk_updated_messages()
+		 * @return array the array of post type bulk messages
+		 */
 		protected function get_default_bulk_messages() {
 			return array(
 				'updated'	=> array(

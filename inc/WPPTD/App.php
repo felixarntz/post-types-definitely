@@ -46,8 +46,11 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		/**
 		 * Class constructor.
 		 *
+		 * This is protected on purpose since it is called by the parent class' singleton.
+		 *
 		 * @internal
 		 * @since 0.5.0
+		 * @param array $args array of class arguments (passed by the plugin utility class)
 		 */
 		protected function __construct( $args ) {
 			parent::__construct( $args );

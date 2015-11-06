@@ -228,6 +228,16 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $vars;
 		}
 
+		/**
+		 * This action actually adjusts the current query to filter by whatever filters are active.
+		 *
+		 * It builds the 'tax_query' and 'meta_query' keys and appends them to the query.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\PostTableHandler::filter_by_taxonomy()
+		 * @see WPPTD\PostTableHandler::filter_by_meta()
+		 * @param WP_Query $wp_query the current instance of WP_Query
+		 */
 		public function maybe_filter_by_table_columns( $wp_query ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -270,6 +280,12 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			}
 		}
 
+		/**
+		 * This action modifies the current query to sort by a specific meta field.
+		 *
+		 * @since 0.5.0
+		 * @param WP_Query $wp_query the current instance of WP_Query
+		 */
 		public function maybe_sort_by_meta_table_column( $wp_query ) {
 			$table_columns = $this->post_type->table_columns;
 
@@ -295,6 +311,18 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			$wp_query->set( 'orderby', 'meta_value' );
 		}
 
+		/**
+		 * This filter modifies the current query to sort by a specific taxonomy term.
+		 *
+		 * WordPress does not natively support this, so the actual SQL query needs to be altered to achieve this.
+		 *
+		 * Code comes from http://scribu.net/wordpress/sortable-taxonomy-columns.html
+		 *
+		 * @since 0.5.0
+		 * @param array $clauses array of SQL clauses
+		 * @param WP_Query $wp_query the current instance of WP_Query
+		 * @return array the modified array of SQL clauses
+		 */
 		public function maybe_sort_by_taxonomy_table_column( $clauses, $wp_query ) {
 			global $wpdb;
 
@@ -328,6 +356,15 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $clauses;
 		}
 
+		/**
+		 * This action adjusts a few default settings in the table screen.
+		 *
+		 * If the 'date' column has been removed...
+		 * - it also removes the months dropdown filter
+		 * - it sets the default sort mode by 'title' (asc)
+		 *
+		 * @since 0.5.0
+		 */
 		public function maybe_sort_default() {
 			$table_columns = $this->post_type->table_columns;
 
@@ -347,6 +384,14 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			$_GET['order'] = 'asc';
 		}
 
+		/**
+		 * This filter adjusts the available row actions.
+		 *
+		 * @since 0.5.0
+		 * @param array $row_actions the original array of row actions
+		 * @param WP_Post $post the current post object
+		 * @return array the adjusted row actions array
+		 */
 		public function filter_row_actions( $row_actions, $post ) {
 			$table_row_actions = $this->post_type->row_actions;
 
@@ -371,6 +416,14 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $row_actions;
 		}
 
+		/**
+		 * This action is a general router to check whether a specific row action should be performed.
+		 *
+		 * It also determines the post ID the action should be performed on.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\PostTableHandler::run_row_action()
+		 */
 		public function maybe_run_row_action() {
 			$table_row_actions = $this->post_type->row_actions;
 
@@ -393,6 +446,14 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			$this->run_row_action( $row_action, $post_id );
 		}
 
+		/**
+		 * This action is a general router to check whether a specific bulk action should be performed.
+		 *
+		 * It also determines the post IDs the action should be performed on.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\PostTableHandler::run_bulk_action()
+		 */
 		public function maybe_run_bulk_action() {
 			$table_bulk_actions = $this->post_type->bulk_actions;
 
@@ -419,6 +480,16 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			$this->run_bulk_action( $bulk_action, $post_ids );
 		}
 
+		/**
+		 * This action is a hack to extend the bulk actions dropdown with custom bulk actions.
+		 *
+		 * WordPress does not natively support this. That's why we need this ugly solution.
+		 *
+		 * Another thing the function does is checking whether a row/bulk action message outputted by the plugin
+		 * is actually an error message. In that case, the CSS class of it is changed accordingly.
+		 *
+		 * @since 0.5.0
+		 */
 		public function hack_bulk_actions() {
 			$table_bulk_actions = $this->post_type->bulk_actions;
 
@@ -448,6 +519,16 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			<?php
 		}
 
+		/**
+		 * This filter adjusts the bulk messages if a custom row/bulk action has just been executed.
+		 *
+		 * It is basically a hack to display a custom message for that action instead of the default message.
+		 *
+		 * @since 0.5.0
+		 * @param array $bulk_messages the original array of bulk messages
+		 * @param array $bulk_counts the counts of updated posts
+		 * @return array the (temporarily) updated array of bulk messages
+		 */
 		public function maybe_hack_bulk_message( $bulk_messages, $bulk_counts ) {
 			if ( $bulk_counts['updated'] > 0 ) {
 				$action_message = get_transient( 'wpptd_' . $this->post_type_slug . '_bulk_row_action_message' );
@@ -464,6 +545,14 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $bulk_messages;
 		}
 
+		/**
+		 * Validates the post type component arguments that are related to the list table.
+		 *
+		 * @since 0.5.0
+		 * @see WPPTD\Components\PostType::validate()
+		 * @param array $args the original arguments
+		 * @return array the validated arguments
+		 */
 		public function validate_post_type_args( $args ) {// handle admin table columns
 			if ( ! $args['show_ui'] || ! is_array( $args['table_columns'] ) ) {
 				$args['table_columns'] = array();
@@ -533,6 +622,13 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return $args;
 		}
 
+		/**
+		 * Prints a dropdown to filter by a term of a specific taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @param string $column_slug the slug of the taxonomy column
+		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component
+		 */
 		protected function render_taxonomy_column_filter( $column_slug, $taxonomy ) {
 			$labels = $taxonomy->labels;
 			echo '<label class="screen-reader-text" for="' . $column_slug . '">' . $labels['filter_by_item'] . '</label>';
@@ -548,6 +644,13 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			) );
 		}
 
+		/**
+		 * Prints a dropdown to filter by a value of a specific meta field.
+		 *
+		 * @since 0.5.0
+		 * @param string $column_slug the slug of the meta field column
+		 * @param WPPTD\Components\Field $field the field component
+		 */
 		protected function render_meta_column_filter( $column_slug, $field ) {
 			switch ( $field->type ) {
 				case 'select':
@@ -608,6 +711,15 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			}
 		}
 
+		/**
+		 * Creates an array to append to the 'tax_query' in order to filter by a specific taxonomy term.
+		 *
+		 * @since 0.5.0
+		 * @param integer $value the term ID to filter by
+		 * @param string $column_slug the slug of the taxonomy column
+		 * @param string $taxonomy_slug the taxonomy slug
+		 * @return array the array to append to the current 'tax_query'
+		 */
 		protected function filter_by_taxonomy( $value, $column_slug, $taxonomy_slug ) {
 			$term_id = absint( $value );
 			if ( $term_id > 0 ) {
@@ -622,6 +734,15 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return array();
 		}
 
+		/**
+		 * Creates an array to append to the 'meta_query' in order to filter by a specific meta field value.
+		 *
+		 * @since 0.5.0
+		 * @param mixed $value the meta value to filter by
+		 * @param string $column_slug the slug of the meta field column
+		 * @param string $meta_key the meta key
+		 * @return array the array to append to the current 'meta_query'
+		 */
 		protected function filter_by_meta( $value, $column_slug, $meta_key ) {
 			$meta_value = stripslashes( $value);
 			if ( $meta_value ) {
@@ -650,6 +771,20 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			return array();
 		}
 
+		/**
+		 * Performs a specific row action and redirects back to the list table screen afterwards.
+		 *
+		 * The callback function of every row action must accept exactly one parameter, the post ID.
+		 * It must return (depending on whether the action was successful or not)...
+		 * - either a string to use as the success message
+		 * - a WP_Error object with a custom message to use as the error message
+		 *
+		 * The message is temporarily stored in a transient and printed out after the redirect.
+		 *
+		 * @since 0.5.0
+		 * @param string $row_action the row action slug
+		 * @param integer $post_id the post ID of the post to perform the action on
+		 */
 		protected function run_row_action( $row_action, $post_id ) {
 			$table_row_actions = $this->post_type->row_actions;
 			$post_type_singular_title = $this->post_type->singular_title;
@@ -685,6 +820,20 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			exit();
 		}
 
+		/**
+		 * Performs a specific bulk action and redirects back to the list table screen afterwards.
+		 *
+		 * The callback function of every bulk action must accept exactly one parameter, an array of post IDs.
+		 * It must return (depending on whether the action was successful or not)...
+		 * - either a string to use as the success message
+		 * - a WP_Error object with a custom message to use as the error message
+		 *
+		 * The message is temporarily stored in a transient and printed out after the redirect.
+		 *
+		 * @since 0.5.0
+		 * @param string $bulk_action the bulk action slug
+		 * @param array $post_ids the array of post IDs of the posts to perform the action on
+		 */
 		protected function run_bulk_action( $bulk_action, $post_ids ) {
 			$table_bulk_actions = $this->post_type->bulk_actions;
 			$post_type_title = $this->post_type->title;
@@ -724,6 +873,12 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 			exit();
 		}
 
+		/**
+		 * Returns the default URL to redirect to after a custom bulk/row action has been performed.
+		 *
+		 * @since 0.5.0
+		 * @return string the default sendback URL
+		 */
 		protected function get_sendback_url() {
 			$sendback = '';
 			if ( 'attachment' === $this->post_type_slug ) {
