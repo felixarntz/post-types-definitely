@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Post Types Definitely
-Plugin URI: http://wordpress.org/plugins/post-types-definitely/
+Plugin URI: https://wordpress.org/plugins/post-types-definitely/
 Description: This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible. It all works using a single action and an array.
 Version: 0.5.0
 Author: Felix Arntz

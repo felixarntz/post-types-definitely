@@ -587,7 +587,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 					}
 					$args['table_columns'][ $column_slug ] = $column_args;
 				} else {
-					App::doing_it_wrong( __METHOD__, sprintf( __( 'The admin table column slug %1$s (for post type %2$s) is invalid. It must be prefix with either &quot;meta-&quot;, &quot;taxonomy-&quot; or &quot;custom-&quot;.', 'post-types-definitely' ), $column_slug, $this->post_type_slug ), '0.5.0' );
+					App::doing_it_wrong( __METHOD__, sprintf( __( 'The admin table column slug %1$s (for post type %2$s) is invalid. It must be prefixed with either &quot;meta-&quot;, &quot;taxonomy-&quot; or &quot;custom-&quot;.', 'post-types-definitely' ), $column_slug, $this->post_type_slug ), '0.5.0' );
 				}
 			}
 

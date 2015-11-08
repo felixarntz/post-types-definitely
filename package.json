@@ -20,7 +20,7 @@
     "email": "felix-arntz@leaves-and-love.net",
     "url": "http://leaves-and-love.net"
   },
-  "homepage": "http://wordpress.org/plugins/post-types-definitely/",
+  "homepage": "https://wordpress.org/plugins/post-types-definitely/",
   "repository": {
     "type": "git",
     "url": "git://github.com/felixarntz/post-types-definitely.git"
