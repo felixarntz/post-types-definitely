@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: post-types-definitely 0.5.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/plugins/post-types-definitely/\n"
-"POT-Creation-Date: 2015-11-10 00:22:06+00:00\n"
+"POT-Creation-Date: 2015-11-12 01:08:55+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -141,8 +141,7 @@ msgstr ""
 #. Description of the plugin/theme
 msgid ""
 "This framework plugin makes adding post types with taxonomies and meta to "
-"WordPress very simple, yet flexible. It all works using a single action and "
-"an array."
+"WordPress very simple, yet flexible."
 msgstr ""
 
 #. Author of the plugin/theme
@@ -155,8 +154,11 @@ msgstr ""
 
 #. Tags of the plugin/theme
 msgid ""
-"wordpress, plugin, framework, library, developer, post-types, taxonomies, "
-"meta, admin, backend, ui"
+"wordpress, plugin, definitely, framework, library, developer, admin, "
+"backend, structured data, ui, api, cms, post-types, posts, "
+"custom-post-type, list table, post filters, row actions, bulk actions, "
+"taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help "
+"tabs"
 msgstr ""
 
 #: inc/WPPTD/Components/PostType.php:676

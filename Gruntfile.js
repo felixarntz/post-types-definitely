@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 						'License URI: <%= pkg.license.url %>\n' +
 						'Text Domain: post-types-definitely\n' +
 						'Domain Path: /languages/\n' +
-						'Tags: wordpress, plugin, framework, library, developer, post-types, taxonomies, meta, admin, backend, ui\n' +
+						'Tags: <%= pkg.keywords.join(", ") %>\n' +
 						'*/',
 		fileheader:		'/**\n' +
 						' * @package WPPTD\n' +

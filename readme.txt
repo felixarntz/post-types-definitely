@@ -12,9 +12,9 @@ Stable tag:        0.5.0
 Version:           0.5.0
 License:           GPL v2 
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
-Tags:              wordpress, plugin, framework, library, developer, post-types, taxonomies, meta, admin, backend, ui
+Tags:              wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help tabs
 
-This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible. It all works using a single action and an array.
+This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.
 
 == Description ==
 
