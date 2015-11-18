@@ -79,5 +79,8 @@ You can also contribute to the plugin by translating it. Among the plugin files,
 
 == Changelog ==
 
+= 0.5.1 =
+* Fixed: on PHP 5.2 the plugin now terminates appropriately
+
 = 0.5.0 =
 * First stable version
