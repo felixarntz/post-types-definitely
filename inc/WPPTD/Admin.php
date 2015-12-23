@@ -109,8 +109,8 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @param boolean $update whether this will create a new post or update an existing one
 		 */
 		public function save_post_meta( $post_id, $post, $update = false ) {
-			$nonce = isset( $_POST[ 'wpptd_edit_' . $post->post_type ] ) ? sanitize_key( $_POST[ 'wpptd_edit_' . $post->post_type ] ) : '';
-			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-' . $post->post_type ) ) {
+			$nonce = isset( $_POST[ 'wpptd_edit_post_' . $post->post_type ] ) ? sanitize_key( $_POST[ 'wpptd_edit_post_' . $post->post_type ] ) : '';
+			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-post-' . $post->post_type ) ) {
 				return;
 			}
 
@@ -128,15 +128,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 * @param WP_Post $post the current post
 		 */
-		public function display_meta_errors( $post ) {
-			wp_nonce_field( 'wpptd-save-' . $post->post_type, 'wpptd_edit_' . $post->post_type );
+		public function display_post_meta_errors( $post ) {
+			wp_nonce_field( 'wpptd-save-post-' . $post->post_type, 'wpptd_edit_post_' . $post->post_type );
 
-			$errors = get_transient( 'wpptd_meta_error_' . $post->post_type . '_' . $post->ID );
+			$errors = get_transient( 'wpptd_post_meta_error_' . $post->post_type . '_' . $post->ID );
 			if ( $errors ) {
 				echo '<div id="wpptd-post-meta-errors" class="notice notice-error is-dismissible"><p>';
 				echo $errors;
 				echo '</p></div>';
-				delete_transient( 'wpptd_meta_error_' . $post->post_type . '_' . $post->ID );
+				delete_transient( 'wpptd_post_meta_error_' . $post->post_type . '_' . $post->ID );
 			}
 		}
 
@@ -415,7 +415,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 */
 		protected function add_post_type_hooks() {
 			add_action( 'save_post', array( $this, 'save_post_meta' ), 10, 3 );
-			add_action( 'edit_form_top', array( $this, 'display_meta_errors' ), 10, 1 );
+			add_action( 'edit_form_top', array( $this, 'display_post_meta_errors' ), 10, 1 );
 			add_action( 'load-post.php', array( $this, 'add_post_help' ) );
 			add_action( 'load-post-new.php', array( $this, 'add_post_help' ) );
 			add_action( 'load-edit.php', array( $this, 'add_post_list_help' ) );

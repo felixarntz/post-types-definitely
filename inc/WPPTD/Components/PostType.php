@@ -699,7 +699,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					$error_text .= '<br/><em>' . $field_slug . '</em>: ' . $error->get_error_message();
 				}
 
-				set_transient( 'wpptd_meta_error_' . $this->slug . '_' . $post_id, $error_text, 120 );
+				set_transient( 'wpptd_post_meta_error_' . $this->slug . '_' . $post_id, $error_text, 120 );
 			}
 		}
 
