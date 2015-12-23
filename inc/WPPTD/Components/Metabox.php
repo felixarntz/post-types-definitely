@@ -37,7 +37,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
-			$this->validate_filter = 'wpptd_metabox_validated';
+			$this->validate_filter = 'wpptd_post_metabox_validated';
 		}
 
 		/**
@@ -80,15 +80,30 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				echo '<div class="wpdlib-narrow">';
 			}
 
+			if ( has_action( 'wpptd_metabox_before' ) ) {
+				App::deprecated_action( 'wpptd_metabox_before', '0.6.0', 'wpptd_post_metabox_before' );
+
+				/**
+				 * This action can be used to display additional content on top of this metabox.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param string the slug of the current metabox
+				 * @param array the arguments array for the current metabox
+				 * @param string the slug of the current post type
+				 */
+				do_action( 'wpptd_metabox_before', $this->slug, $this->args, $parent_post_type->slug );
+			}
+
 			/**
 			 * This action can be used to display additional content on top of this metabox.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param string the slug of the current metabox
 			 * @param array the arguments array for the current metabox
 			 * @param string the slug of the current post type
 			 */
-			do_action( 'wpptd_metabox_before', $this->slug, $this->args, $parent_post_type->slug );
+			do_action( 'wpptd_post_metabox_before', $this->slug, $this->args, $parent_post_type->slug );
 
 			if ( ! empty( $this->args['description'] ) ) {
 				echo '<p class="description">' . $this->args['description'] . '</p>';
@@ -99,14 +114,28 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 					'class'		=> 'form-table wpdlib-form-table',
 				);
 
+				if ( has_filter( 'wpptd_table_atts' ) ) {
+					App::deprecated_filter( 'wpptd_table_atts', '0.6.0', 'wpptd_post_table_atts' );
+
+					/**
+					 * This filter can be used to adjust the form table attributes.
+					 *
+					 * @since 0.5.0
+					 * @deprecated 0.6.0
+					 * @param array the associative array of form table attributes
+					 * @param WPPTD\Components\Metabox current metabox instance
+					 */
+					$table_atts = apply_filters( 'wpptd_table_atts', $table_atts, $this );
+				}
+
 				/**
 				 * This filter can be used to adjust the form table attributes.
 				 *
-				 * @since 0.5.0
+				 * @since 0.6.0
 				 * @param array the associative array of form table attributes
 				 * @param WPPTD\Components\Metabox current metabox instance
 				 */
-				$table_atts = apply_filters( 'wpptd_table_atts', $table_atts, $this );
+				$table_atts = apply_filters( 'wpptd_post_table_atts', $table_atts, $this );
 
 				echo '<table' . FieldManager::make_html_attributes( $table_atts, false, false ) . '>';
 
@@ -121,15 +150,30 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				App::doing_it_wrong( __METHOD__, sprintf( __( 'There are no fields to display for metabox %s. Either add some or provide a valid callback function instead.', 'post-types-definitely' ), $this->slug ), '0.5.0' );
 			}
 
+			if ( has_action( 'wpptd_metabox_after' ) ) {
+				App::deprecated_action( 'wpptd_metabox_after', '0.6.0', 'wpptd_post_metabox_after' );
+
+				/**
+				 * This action can be used to display additional content at the bottom of this metabox.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param string the slug of the current metabox
+				 * @param array the arguments array for the current metabox
+				 * @param string the slug of the current tab
+				 */
+				do_action( 'wpptd_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
+			}
+
 			/**
 			 * This action can be used to display additional content at the bottom of this metabox.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param string the slug of the current metabox
 			 * @param array the arguments array for the current metabox
 			 * @param string the slug of the current tab
 			 */
-			do_action( 'wpptd_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
+			do_action( 'wpptd_post_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
 
 			if ( 'side' == $this->args['context'] ) {
 				echo '</div>';
@@ -171,13 +215,26 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				'position'		=> null,
 			);
 
+			if ( has_filter( 'wpptd_metabox_defaults' ) ) {
+				App::deprecated_filter( 'wpptd_metabox_defaults', '0.6.0', 'wpptd_post_metabox_defaults' );
+
+				/**
+				 * This filter can be used by the developer to modify the default values for each metabox component.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param array the associative array of default values
+				 */
+				$defaults = apply_filters( 'wpptd_metabox_defaults', $defaults );
+			}
+
 			/**
 			 * This filter can be used by the developer to modify the default values for each metabox component.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param array the associative array of default values
 			 */
-			return apply_filters( 'wpptd_metabox_defaults', $defaults );
+			return apply_filters( 'wpptd_post_metabox_defaults', $defaults );
 		}
 
 		/**

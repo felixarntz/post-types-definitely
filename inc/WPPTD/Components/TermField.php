@@ -29,7 +29,7 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 
 			do_action( 'wpptd_term_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_taxonomy->slug );
 
-			$meta_value = wpptd_get_term_meta( $term->term_id, $this->slug );
+			$meta_value = wpptd_get_term_meta_value( $term->term_id, $this->slug );
 
 			$this->_field->display( $meta_value );
 

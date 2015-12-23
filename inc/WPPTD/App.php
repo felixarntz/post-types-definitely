@@ -75,7 +75,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 
 			add_filter( 'wpdlib_menu_validated', array( $this, 'menu_validated' ), 10, 2 );
 			add_filter( 'wpptd_post_type_validated', array( $this, 'post_type_validated' ), 10, 2 );
-			add_filter( 'wpptd_metabox_validated', array( $this, 'metabox_validated' ), 10, 2 );
+			add_filter( 'wpptd_post_metabox_validated', array( $this, 'metabox_validated' ), 10, 2 );
 			add_filter( 'wpptd_taxonomy_validated', array( $this, 'taxonomy_validated' ), 10, 2 );
 			add_filter( 'wpptd_term_metabox_validated', array( $this, 'term_metabox_validated' ), 10, 2 );
 		}

@@ -7,6 +7,7 @@
 
 namespace WPPTD\Components;
 
+use WPPTD\App as App;
 use WPPTD\Utility as Utility;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
@@ -45,7 +46,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
-			$this->validate_filter = 'wpptd_field_validated';
+			$this->validate_filter = 'wpptd_post_field_validated';
 		}
 
 		/**
@@ -81,16 +82,32 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			echo '<th scope="row"><label for="' . esc_attr( $this->args['id'] ) . '">' . $this->args['title'] . '</label></th>';
 			echo '<td>';
 
+			if ( has_action( 'wpptd_field_before' ) ) {
+				App::deprecated_action( 'wpptd_field_before', '0.6.0', 'wpptd_post_field_before' );
+
+				/**
+				 * This action can be used to display additional content on top of this field.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param string the slug of the current field
+				 * @param array the arguments array for the current field
+				 * @param string the slug of the current metabox
+				 * @param string the slug of the current post type
+				 */
+				do_action( 'wpptd_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
+			}
+
 			/**
 			 * This action can be used to display additional content on top of this field.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param string the slug of the current field
 			 * @param array the arguments array for the current field
 			 * @param string the slug of the current metabox
 			 * @param string the slug of the current post type
 			 */
-			do_action( 'wpptd_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
+			do_action( 'wpptd_post_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
 
 			$meta_value = wpptd_get_post_meta_value( $post->ID, $this->slug );
 
@@ -100,16 +117,32 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				echo '<br/><span class="description">' . $this->args['description'] . '</span>';
 			}
 
+			if ( has_action( 'wpptd_field_after' ) ) {
+				App::deprecated_action( 'wpptd_field_after', '0.6.0', 'wpptd_post_field_after' );
+
+				/**
+				 * This action can be used to display additional content at the bottom of this field.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param string the slug of the current field
+				 * @param array the arguments array for the current field
+				 * @param string the slug of the current metabox
+				 * @param string the slug of the current post type
+				 */
+				do_action( 'wpptd_field_after', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
+			}
+
 			/**
 			 * This action can be used to display additional content at the bottom of this field.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param string the slug of the current field
 			 * @param array the arguments array for the current field
 			 * @param string the slug of the current metabox
 			 * @param string the slug of the current post type
 			 */
-			do_action( 'wpptd_field_after', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
+			do_action( 'wpptd_post_field_after', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
 
 			echo '</td>';
 			echo '</tr>';
@@ -145,14 +178,30 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 					$formatted = true;
 			}
 
+			$output = wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted );
+
+			if ( has_filter( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output' ) ) {
+				App::deprecated_filter( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', '0.6.0', 'wpptd_' . get_post_type( $post_id ) . '_post_table_meta_' . $this->slug . '_output' )
+
+				/**
+				 * This filter can be used by the developer to modify the way a specific meta value is printed in the posts list table.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param mixed the formatted meta value
+				 * @param integer the post ID
+				 */
+				$output = apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', $output, $post_id );
+			}
+
 			/**
 			 * This filter can be used by the developer to modify the way a specific meta value is printed in the posts list table.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param mixed the formatted meta value
 			 * @param integer the post ID
 			 */
-			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted ), $post_id );
+			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_post_table_meta_' . $this->slug . '_output', $output, $post_id );
 		}
 
 		/**
@@ -227,13 +276,26 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				'position'			=> null,
 			);
 
+			if ( has_filter( 'wpptd_field_defaults' ) ) {
+				App::deprecated_filter( 'wpptd_field_defaults', '0.6.0', 'wpptd_post_field_defaults' );
+
+				/**
+				 * This filter can be used by the developer to modify the default values for each field component.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param array the associative array of default values
+				 */
+				$defaults = apply_filters( 'wpptd_field_defaults', $defaults );
+			}
+
 			/**
 			 * This filter can be used by the developer to modify the default values for each field component.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param array the associative array of default values
 			 */
-			return apply_filters( 'wpptd_field_defaults', $defaults );
+			return apply_filters( 'wpptd_post_field_defaults', $defaults );
 		}
 
 		/**
