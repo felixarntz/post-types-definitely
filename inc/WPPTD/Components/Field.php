@@ -181,7 +181,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			$output = wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted );
 
 			if ( has_filter( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output' ) ) {
-				App::deprecated_filter( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', '0.6.0', 'wpptd_' . get_post_type( $post_id ) . '_post_table_meta_' . $this->slug . '_output' )
+				App::deprecated_filter( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', '0.6.0', 'wpptd_' . get_post_type( $post_id ) . '_post_table_meta_' . $this->slug . '_output' );
 
 				/**
 				 * This filter can be used by the developer to modify the way a specific meta value is printed in the posts list table.
