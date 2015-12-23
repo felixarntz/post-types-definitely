@@ -78,12 +78,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function enqueue_assets() {
 			$screen = get_current_screen();
 
-			if ( isset( $screen->taxonomy ) && $screen->taxonomy ) {
-				// we don't need any additional assets for taxonomy screens
-				/*$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( wpptd_supports_termmeta() && isset( $screen->taxonomy ) && $screen->taxonomy ) {
+				$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 				if ( $taxonomy ) {
-
-				}*/
+					if ( 'edit-tags' === $screen->base && isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
+						$taxonomy->enqueue_assets();
+					}
+				}
 			} elseif ( isset( $screen->post_type ) && $screen->post_type ) {
 				$post_type = ComponentManager::get( '*.' . $screen->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 				if ( $post_type ) {
@@ -408,6 +409,173 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		public function initialize_term_ui() {
+			$screen = get_current_screen();
+			if ( ! isset( $screen->taxonomy ) || ! isset( $_REQUEST['tag_ID'] ) ) {
+				return;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( ! $taxonomy ) {
+				return;
+			}
+
+			$term = get_term( $_REQUEST['tag_ID'] );
+
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_metabox_scripts' ) );
+
+			add_meta_box( 'submitdiv', __( 'Update' ), array( $this, 'term_submit_meta_box' ), null, 'side', 'core' );
+
+			do_action( 'wpptd_add_term_meta_boxes', $taxonomy->slug, $term );
+
+			do_action( 'wpptd_add_term_meta_boxes_' . $taxonomy->slug, $term );
+		}
+
+		public function enqueue_metabox_scripts() {
+			wp_enqueue_script( 'common' );
+			wp_enqueue_script( 'wp-lists' );
+			wp_enqueue_script( 'postbox' );
+		}
+
+		public function wrap_term_ui_top() {
+			echo '>';
+
+			?>
+			<div id="poststuff">
+				<div id="post-body" class="metabox-holder columns-2">
+			<?php
+
+			echo '<div id="post-body-content"';
+		}
+
+		public function wrap_term_ui_bottom( $term, $taxonomy ) {
+			?>
+					</div>
+
+					<?php wp_nonce_field( 'wpptd-save-term-' . $taxonomy, 'wpptd_edit_term_' . $taxonomy ); ?>
+					<?php wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>
+					<?php wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false ); ?>
+
+					<div id="postbox-container-1" class="postbox-container">
+						<?php do_meta_boxes( null, 'side', $term ); ?>
+					</div>
+
+					<div id="postbox-container-2" class="postbox-container">
+						<?php do_meta_boxes( null, 'normal', $term ); ?>
+						<?php do_meta_boxes( null, 'advanced', $term ); ?>
+					</div>
+
+				</div>
+
+				<br class="clear" />
+
+				<style type="text/css">
+					#poststuff + .submit {
+						display: none;
+					}
+				</style>
+
+				<script type="text/javascript">
+				//<![CDATA[
+				jQuery(document).ready( function ($) {
+				  // close postboxes that should be closed
+				  $('.if-js-closed').removeClass('if-js-closed').addClass('closed');
+				  // postboxes setup
+				  postboxes.add_postbox_toggles('edit-<?php echo $taxonomy; ?>');
+				});
+				//]]>
+				</script>
+
+			</div>
+
+			<?php
+		}
+
+		public function term_submit_meta_box( $term ) {
+			$screen = get_current_screen();
+
+			$tax = get_taxonomy( $screen->taxonomy );
+			$type = get_post_type_object( $screen->post_type );
+
+			$base_url = 'edit.php';
+			$args = array();
+			if ( $tax->query_var ) {
+				$args[ $tax->query_var ] = $term->slug;
+			} else {
+				$args['taxonomy'] = $tax->name;
+				$args['term'] = $term->slug;
+			}
+
+			switch ( $type->name ) {
+				case 'post':
+					break;
+				case 'attachment':
+					$base_url = 'upload.php';
+					break;
+				case 'link':
+					$base_url = 'link-manager.php';
+					$args['cat_id'] = $term->term_id;
+					break;
+				default:
+					$args['post_type'] = $type->name;
+			}
+
+			?>
+			<div class="submitbox" id="submitpost">
+				<div id="minor-publishing">
+					<div style="display:none;">
+						<?php submit_button( __( 'Update' ), 'button', 'save' ); ?>
+					</div>
+					<div class="misc-publishing-actions">
+						<div class="misc-pub-section">
+							<?php if ( 1 == $term->count ) : ?>
+								<span><?php printf( __( '<a href="%1$s">%2$s %3$s</a> available for %4$s %5$s', 'post-types-definitely' ), esc_url( add_query_arg( $args, $base_url ) ), number_format_i18n( $term->count ), $type->labels->singular_name, $tax->labels->singular_name, $term->name ); ?></span>
+							<?php else : ?>
+								<span><?php printf( __( '<a href="%1$s">%2$s %3$s</a> available for %4$s %5$s', 'post-types-definitely' ), esc_url( add_query_arg( $args, $base_url ) ), number_format_i18n( $term->count ), $type->labels->name, $tax->labels->singular_name, $term->name ); ?></span>
+							<?php endif; ?>
+						</div>
+						<?php
+						do_action( 'wpptd_term_submitbox_misc_actions', $term );
+						?>
+					</div>
+					<div class="clear"></div>
+				</div>
+				<div id="major-publishing-actions">
+					<?php
+					do_action( 'wpptd_term_submitbox_start' );
+					?>
+					<div id="publishing-action">
+					<?php submit_button( __( 'Update' ), 'primary button-large', 'publish', false ); ?>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<?php
+		}
+
+		public function save_term_meta( $term_id, $tt_id, $tax ) {
+			$nonce = isset( $_POST[ 'wpptd_edit_term_' . $tax ] ) ? sanitize_key( $_POST[ 'wpptd_edit_term_' . $tax ] ) : '';
+			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-term-' . $tax ) ) {
+				return;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $tax, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$term = get_term( $term_id );
+				$taxonomy->save_meta( $term_id, $term, true );
+			}
+		}
+
+		public function display_term_meta_errors( $term ) {
+			$errors = get_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
+			if ( $errors ) {
+				echo '<div id="wpptd-term-meta-errors" class="notice notice-error is-dismissible"><p>';
+				echo $errors;
+				echo '</p></div>';
+				delete_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
+			}
+		}
+
 		/**
 		 * Hooks in all functions related to a post type.
 		 *
@@ -435,6 +603,19 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		protected function add_taxonomy_hooks() {
 			add_action( 'load-edit-tags.php', array( $this, 'add_term_or_term_list_help' ) );
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
+
+			if ( wpptd_supports_termmeta() ) {
+				$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
+				foreach ( $taxonomies as $taxonomy ) {
+					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'wrap_term_ui_top' ), 9999 );
+					add_action( $taxonomy->slug . '_edit_form', array( $this, 'wrap_term_ui_bottom' ), 9999, 2 );
+				}
+
+				add_action( 'load-edit-tags.php', array( $this, 'initialize_term_ui' ) );
+				add_action( 'edit_term', array( $this, 'save_term_meta' ), 10, 3 );
+				//TODO: how can we display term meta errors?
+				//add_action( 'some_hook', array( $this, 'display_term_meta_errors' ), 10, 1 );
+			}
 		}
 
 		/**

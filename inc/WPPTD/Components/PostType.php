@@ -691,6 +691,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 *
 		 * @since 0.5.0
 		 * @param array $errors an array (possibly) containing validation errors as $field_slug => $wp_error
+		 * @param integer $post_id the ID of the current post
 		 */
 		protected function add_settings_message( $errors, $post_id ) {
 			if ( count( $errors ) > 0 ) {

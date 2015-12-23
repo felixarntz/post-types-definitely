@@ -34,8 +34,7 @@ if ( ! class_exists( 'WPPTD\Components\TermMetabox' ) ) {
 				$priority = 'default';
 			}
 
-			//TODO: how can we send current term object to the callback function?
-			add_meta_box( $this->slug, $this->args['title'], array( $this, 'render' ), $parent_taxonomy->slug, $context, $priority );
+			add_meta_box( $this->slug, $this->args['title'], array( $this, 'render' ), 'edit-' . $parent_taxonomy->slug, $context, $priority );
 		}
 
 		public function render( $term ) {
