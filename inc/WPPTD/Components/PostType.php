@@ -589,23 +589,50 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			}
 
 			if ( $changes ) {
+				if ( has_action( 'wpptd_update_meta_values_' . $this->slug ) ) {
+					App::deprecated_action( 'wpptd_update_meta_values_' . $this->slug, '0.6.0', 'wpptd_update_post_meta_values_' . $this->slug );
+
+					/**
+					 * This action can be used to perform additional steps when the meta values of this post type were updated.
+					 *
+					 * @since 0.5.0
+					 * @deprecated 0.6.0
+					 * @param array the updated meta values as $field_slug => $value
+					 * @param array the previous meta values as $field_slug => $value
+					 */
+					do_action( 'wpptd_update_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
+				}
+
 				/**
 				 * This action can be used to perform additional steps when the meta values of this post type were updated.
 				 *
-				 * @since 0.5.0
+				 * @since 0.6.0
 				 * @param array the updated meta values as $field_slug => $value
 				 * @param array the previous meta values as $field_slug => $value
 				 */
-				do_action( 'wpptd_update_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
+				do_action( 'wpptd_update_post_meta_values_' . $this->slug, $meta_values_validated, $meta_values_old );
+			}
+
+			if ( has_filter( 'wpptd_validated_meta_values' ) ) {
+				App::deprecated_filter( 'wpptd_validated_meta_values', '0.6.0', 'wpptd_validated_post_meta_values_' . $this->slug );
+
+				/**
+				 * This filter can be used by the developer to modify the validated meta values right before they are saved.
+				 *
+				 * @since 0.5.0
+				 * @deprecated 0.6.0
+				 * @param array the associative array of meta keys (fields slugs) and their values
+				 */
+				$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
 			}
 
 			/**
 			 * This filter can be used by the developer to modify the validated meta values right before they are saved.
 			 *
-			 * @since 0.5.0
+			 * @since 0.6.0
 			 * @param array the associative array of meta keys (fields slugs) and their values
 			 */
-			$meta_values_validated = apply_filters( 'wpptd_validated_meta_values', $meta_values_validated );
+			$meta_values_validated = apply_filters( 'wpptd_validated_post_meta_values_' . $this->slug, $meta_values_validated );
 
 			$this->add_settings_message( $errors, $post_id );
 
@@ -630,14 +657,29 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				$error = $meta_value;
 				$meta_value = $meta_value_old;
 			} elseif ( $meta_value != $meta_value_old ) {
+				if ( has_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug ) ) {
+					App::deprecated_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, '0.6.0', 'wpptd_update_post_meta_value_' . $this->slug . '_' . $field->slug );
+
+					/**
+					 * This action can be used to perform additional steps when the meta value for a specific field of this post type has been updated.
+					 *
+					 * @since 0.5.0
+					 * @deprecated 0.6.0
+					 * @param mixed the updated meta value
+					 * @param mixed the previous meta value
+					 */
+					do_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
+				}
+
 				/**
 				 * This action can be used to perform additional steps when the meta value for a specific field of this post type has been updated.
 				 *
-				 * @since 0.5.0
+				 * @since 0.6.0
 				 * @param mixed the updated meta value
 				 * @param mixed the previous meta value
 				 */
-				do_action( 'wpptd_update_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
+				do_action( 'wpptd_update_post_meta_value_' . $this->slug . '_' . $field->slug, $meta_value, $meta_value_old );
+
 				$changed = true;
 			}
 

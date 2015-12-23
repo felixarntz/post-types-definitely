@@ -25,6 +25,8 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 		 *
 		 * @see wpptd_get_post_meta_values()
 		 * @see wpptd_get_post_meta_value()
+		 * @see wpptd_get_term_meta_values()
+		 * @see wpptd_get_term_meta_value()
 		 * @since 0.5.0
 		 * @param mixed $meta_value the meta value to parse (or format)
 		 * @param WPPTD\Components\Field|WPPTD\Components\TermField $field the field component the meta value belongs to
