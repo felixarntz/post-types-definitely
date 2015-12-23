@@ -1,13 +1,14 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.5.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
+use WPPTD\Utility as Utility;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
 
@@ -17,8 +18,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 
+	/**
+	 * Class for a metabox component.
+	 *
+	 * This denotes a metabox for a specific post type in the WordPress admin.
+	 *
+	 * @internal
+	 * @since 0.5.0
+	 */
 	class Metabox extends Base {
 
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.5.0
+		 * @param string $slug the metabox slug
+		 * @param array $args array of metabox properties
+		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_metabox_validated';
@@ -82,6 +98,14 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				$table_atts = array(
 					'class'		=> 'form-table wpdlib-form-table',
 				);
+
+				/**
+				 * This filter can be used to adjust the form table attributes.
+				 *
+				 * @since 0.5.0
+				 * @param array the associative array of form table attributes
+				 * @param WPPTD\Components\Metabox current metabox instance
+				 */
 				$table_atts = apply_filters( 'wpptd_table_atts', $table_atts, $this );
 
 				echo '<table' . FieldManager::make_html_attributes( $table_atts, false, false ) . '>';
@@ -116,14 +140,14 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		 * Validates the arguments array.
 		 *
 		 * @since 0.5.0
+		 * @param WPPTD\Components\PostType $parent the parent component
+		 * @return bool|WPDLib\Util\Error an error object if an error occurred during validation, true if it was validated, false if it did not need to be validated
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
 
 			if ( $status === true ) {
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_position_args( $this->args );
 			}
 
 			return $status;
@@ -143,8 +167,8 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				'description'	=> '',
 				'context'		=> null,
 				'priority'		=> null,
-				'position'		=> null,
 				'callback'		=> false, //only used if no fields are attached to this metabox
+				'position'		=> null,
 			);
 
 			/**

@@ -1,13 +1,14 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.5.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
 namespace WPPTD\Components;
 
 use WPPTD\App as App;
+use WPPTD\Utility as Utility;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\Util\Error as UtilError;
@@ -17,20 +18,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
-
+	/**
+	 * Class for a taxonomy component.
+	 *
+	 * This denotes a taxonomy within WordPress.
+	 *
+	 * @internal
+	 * @since 0.5.0
+	 */
 	class Taxonomy extends Base {
 
+		/**
+		 * @since 0.5.0
+		 * @var bool Stores whether this taxonomy has already been registered.
+		 */
 		protected $registered = false;
 
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.5.0
+		 * @param string $slug the taxonomy slug
+		 * @param array $args array of taxonomy properties
+		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_taxonomy_validated';
 		}
 
+		/**
+		 * Checks whether this taxonomy already exists in WordPress.
+		 *
+		 * @since 0.5.0
+		 * @return bool true if the taxonomy exists, otherwise false
+		 */
 		public function is_already_added() {
 			return taxonomy_exists( $this->slug );
 		}
 
+		/**
+		 * Registers the taxonomy.
+		 *
+		 * If the taxonomy already exists, some of the arguments will be merged into the existing taxonomy object.
+		 *
+		 * @since 0.5.0
+		 */
 		public function register() {
 			if ( $this->registered ) {
 				return;
@@ -59,7 +91,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				global $wp_taxonomies;
 
 				if ( $this->args['labels'] ) {
-					$wp_taxonomies[ $this->slug ]->labels = get_taxonomy_labels( (object) $this->args );
+					// merge the slug as $name into the arguments (required for `get_taxonomy_labels()`)
+					$wp_taxonomies[ $this->slug ]->labels = get_taxonomy_labels( (object) array_merge( $this->args, array( 'name' => $this->slug ) ) );
 					$wp_taxonomies[ $this->slug ]->label = $wp_taxonomies[ $this->slug ]->labels->name;
 				}
 			}
@@ -67,20 +100,30 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			$this->registered = true;
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the term editing screen of the taxonomy.
+		 *
+		 * @since 0.5.0
+		 */
 		public function render_help() {
-			$screen = get_current_screen();
-
-			foreach ( $this->args['help']['tabs'] as $slug => $tab ) {
-				$args = array_merge( array( 'id' => $slug ), $tab );
-
-				$screen->add_help_tab( $args );
-			}
-
-			if ( ! empty( $this->args['help']['sidebar'] ) ) {
-				$screen->set_help_sidebar( $this->args['help']['sidebar'] );
-			}
+			Utility::render_help( get_current_screen(), $this->args['help'] );
 		}
 
+		/**
+		 * Renders the help tabs and sidebar on the terms list screen of the taxonomy.
+		 *
+		 * @since 0.5.0
+		 */
+		public function render_list_help() {
+			Utility::render_help( get_current_screen(), $this->args['list_help'] );
+		}
+
+		/**
+		 * Returns the custom term updated messages for this taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the custom messages
+		 */
 		public function get_updated_messages() {
 			return $this->args['messages'];
 		}
@@ -89,6 +132,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 * Validates the arguments array.
 		 *
 		 * @since 0.5.0
+		 * @param WPPTD\Components\PostType $parent the parent component
+		 * @return bool|WPDLib\Util\Error an error object if an error occurred during validation, true if it was validated, false if it did not need to be validated
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
@@ -105,76 +150,13 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 
 				// generate titles if not provided
-				if ( empty( $this->args['title'] ) && isset( $this->args['label'] ) ) {
-					$this->args['title'] = $this->args['label'];
-					unset( $this->args['label'] );
-				}
-				if ( empty( $this->args['title'] ) ) {
-					if ( empty( $this->args['singular_title'] ) ) {
-						$this->args['singular_title'] = ucwords( str_replace( '_', '', $this->slug ) );
-					}
-					$this->args['title'] = $this->args['singular_title'] . 's';
-				} elseif ( empty( $this->args['singular_title'] ) ) {
-					$this->args['singular_title'] = $this->args['title'];
-				}
+				$this->args = Utility::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
 
 				// generate taxonomy labels
-				if ( false !== $this->args['labels'] ) {
-					if ( ! is_array( $this->args['labels'] ) ) {
-						$this->args['labels'] = array();
-					}
-					$default_labels = array(
-						'name'							=> $this->args['title'],
-						'singular_name'					=> $this->args['singular_title'],
-						'menu_name'						=> $this->args['title'],
-						'all_items'						=> sprintf( __( 'All %s', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new_item'					=> sprintf( __( 'Add New %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'						=> sprintf( __( 'Edit %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'						=> sprintf( __( 'View %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'update_item'					=> sprintf( __( 'Update %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item_name'					=> sprintf( __( 'New %s Name', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'					=> sprintf( __( 'Search %s', 'post-types-definitely' ), $this->args['title'] ),
-						'popular_items'					=> sprintf( __( 'Popular %s', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'						=> sprintf( __( 'No %s found', 'post-types-definitely' ), $this->args['title'] ),
-						'separate_items_with_commas'	=> sprintf( __( 'Separate %s with commas', 'post-types-definitely' ), $this->args['title'] ),
-						'add_or_remove_items'			=> sprintf( __( 'Add or remove %s', 'post-types-definitely' ), $this->args['title'] ),
-						'choose_from_most_used'			=> sprintf( __( 'Choose from the most used %s', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item'					=> sprintf( __( 'Parent %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'parent_item_colon'				=> sprintf( __( 'Parent %s:', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// additional label for post listings
-						'filter_by_item'				=> sprintf( __( 'Filter by %s', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-					foreach ( $default_labels as $type => $default_label ) {
-						if ( ! isset( $this->args['labels'][ $type ] ) ) {
-							$this->args['labels'][ $type ] = $default_label;
-						}
-					}
-				} else {
-					$this->args['labels'] = array();
-				}
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
 
-				// generate post type updated messages
-				if ( false !== $this->args['messages'] ) {
-					if ( ! is_array( $this->args['messages'] ) ) {
-						$this->args['messages'] = array();
-					}
-					$default_messages = array(
-						 0 => '',
-						 1 => sprintf( __( '%s added.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( __( '%s updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( __( '%s not added.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( __( '%s not updated.', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( __( '%s deleted.', 'post-types-definitely' ), $this->args['title'] ),
-					);
-					foreach ( $default_messages as $i => $default_message ) {
-						if ( ! isset( $this->args['messages'][ $i ] ) ) {
-							$this->args['messages'][ $i ] = $default_message;
-						}
-					}
-				} else {
-					$this->args['messages'] = array();
-				}
+				// generate taxonomy updated messages
+				$this->args = Utility::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -189,35 +171,16 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 						$this->args['rewrite'] = false;
 					}
 				}
-				if ( null === $this->args['show_ui'] ) {
-					$this->args['show_ui'] = $this->args['public'];
-				}
-				if ( null === $this->args['show_in_menu'] ) {
-					$this->args['show_in_menu'] = $this->args['show_ui'];
-				}
 
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_ui_args( $this->args );
+
+				$this->args = Utility::validate_position_args( $this->args );
 
 				// handle help
-				if( ! is_array( $this->args['help'] ) ) {
-					$this->args['help'] = array();
-				}
-				if ( ! isset( $this->args['help']['tabs'] ) || ! is_array( $this->args['help']['tabs'] ) ) {
-					$this->args['help']['tabs'] = array();
-				}
-				if ( ! isset( $this->args['help']['sidebar'] ) ) {
-					$this->args['help']['sidebar'] = '';
-				}
-				foreach ( $this->args['help']['tabs'] as &$tab ) {
-					$tab = wp_parse_args( $tab, array(
-						'title'			=> __( 'Help tab title', 'post-types-definitely' ),
-						'content'		=> '',
-						'callback'		=> false,
-					) );
-				}
-				unset( $tab );
+				$this->args = Utility::validate_help_args( $this->args, 'help' );
+
+				// handle list help
+				$this->args = Utility::validate_help_args( $this->args, 'list_help' );
 			}
 
 			return $status;
@@ -243,8 +206,8 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'show_in_menu'			=> null,
 				'show_in_nav_menus'		=> null,
 				'show_tagcloud'			=> null,
-				'show_admin_column'		=> null,
 				'show_in_quick_edit'	=> null,
+				'show_admin_column'		=> false,
 				'capabilities'			=> array(),
 				'hierarchical'			=> false,
 				'rewrite'				=> null,
@@ -252,6 +215,10 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'sort'					=> null,
 				'position'				=> null,
 				'help'					=> array(
+					'tabs'					=> array(),
+					'sidebar'				=> '',
+				),
+				'list_help'				=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',
 				),
@@ -287,6 +254,58 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 */
 		protected function supports_globalslug() {
 			return false;
+		}
+
+		/**
+		 * Returns the default labels for the taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the array of taxonomy labels
+		 */
+		protected function get_default_labels() {
+			return array(
+				'name'							=> $this->args['title'],
+				'singular_name'					=> $this->args['singular_title'],
+				'menu_name'						=> $this->args['title'],
+				'all_items'						=> sprintf( _x( 'All %s', 'all_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'add_new_item'					=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'edit_item'						=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'view_item'						=> sprintf( _x( 'View %s', 'view_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'update_item'					=> sprintf( _x( 'Update %s', 'update_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'new_item_name'					=> sprintf( _x( 'New %s Name', 'new_item_name label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'search_items'					=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'popular_items'					=> sprintf( _x( 'Popular %s', 'popular_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'not_found'						=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'no_terms'						=> sprintf( _x( 'No %s', 'no_terms label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'separate_items_with_commas'	=> sprintf( _x( 'Separate %s with commas', 'separate_items_with_commas label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'add_or_remove_items'			=> sprintf( _x( 'Add or remove %s', 'add_or_remove_items label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'parent_item'					=> sprintf( _x( 'Parent %s', 'parent_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				'parent_item_colon'				=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				// new accessibility labels added in WP 4.4
+				'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+				// additional label for post listings (handled by the plugin)
+				'filter_by_item'				=> sprintf( _x( 'Filter by %s', 'filter_by_item label: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+			);
+		}
+
+		/**
+		 * Returns the default messages for the taxonomy.
+		 *
+		 * @since 0.5.0
+		 * @return array the array of taxonomy messages
+		 */
+		protected function get_default_messages() {
+			return array(
+				 0 => '',
+				 1 => sprintf( _x( '%s added.', 'term message: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 2 => sprintf( _x( '%s deleted.', 'term message: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 3 => sprintf( _x( '%s updated.', 'term message: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 4 => sprintf( _x( '%s not added.', 'term message: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 5 => sprintf( _x( '%s not updated.', 'term message: argument is the singular taxonomy label', 'post-types-definitely' ), $this->args['singular_title'] ),
+				 6 => sprintf( _x( '%s deleted.', 'bulk term message: argument is the plural taxonomy label', 'post-types-definitely' ), $this->args['title'] ),
+			);
 		}
 
 	}

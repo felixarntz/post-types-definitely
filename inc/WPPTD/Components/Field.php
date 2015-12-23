@@ -1,12 +1,13 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.5.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
 namespace WPPTD\Components;
 
+use WPPTD\Utility as Utility;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
@@ -18,13 +19,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
-
+	/**
+	 * Class for a field component.
+	 *
+	 * This denotes a meta field, i.e. both the meta value and the visual input in the WordPress admin.
+	 * The field slug is used as the meta key.
+	 *
+	 * @internal
+	 * @since 0.5.0
+	 */
 	class Field extends Base {
-
-		public function __construct( $slug, $args ) {
-			parent::__construct( $slug, $args );
-			$this->validate_filter = 'wpptd_field_validated';
-		}
 
 		/**
 		 * @since 0.5.0
@@ -32,6 +36,27 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 */
 		protected $_field = null;
 
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.5.0
+		 * @param string $slug the field slug
+		 * @param array $args array of field properties
+		 */
+		public function __construct( $slug, $args ) {
+			parent::__construct( $slug, $args );
+			$this->validate_filter = 'wpptd_field_validated';
+		}
+
+		/**
+		 * Magic get method.
+		 *
+		 * This function exists to allow direct access to properties that are stored on the internal WPDLib\FieldTypes\Base object of the field.
+		 *
+		 * @since 0.5.0
+		 * @param string $property name of the property to find
+		 * @return mixed value of the property or null if it does not exist
+		 */
 		public function __get( $property ) {
 			$value = parent::__get( $property );
 			if ( null === $value ) {
@@ -67,7 +92,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			 */
 			do_action( 'wpptd_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_post_type->slug );
 
-			$meta_value = wpptd_get_post_meta( $post->ID, $this->slug );
+			$meta_value = wpptd_get_post_meta_value( $post->ID, $this->slug );
 
 			$this->_field->display( $meta_value );
 
@@ -90,6 +115,12 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			echo '</tr>';
 		}
 
+		/**
+		 * Renders the meta value of this field for usage in a posts list table column.
+		 *
+		 * @since 0.5.0
+		 * @param integer $post_id the post ID to display the meta value for
+		 */
 		public function render_table_column( $post_id ) {
 			$formatted = true;
 			switch ( $this->type ) {
@@ -114,7 +145,14 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 					$formatted = true;
 			}
 
-			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta( $post_id, $this->slug, null, $formatted ), $post_id );
+			/**
+			 * This filter can be used by the developer to modify the way a specific meta value is printed in the posts list table.
+			 *
+			 * @since 0.5.0
+			 * @param mixed the formatted meta value
+			 * @param integer the post ID
+			 */
+			echo apply_filters( 'wpptd_' . get_post_type( $post_id ) . '_table_meta_' . $this->slug . '_output', wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted ), $post_id );
 		}
 
 		/**
@@ -138,6 +176,8 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 * Validates the arguments array.
 		 *
 		 * @since 0.5.0
+		 * @param WPPTD\Components\Metabox $parent the parent component
+		 * @return bool|WPDLib\Util\Error an error object if an error occurred during validation, true if it was validated, false if it did not need to be validated
 		 */
 		public function validate( $parent = null ) {
 			$status = parent::validate( $parent );
@@ -162,9 +202,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 					$this->args['default'] = $this->_field->validate();
 				}
 
-				if ( null !== $this->args['position'] ) {
-					$this->args['position'] = floatval( $this->args['position'] );
-				}
+				$this->args = Utility::validate_position_args( $this->args );
 			}
 
 			return $status;

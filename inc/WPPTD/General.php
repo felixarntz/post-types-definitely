@@ -1,7 +1,7 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.5.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WPPTD\General' ) ) {
 	/**
-	 * This class register post types and taxonomies
+	 * This class register post types and taxonomies and connects them appropriately.
 	 *
 	 * @internal
 	 * @since 0.5.0
@@ -45,16 +45,31 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 		/**
 		 * Class constructor.
 		 *
-		 * This will hook functions into the 'init' action.
-		 *
 		 * @since 0.5.0
 		 */
 		private function __construct() {
+			add_action( 'after_setup_theme', array( $this, 'add_hooks' ) );
+		}
+
+		/**
+		 * Hooks in all the necessary actions.
+		 *
+		 * This function should be executed after the plugin has been initialized.
+		 *
+		 * @since 0.5.0
+		 */
+		public function add_hooks() {
 			add_action( 'init', array( $this, 'register_post_types' ), 20 );
 			add_action( 'init', array( $this, 'register_taxonomies' ), 30 );
 			add_action( 'init', array( $this, 'register_connections' ), 40 );
 		}
 
+		/**
+		 * Registers all post types added with the plugin.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @since 0.5.0
+		 */
 		public function register_post_types() {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {
@@ -62,6 +77,12 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 			}
 		}
 
+		/**
+		 * Registers all taxonomies added with the plugin.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 */
 		public function register_taxonomies() {
 			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 			foreach ( $taxonomies as $taxonomy ) {
@@ -69,6 +90,13 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 			}
 		}
 
+		/**
+		 * Connects post types with their assigned taxonomies.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 */
 		public function register_connections() {
 			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
 			foreach ( $post_types as $post_type ) {

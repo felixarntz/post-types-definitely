@@ -1,20 +1,20 @@
 <?php
 /*
 Plugin Name: Post Types Definitely
-Plugin URI: http://wordpress.org/plugins/post-types-definitely/
-Description: This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible. It all works using a single action and an array.
-Version: 0.5.0
+Plugin URI: https://wordpress.org/plugins/post-types-definitely/
+Description: This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.
+Version: 0.5.1
 Author: Felix Arntz
 Author URI: http://leaves-and-love.net
-License: GNU General Public License v2
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License: GNU General Public License v3
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: post-types-definitely
 Domain Path: /languages/
-Tags: wordpress, plugin, framework, library, developer, post-types, taxonomies, meta, admin, backend, ui
+Tags: wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help tabs
 */
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.5.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
@@ -23,13 +23,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\App' ) && file_exists( dirname( __FILE__ ) . '/vendor/autoload.php' ) ) {
-	require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+	if ( version_compare( phpversion(), '5.3.0' ) >= 0 ) {
+		require_once dirname( __FILE__ ) . '/vendor/autoload.php';
+	} else {
+		require_once dirname( __FILE__ ) . '/vendor/felixarntz/leavesandlove-wp-plugin-util/leavesandlove-wp-plugin-loader.php';
+	}
 }
 
-\LaL_WP_Plugin_Loader::load_plugin( array(
+LaL_WP_Plugin_Loader::load_plugin( array(
 	'slug'				=> 'post-types-definitely',
 	'name'				=> 'Post Types Definitely',
-	'version'			=> '0.5.0',
+	'version'			=> '0.5.1',
 	'main_file'			=> __FILE__,
 	'namespace'			=> 'WPPTD',
 	'textdomain'		=> 'post-types-definitely',
