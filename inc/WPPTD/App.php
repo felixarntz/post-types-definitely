@@ -13,6 +13,8 @@ use WPPTD\Components\PostType as PostType;
 use WPPTD\Components\Metabox as Metabox;
 use WPPTD\Components\Field as Field;
 use WPPTD\Components\Taxonomy as Taxonomy;
+use WPPTD\Components\TermMetabox as TermMetabox;
+use WPPTD\Components\TermField as TermField;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Menu as Menu;
 use LaL_WP_Plugin as Plugin;

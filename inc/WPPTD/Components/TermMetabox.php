@@ -7,6 +7,9 @@
 
 namespace WPPTD\Components;
 
+use WPPTD\App as App;
+use WPDLib\FieldTypes\Manager as FieldManager;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }

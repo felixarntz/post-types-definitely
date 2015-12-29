@@ -437,7 +437,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			wp_enqueue_script( 'postbox' );
 		}
 
-		public function wrap_term_ui_top() {
+		public function wrap_term_ui_top_hack() {
 			echo '>';
 
 			?>
@@ -447,6 +447,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			echo '<div id="post-body-content"';
 		}
+
+		// the following should be used if we get something like an `edit_form_top` action
+		/*public function wrap_term_ui_top() {
+			?>
+			<div id="poststuff">
+				<div id="post-body" class="metabox-holder columns-2">
+					<div id="post-body-content">
+			<?php
+		}*/
 
 		public function wrap_term_ui_bottom( $term, $taxonomy ) {
 			?>
@@ -566,7 +575,24 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
-		public function display_term_meta_errors( $term ) {
+		public function display_term_meta_errors_hack() {
+			if ( ! isset( $_REQUEST['tag_ID'] ) ) {
+				return;
+			}
+
+			$term = get_term( (int) $_REQUEST['tag_ID'] );
+
+			$errors = get_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
+			if ( $errors ) {
+				echo '><div id="wpptd-term-meta-errors" class="notice notice-error is-dismissible"><p>';
+				echo $errors;
+				echo '</p></div';
+				delete_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
+			}
+		}
+
+		// the following should be used if we get something like an `edit_form_top` action
+		/*public function display_term_meta_errors( $term ) {
 			$errors = get_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
 			if ( $errors ) {
 				echo '<div id="wpptd-term-meta-errors" class="notice notice-error is-dismissible"><p>';
@@ -574,7 +600,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				echo '</p></div>';
 				delete_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
 			}
-		}
+		}*/
 
 		/**
 		 * Hooks in all functions related to a post type.
@@ -607,14 +633,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			if ( wpptd_supports_termmeta() ) {
 				$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 				foreach ( $taxonomies as $taxonomy ) {
-					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'wrap_term_ui_top' ), 9999 );
+					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'display_term_meta_errors_hack' ), 9998 );
+					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'wrap_term_ui_top_hack' ), 9999 );
 					add_action( $taxonomy->slug . '_edit_form', array( $this, 'wrap_term_ui_bottom' ), 9999, 2 );
 				}
 
 				add_action( 'load-edit-tags.php', array( $this, 'initialize_term_ui' ) );
 				add_action( 'edit_term', array( $this, 'save_term_meta' ), 10, 3 );
-				//TODO: how can we display term meta errors?
-				//add_action( 'some_hook', array( $this, 'display_term_meta_errors' ), 10, 1 );
 			}
 		}
 
