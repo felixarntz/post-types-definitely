@@ -13,12 +13,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 
+	/**
+	 * Class for a term meta field component.
+	 *
+	 * This denotes a meta field, i.e. both the meta value and the visual input in the WordPress admin.
+	 * The field slug is used as the meta key.
+	 *
+	 * @internal
+	 * @since 0.6.0
+	 */
 	class TermField extends Field {
+
+		/**
+		 * Class constructor.
+		 *
+		 * @since 0.6.0
+		 * @param string $slug the field slug
+		 * @param array $args array of field properties
+		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
 			$this->validate_filter = 'wpptd_term_field_validated';
 		}
 
+		/**
+		 * Renders the term meta field.
+		 *
+		 * This function will show the input field(s) in the term editing screen.
+		 *
+		 * @since 0.6.0
+		 * @param WP_Term $term the term currently being shown
+		 */
 		public function render( $term ) {
 			$parent_metabox = $this->get_parent();
 			$parent_taxonomy = $parent_metabox->get_parent();
@@ -27,6 +52,15 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 			echo '<th scope="row"><label for="' . esc_attr( $this->args['id'] ) . '">' . $this->args['title'] . '</label></th>';
 			echo '<td>';
 
+			/**
+			 * This action can be used to display additional content on top of this term meta field.
+			 *
+			 * @since 0.6.0
+			 * @param string the slug of the current field
+			 * @param array the arguments array for the current field
+			 * @param string the slug of the current metabox
+			 * @param string the slug of the current taxonomy
+			 */
 			do_action( 'wpptd_term_field_before', $this->slug, $this->args, $parent_metabox->slug, $parent_taxonomy->slug );
 
 			$meta_value = wpptd_get_term_meta_value( $term->term_id, $this->slug );
@@ -37,12 +71,50 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 				echo '<br/><span class="description">' . $this->args['description'] . '</span>';
 			}
 
+			/**
+			 * This action can be used to display additional content at the bottom of this term meta field.
+			 *
+			 * @since 0.6.0
+			 * @param string the slug of the current field
+			 * @param array the arguments array for the current field
+			 * @param string the slug of the current metabox
+			 * @param string the slug of the current taxonomy
+			 */
 			do_action( 'wpptd_term_field_after', $this->slug, $this->args, $parent_metabox->slug, $parent_taxonomy->slug );
 
 			echo '</td>';
 			echo '</tr>';
 		}
 
+		/**
+		 * Renders the meta value of this field for usage in a terms list table column.
+		 *
+		 * @since 0.6.0
+		 * @param integer $term_id the term ID to display the meta value for
+		 */
+		public function render_table_column( $term_id ) {
+			$formatted = Utility::get_default_formatted( $this->type );
+
+			$output = wpptd_get_term_meta_value( $term_id, $this->slug, null, $formatted );
+
+			/**
+			 * This filter can be used by the developer to modify the way a specific meta value is printed in the terms list table.
+			 *
+			 * @since 0.6.0
+			 * @param mixed the formatted meta value
+			 * @param integer the term ID
+			 */
+			echo apply_filters( 'wpptd_' . wpptd_get_taxonomy( $term_id ) . '_term_table_meta_' . $this->slug . '_output', $output, $term_id );
+		}
+
+		/**
+		 * Returns the keys of the arguments array and their default values.
+		 *
+		 * Read the plugin guide for more information about the term meta field arguments.
+		 *
+		 * @since 0.6.0
+		 * @return array
+		 */
 		protected function get_defaults() {
 			$defaults = array(
 				'title'				=> __( 'Field title', 'post-types-definitely' ),
@@ -54,9 +126,24 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 				'position'			=> null,
 			);
 
+			/**
+			 * This filter can be used by the developer to modify the default values for each term meta field component.
+			 *
+			 * @since 0.6.0
+			 * @param array the associative array of default values
+			 */
 			return apply_filters( 'wpptd_term_field_defaults', $defaults );
 		}
 
+		/**
+		 * Returns whether this component supports global slugs.
+		 *
+		 * If it does not support global slugs, the function either returns false for the slug to be globally unique
+		 * or the class name of a parent component to ensure the slug is unique within that parent's scope.
+		 *
+		 * @since 0.6.0
+		 * @return bool|string
+		 */
 		protected function supports_globalslug() {
 			return 'WPPTD\Components\Taxonomy';
 		}

@@ -20,8 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
+
 	/**
-	 * Class for a field component.
+	 * Class for a post meta field component.
 	 *
 	 * This denotes a meta field, i.e. both the meta value and the visual input in the WordPress admin.
 	 * The field slug is used as the meta key.
@@ -67,7 +68,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		}
 
 		/**
-		 * Renders the field.
+		 * Renders the post meta field.
 		 *
 		 * This function will show the input field(s) in the post editing screen.
 		 *
@@ -99,7 +100,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			}
 
 			/**
-			 * This action can be used to display additional content on top of this field.
+			 * This action can be used to display additional content on top of this post meta field.
 			 *
 			 * @since 0.6.0
 			 * @param string the slug of the current field
@@ -134,7 +135,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			}
 
 			/**
-			 * This action can be used to display additional content at the bottom of this field.
+			 * This action can be used to display additional content at the bottom of this post meta field.
 			 *
 			 * @since 0.6.0
 			 * @param string the slug of the current field
@@ -155,28 +156,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 * @param integer $post_id the post ID to display the meta value for
 		 */
 		public function render_table_column( $post_id ) {
-			$formatted = true;
-			switch ( $this->type ) {
-				case 'checkbox':
-					$formatted = array( 'mode' => 'tick' );
-					break;
-				case 'color':
-					$formatted = array( 'mode' => 'color' );
-					break;
-				case 'media':
-					$formatted = array( 'mode' => 'link' );
-					break;
-				case 'multibox':
-				case 'multiselect':
-					$formatted = array( 'mode' => 'html', 'list' => true );
-					break;
-				case 'radio':
-				case 'select':
-					$formatted = array( 'mode' => 'html' );
-					break;
-				default:
-					$formatted = true;
-			}
+			$formatted = Utility::get_default_formatted( $this->type );
 
 			$output = wpptd_get_post_meta_value( $post_id, $this->slug, null, $formatted );
 
@@ -260,7 +240,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		/**
 		 * Returns the keys of the arguments array and their default values.
 		 *
-		 * Read the plugin guide for more information about the field arguments.
+		 * Read the plugin guide for more information about the post meta field arguments.
 		 *
 		 * @since 0.5.0
 		 * @return array
@@ -290,7 +270,7 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			}
 
 			/**
-			 * This filter can be used by the developer to modify the default values for each field component.
+			 * This filter can be used by the developer to modify the default values for each post meta field component.
 			 *
 			 * @since 0.6.0
 			 * @param array the associative array of default values

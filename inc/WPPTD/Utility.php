@@ -103,6 +103,40 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 		}
 
 		/**
+		 * Returns the default arguments to format a field value of a specific type.
+		 *
+		 * @since 0.6.0
+		 * @param string $type the type of field to format a value of
+		 * @return array|true either an array of arguments or just true if no special arguments needed
+		 */
+		public static function get_default_formatted( $type ) {
+			$formatted = true;
+
+			switch ( $type ) {
+				case 'checkbox':
+					$formatted = array( 'mode' => 'tick' );
+					break;
+				case 'color':
+					$formatted = array( 'mode' => 'color' );
+					break;
+				case 'media':
+					$formatted = array( 'mode' => 'link' );
+					break;
+				case 'multibox':
+				case 'multiselect':
+					$formatted = array( 'mode' => 'html', 'list' => true );
+					break;
+				case 'radio':
+				case 'select':
+					$formatted = array( 'mode' => 'html' );
+					break;
+				default:
+			}
+
+			return $formatted;
+		}
+
+		/**
 		 * Validates singular and plural titles.
 		 *
 		 * If not provided, they are generated from the slug.

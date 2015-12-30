@@ -122,9 +122,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		/**
-		 * Displays validation errors for meta fields if any occurred.
+		 * Displays validation errors for post meta fields if any occurred.
 		 *
-		 * If there was a WordPress function like `add_meta_error()`, it would do something like this.
+		 * If there was a WordPress function like `add_post_meta_error()`, it would do something like this.
 		 *
 		 * @since 0.5.0
 		 * @param WP_Post $post the current post
@@ -409,6 +409,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Initializes the plugin's term meta UI.
+		 *
+		 * The actions where metaboxes can be added are run in this function.
+		 *
+		 * @since 0.6.0
+		 */
 		public function initialize_term_ui() {
 			$screen = get_current_screen();
 			if ( ! isset( $screen->taxonomy ) || ! isset( $_REQUEST['tag_ID'] ) ) {
@@ -424,19 +431,50 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_metabox_scripts' ) );
 
-			add_meta_box( 'submitdiv', __( 'Update' ), array( $this, 'term_submit_meta_box' ), null, 'side', 'core' );
+			add_meta_box( 'submitdiv', __( 'Update' ), array( $this, 'term_submit_metabox' ), null, 'side', 'core' );
 
+			/**
+			 * This action can be used to add metaboxes to the term editing screen.
+			 *
+			 * @since 0.6.0
+			 * @param string the slug of the current taxonomy
+			 * @param WP_Term $term the current term object
+			 */
 			do_action( 'wpptd_add_term_meta_boxes', $taxonomy->slug, $term );
 
+			/**
+			 * This action can be used to add metaboxes to the term editing screen of a specific taxonomy.
+			 *
+			 * @since 0.6.0
+			 * @param WP_Term $term the current term object
+			 */
 			do_action( 'wpptd_add_term_meta_boxes_' . $taxonomy->slug, $term );
 		}
 
+		/**
+		 * Enqueues the metabox scripts.
+		 *
+		 * These are needed on the term edit page for the custom term meta UI.
+		 *
+		 * @since 0.6.0
+		 */
 		public function enqueue_metabox_scripts() {
 			wp_enqueue_script( 'common' );
 			wp_enqueue_script( 'wp-lists' );
 			wp_enqueue_script( 'postbox' );
 		}
 
+		/**
+		 * Wraps the original Edit Term content (top part).
+		 *
+		 * This function is very hacky since it is actually hooked into the form tag itself.
+		 * That is also the reason for the weird-looking HTML (it IS correct though).
+		 *
+		 * Maybe in a future version of WordPress there will be a hook so that this function
+		 * does not need to be used anymore.
+		 *
+		 * @since 0.6.0
+		 */
 		public function wrap_term_ui_top_hack() {
 			echo '>';
 
@@ -457,6 +495,18 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			<?php
 		}*/
 
+		/**
+		 * Wraps the original Edit Term content (bottom part).
+		 *
+		 * The necessary nonce fields for the metaboxes and the metabox script are printed.
+		 * Furthermore the metaboxes are outputted with a UI that works similar like when editing a post.
+		 *
+		 * The original Submit button is hidden via CSS since we now have a metabox that contains it already.
+		 *
+		 * @since 0.6.0
+		 * @param WP_Term $term the current term object
+		 * @param string $taxonomy the current taxonomy
+		 */
 		public function wrap_term_ui_bottom( $term, $taxonomy ) {
 			?>
 					</div>
@@ -485,14 +535,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				</style>
 
 				<script type="text/javascript">
-				//<![CDATA[
-				jQuery(document).ready( function ($) {
-				  // close postboxes that should be closed
-				  $('.if-js-closed').removeClass('if-js-closed').addClass('closed');
-				  // postboxes setup
-				  postboxes.add_postbox_toggles('edit-<?php echo $taxonomy; ?>');
-				});
-				//]]>
+					//<![CDATA[
+					jQuery( document ).ready( function ( $ ) {
+						// close postboxes that should be closed
+						$( '.if-js-closed' ).removeClass( 'if-js-closed' ).addClass( 'closed' );
+						// postboxes setup
+						postboxes.add_postbox_toggles( 'edit-<?php echo $taxonomy; ?>' );
+					});
+					//]]>
 				</script>
 
 			</div>
@@ -500,7 +550,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			<?php
 		}
 
-		public function term_submit_meta_box( $term ) {
+		/**
+		 * Renders the Submit metabox for the Edit Term screen.
+		 *
+		 * This metabox now contains the Submit button (similar like when editing a post).
+		 *
+		 * @since 0.6.0
+		 * @param WP_Term $term the current term object
+		 */
+		public function term_submit_metabox( $term ) {
 			$screen = get_current_screen();
 
 			$tax = get_taxonomy( $screen->taxonomy );
@@ -544,6 +602,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 							<?php endif; ?>
 						</div>
 						<?php
+						/**
+						 * This action can be used to print additional content in the Misc section of the Term Submit metabox.
+						 *
+						 * This is the equivalent of a post's `post_submitbox_misc_actions` hook.
+						 *
+						 * @since 0.6.0
+						 * @param WP_Term $term the current term object
+						 */
 						do_action( 'wpptd_term_submitbox_misc_actions', $term );
 						?>
 					</div>
@@ -551,6 +617,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				</div>
 				<div id="major-publishing-actions">
 					<?php
+					/**
+					 * This action can be used to print additional content in the Submit section of the Term Submit metabox.
+					 *
+					 * This is the equivalent of a post's `post_submitbox_start` hook.
+					 *
+					 * @since 0.6.0
+					 */
 					do_action( 'wpptd_term_submitbox_start' );
 					?>
 					<div id="publishing-action">
@@ -562,6 +635,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			<?php
 		}
 
+		/**
+		 * Wrapper function to control saving meta values for a taxonomy registered with the plugin.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.6.0
+		 * @param integer $term_id term ID of the term to be saved
+		 * @param integer $tt_id term taxonomy ID of the term to be saved
+		 * @param string $tax the term's taxonomy name
+		 */
 		public function save_term_meta( $term_id, $tt_id, $tax ) {
 			$nonce = isset( $_POST[ 'wpptd_edit_term_' . $tax ] ) ? sanitize_key( $_POST[ 'wpptd_edit_term_' . $tax ] ) : '';
 			if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wpptd-save-term-' . $tax ) ) {
@@ -575,6 +657,19 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
+		/**
+		 * Displays validation errors for term meta fields if any occurred.
+		 *
+		 * If there was a WordPress function like `add_term_meta_error()`, it would do something like this.
+		 *
+		 * This function is very hacky since it is actually hooked into the form tag itself.
+		 * That is also the reason for the weird-looking HTML (it IS correct though).
+		 *
+		 * Maybe in a future version of WordPress there will be a hook so that this function
+		 * does not need to be used anymore.
+		 *
+		 * @since 0.6.0
+		 */
 		public function display_term_meta_errors_hack() {
 			if ( ! isset( $_REQUEST['tag_ID'] ) ) {
 				return;
@@ -633,8 +728,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			if ( wpptd_supports_termmeta() ) {
 				$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
 				foreach ( $taxonomies as $taxonomy ) {
+					// so hacky...
 					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'display_term_meta_errors_hack' ), 9998 );
 					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'wrap_term_ui_top_hack' ), 9999 );
+
 					add_action( $taxonomy->slug . '_edit_form', array( $this, 'wrap_term_ui_bottom' ), 9999, 2 );
 				}
 

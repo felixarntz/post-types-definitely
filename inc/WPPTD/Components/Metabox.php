@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 
 	/**
-	 * Class for a metabox component.
+	 * Class for a post metabox component.
 	 *
 	 * This denotes a metabox for a specific post type in the WordPress admin.
 	 *
@@ -41,7 +41,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		}
 
 		/**
-		 * Adds the metabox the post type edit screen it belongs to.
+		 * Adds the post metabox the post type edit screen it belongs to.
 		 *
 		 * @since 0.5.0
 		 * @param WPPTD\Components\PostType $parent_post_type the parent post type component of this metabox
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		}
 
 		/**
-		 * Renders the metabox.
+		 * Renders the post metabox.
 		 *
 		 * It displays the title and description (if available) for the metabox.
 		 * Then it shows the fields of this metabox or, if no fields are available, calls the callback function.
@@ -96,7 +96,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			}
 
 			/**
-			 * This action can be used to display additional content on top of this metabox.
+			 * This action can be used to display additional content on top of this post metabox.
 			 *
 			 * @since 0.6.0
 			 * @param string the slug of the current metabox
@@ -129,7 +129,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				}
 
 				/**
-				 * This filter can be used to adjust the form table attributes.
+				 * This filter can be used to adjust the post editing form table attributes.
 				 *
 				 * @since 0.6.0
 				 * @param array the associative array of form table attributes
@@ -160,18 +160,18 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 				 * @deprecated 0.6.0
 				 * @param string the slug of the current metabox
 				 * @param array the arguments array for the current metabox
-				 * @param string the slug of the current tab
+				 * @param string the slug of the current post type
 				 */
 				do_action( 'wpptd_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
 			}
 
 			/**
-			 * This action can be used to display additional content at the bottom of this metabox.
+			 * This action can be used to display additional content at the bottom of this post metabox.
 			 *
 			 * @since 0.6.0
 			 * @param string the slug of the current metabox
 			 * @param array the arguments array for the current metabox
-			 * @param string the slug of the current tab
+			 * @param string the slug of the current post type
 			 */
 			do_action( 'wpptd_post_metabox_after', $this->slug, $this->args, $parent_post_type->slug );
 
@@ -200,7 +200,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		/**
 		 * Returns the keys of the arguments array and their default values.
 		 *
-		 * Read the plugin guide for more information about the metabox arguments.
+		 * Read the plugin guide for more information about the post metabox arguments.
 		 *
 		 * @since 0.5.0
 		 * @return array
@@ -229,7 +229,7 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 			}
 
 			/**
-			 * This filter can be used by the developer to modify the default values for each metabox component.
+			 * This filter can be used by the developer to modify the default values for each post metabox component.
 			 *
 			 * @since 0.6.0
 			 * @param array the associative array of default values
