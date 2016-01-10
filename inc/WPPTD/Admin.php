@@ -91,14 +91,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 						 *
 						 * @since 0.6.0
 						 */
-						do_action( 'taxonomy_' . $taxonomy->slug . '_edit_enqueue_scripts' );
+						do_action( 'wpptd_taxonomy_' . $taxonomy->slug . '_edit_enqueue_scripts' );
 					} elseif ( 'edit-tags' === $screen->base ) {
 						/**
 						 * This action can be used to enqueue additional scripts and stylesheets on a terms list screen for a specific taxonomy.
 						 *
 						 * @since 0.6.0
 						 */
-						do_action( 'taxonomy_' . $taxonomy->slug . '_list_enqueue_scripts' );
+						do_action( 'wpptd_taxonomy_' . $taxonomy->slug . '_list_enqueue_scripts' );
 					}
 				}
 			} elseif ( isset( $screen->post_type ) && $screen->post_type ) {
@@ -113,7 +113,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 							 *
 							 * @since 0.6.0
 							 */
-							do_action( 'post_type_' . $post_type->slug . '_edit_enqueue_scripts' );
+							do_action( 'wpptd_post_type_' . $post_type->slug . '_edit_enqueue_scripts' );
 							break;
 						case 'edit':
 							/**
@@ -121,7 +121,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 							 *
 							 * @since 0.6.0
 							 */
-							do_action( 'post_type_' . $post_type->slug . '_list_enqueue_scripts' );
+							do_action( 'wpptd_post_type_' . $post_type->slug . '_list_enqueue_scripts' );
 							break;
 						default:
 					}
