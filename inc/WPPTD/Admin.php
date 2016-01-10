@@ -78,11 +78,27 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function enqueue_assets() {
 			$screen = get_current_screen();
 
-			if ( wpptd_supports_termmeta() && isset( $screen->taxonomy ) && $screen->taxonomy ) {
+			if ( isset( $screen->taxonomy ) && $screen->taxonomy ) {
 				$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 				if ( $taxonomy ) {
 					if ( 'edit-tags' === $screen->base && isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
-						$taxonomy->enqueue_assets();
+						if ( wpptd_supports_termmeta() ) {
+							$taxonomy->enqueue_assets();
+						}
+
+						/**
+						 * This action can be used to enqueue additional scripts and stylesheets on a term editing screen for a specific taxonomy.
+						 *
+						 * @since 0.6.0
+						 */
+						do_action( 'taxonomy_' . $taxonomy->slug . '_edit_enqueue_scripts' );
+					} elseif ( 'edit-tags' === $screen->base ) {
+						/**
+						 * This action can be used to enqueue additional scripts and stylesheets on a terms list screen for a specific taxonomy.
+						 *
+						 * @since 0.6.0
+						 */
+						do_action( 'taxonomy_' . $taxonomy->slug . '_list_enqueue_scripts' );
 					}
 				}
 			} elseif ( isset( $screen->post_type ) && $screen->post_type ) {
@@ -91,8 +107,21 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 					switch ( $screen->base ) {
 						case 'post':
 							$post_type->enqueue_assets();
+
+							/**
+							 * This action can be used to enqueue additional scripts and stylesheets on a post editing screen for a specific post type.
+							 *
+							 * @since 0.6.0
+							 */
+							do_action( 'post_type_' . $post_type->slug . '_edit_enqueue_scripts' );
 							break;
 						case 'edit':
+							/**
+							 * This action can be used to enqueue additional scripts and stylesheets on a posts list screen for a specific post type.
+							 *
+							 * @since 0.6.0
+							 */
+							do_action( 'post_type_' . $post_type->slug . '_list_enqueue_scripts' );
 							break;
 						default:
 					}
