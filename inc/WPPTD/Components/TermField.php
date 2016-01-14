@@ -7,6 +7,8 @@
 
 namespace WPPTD\Components;
 
+use WPPTD\Utility as Utility;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }

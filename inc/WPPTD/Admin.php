@@ -65,7 +65,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			$this->add_post_type_hooks();
 			$this->add_taxonomy_hooks();
+
 			$this->add_posts_table_hooks();
+			$this->add_terms_table_hooks();
 		}
 
 		/**
@@ -201,25 +203,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		/**
-		 * Wrapper function to control the addition of help tabs to a taxonomy editing or list screen.
-		 *
-		 * @see WPPTD\Components\Taxonomy
-		 * @since 0.5.0
-		 */
-		public function add_term_or_term_list_help() {
-			global $taxnow;
-
-			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
-			if ( $taxonomy ) {
-				if ( isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
-					$taxonomy->render_help();
-				} else {
-					$taxonomy->render_list_help();
-				}
-			}
-		}
-
-		/**
 		 * This filter returns the custom 'enter_title_here' string for a post type if available.
 		 *
 		 * @see WPPTD\Components\PostType
@@ -320,28 +303,6 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 
 			return $strings;
-		}
-
-		/**
-		 * This filter returns the custom messages array for when a term of a certain taxonomy has been modified.
-		 *
-		 * @see WPPTD\Components\Taxonomy
-		 * @since 0.5.0
-		 * @param array $messages the original messages
-		 * @return array the custom messages to use
-		 */
-		public function get_term_updated_messages( $messages ) {
-			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
-			foreach ( $taxonomies as $taxonomy ) {
-				if ( ! in_array( $taxonomy->slug, array( '_item', 'category', 'post_tag' ) ) ) {
-					$taxonomy_messages = $taxonomy->get_updated_messages();
-					if ( $taxonomy_messages ) {
-						$messages[ $taxonomy->slug ] = $taxonomy_messages;
-					}
-				}
-			}
-
-			return $messages;
 		}
 
 		/**
@@ -727,6 +688,127 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}*/
 
 		/**
+		 * Wrapper function to control the addition of help tabs to a taxonomy editing or list screen.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 */
+		public function add_term_or_term_list_help() {
+			global $taxnow;
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				if ( isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
+					$taxonomy->render_help();
+				} else {
+					$taxonomy->render_list_help();
+				}
+			}
+		}
+
+		/**
+		 * This filter returns the custom messages array for when a term of a certain taxonomy has been modified.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.5.0
+		 * @param array $messages the original messages
+		 * @return array the custom messages to use
+		 */
+		public function get_term_updated_messages( $messages ) {
+			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
+			foreach ( $taxonomies as $taxonomy ) {
+				if ( ! in_array( $taxonomy->slug, array( '_item', 'category', 'post_tag' ) ) ) {
+					$taxonomy_messages = $taxonomy->get_updated_messages();
+					if ( $taxonomy_messages ) {
+						$messages[ $taxonomy->slug ] = $taxonomy_messages;
+					}
+				}
+			}
+
+			return $messages;
+		}
+
+		/**
+		 * This filter adds the custom row actions for a taxonomy to the row actions array.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @see WPPTD\TermTableHandler
+		 * @since 0.6.0
+		 * @param array $actions the original row actions
+		 * @param WP_Term $term the current term
+		 * @return array the row actions including the custom ones
+		 */
+		public function get_term_row_actions( $actions, $term ) {
+			$taxonomy = ComponentManager::get( '*.*.' . $term->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy_table_handler = $taxonomy->get_table_handler();
+
+				$actions = $taxonomy_table_handler->filter_row_actions( $actions, $term );
+			}
+			return $actions;
+		}
+
+		/**
+		 * Hooks in the function to handle a certain row action if that row action should be run.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @see WPPTD\TermTableHandler
+		 * @since 0.6.0
+		 */
+		public function handle_term_row_actions() {
+			global $taxnow;
+
+			// do not run this on a terms list
+			if ( ! isset( $_GET['tag_ID'] ) ) {
+				return;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy_table_handler = $taxonomy->get_table_handler();
+
+				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_table_handler, 'maybe_run_row_action' ) );
+				}
+			}
+		}
+
+		/**
+		 * Hooks in the function to handle a certain bulk action if that bulk action should be run.
+		 *
+		 * The function furthermore hooks in functions to add the custom bulk actions to the dropdown (hacky)
+		 * and to correctly displayed messages for bulk and row actions (hacky too).
+		 *
+		 * It has to be hacky because WordPress natively does not support it :(
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @see WPPTD\TermTableHandler
+		 * @since 0.6.0
+		 */
+		public function handle_term_bulk_actions() {
+			global $taxnow;
+
+			// do not run this on a term edit form
+			if ( isset( $_GET['tag_ID'] ) ) {
+				return;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy_table_handler = $taxonomy->get_table_handler();
+
+				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
+					$_REQUEST['action'] = $_REQUEST['action2'];
+				}
+				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_table_handler, 'maybe_run_bulk_action' ) );
+				}
+				add_action( 'admin_head', array( $taxonomy_table_handler, 'hack_bulk_actions' ), 100 );
+				add_filter( 'term_updated_messages', array( $taxonomy_table_handler, 'maybe_hack_action_message' ), 100 );
+			}
+		}
+
+		/**
 		 * Hooks in all functions related to a post type.
 		 *
 		 * @since 0.5.0
@@ -790,6 +872,27 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
 			add_action( 'load-post.php', array( $this, 'handle_row_actions' ) );
 			add_action( 'load-edit.php', array( $this, 'handle_bulk_actions' ) );
+		}
+
+		/**
+		 * Hooks in all functions related to a taxonomy list table.
+		 *
+		 * @since 0.6.0
+		 */
+		protected function add_terms_table_hooks() {
+			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
+			foreach ( $taxonomies as $taxonomy ) {
+				$taxonomy_table_handler = $taxonomy->get_table_handler();
+
+				add_filter( 'manage_edit-' . $taxonomy->slug . '_columns', array( $taxonomy_table_handler, 'filter_table_columns' ) );
+				add_filter( 'manage_edit-' . $taxonomy->slug . '_sortable_columns', array( $taxonomy_table_handler, 'filter_table_sortable_columns' ) );
+				add_filter( 'manage_' . $taxonomy->slug . '_custom_column', array( $taxonomy_table_handler, 'render_table_column' ), 10, 3 );
+
+				add_filter( $taxonomy->slug . '_row_actions', array( $this, 'get_term_row_actions' ), 10, 2 );
+			}
+
+			add_action( 'load-edit-tags.php', array( $this, 'handle_term_row_actions' ) );
+			add_action( 'load-edit-tags.php', array( $this, 'handle_term_bulk_actions' ) );
 		}
 	}
 }

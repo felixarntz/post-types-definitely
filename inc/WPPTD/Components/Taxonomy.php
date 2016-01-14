@@ -9,6 +9,7 @@ namespace WPPTD\Components;
 
 use WPPTD\App as App;
 use WPPTD\Utility as Utility;
+use WPPTD\TermTableHandler as TermTableHandler;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
@@ -30,6 +31,12 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 	class Taxonomy extends Base {
 
 		/**
+		 * @since 0.6.0
+		 * @var WPPTD\TermTableHandler Holds the list table handler instance for this taxonomy.
+		 */
+		protected $table_handler = null;
+
+		/**
 		 * @since 0.5.0
 		 * @var bool Stores whether this taxonomy has already been registered.
 		 */
@@ -44,7 +51,18 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
+			$this->table_handler = new TermTableHandler( $this );
 			$this->validate_filter = 'wpptd_taxonomy_validated';
+		}
+
+		/**
+		 * Returns the table handler for this taxonomy.
+		 *
+		 * @since 0.6.0
+		 * @return WPPTD\TermTableHandler the list table handler instance for this taxonomy
+		 */
+		public function get_table_handler() {
+			return $this->table_handler;
 		}
 
 		/**
@@ -240,6 +258,9 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 				$this->args = Utility::validate_position_args( $this->args );
 
+				// handle term table
+				$this->args = $this->table_handler->validate_taxonomy_args( $this->args );
+
 				// handle help
 				$this->args = Utility::validate_help_args( $this->args, 'help' );
 
@@ -278,6 +299,9 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				'query_var'				=> true,
 				'sort'					=> null,
 				'position'				=> null,
+				'table_columns'			=> array(),
+				'row_actions'			=> array(),
+				'bulk_actions'			=> array(),
 				'help'					=> array(
 					'tabs'					=> array(),
 					'sidebar'				=> '',

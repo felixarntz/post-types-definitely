@@ -530,10 +530,10 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 		 * @return array the (temporarily) updated array of bulk messages
 		 */
 		public function maybe_hack_bulk_message( $bulk_messages, $bulk_counts ) {
-			if ( $bulk_counts['updated'] > 0 ) {
-				$action_message = get_transient( 'wpptd_' . $this->post_type_slug . '_bulk_row_action_message' );
+			if ( 0 < $bulk_counts['updated'] ) {
+				$action_message = get_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message' );
 				if ( $action_message ) {
-					delete_transient( 'wpptd_' . $this->post_type_slug . '_bulk_row_action_message' );
+					delete_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message' );
 
 					if ( ! isset( $bulk_messages[ $this->post_type_slug ] ) ) {
 						$bulk_messages[ $this->post_type_slug ] = array();
@@ -553,7 +553,8 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 		 * @param array $args the original arguments
 		 * @return array the validated arguments
 		 */
-		public function validate_post_type_args( $args ) {// handle admin table columns
+		public function validate_post_type_args( $args ) {
+			// handle admin table columns
 			if ( ! $args['show_ui'] || ! is_array( $args['table_columns'] ) ) {
 				$args['table_columns'] = array();
 			}
@@ -722,7 +723,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 		 */
 		protected function filter_by_taxonomy( $value, $column_slug, $taxonomy_slug ) {
 			$term_id = absint( $value );
-			if ( $term_id > 0 ) {
+			if ( 0 < $term_id ) {
 				$this->active_filters[ $column_slug ] = $term_id;
 				return array(
 					'taxonomy'	=> $taxonomy_slug,
@@ -813,7 +814,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 				if ( $error ) {
 					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
 				}
-				set_transient( 'wpptd_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			wp_redirect( add_query_arg( 'updated', 1, $sendback ) );
@@ -864,7 +865,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 				if ( $error ) {
 					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
 				}
-				set_transient( 'wpptd_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			$sendback = remove_query_arg( array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), $sendback );
