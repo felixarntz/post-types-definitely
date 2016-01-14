@@ -174,7 +174,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			foreach ( $this->get_children( 'WPPTD\Components\Taxonomy' ) as $taxonomy ) {
 				if ( $taxonomy->show_in_menu ) {
 					$taxonomy_obj = get_taxonomy( $taxonomy->slug );
-					add_submenu_page( $sub_slug, $taxonomy_obj->labels->name, $taxonomy_obj->labels->menu_name, $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $taxonomy->slug . '&post_type=' . $this->slug );
+					add_submenu_page( $sub_slug, $taxonomy_obj->labels->name, $taxonomy_obj->labels->menu_name, $taxonomy_obj->cap->manage_terms, 'edit-tags.php?taxonomy=' . $taxonomy->slug . '&amp;post_type=' . $this->slug );
 				}
 			}
 
