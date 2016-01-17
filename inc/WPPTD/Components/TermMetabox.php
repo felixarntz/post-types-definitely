@@ -1,7 +1,7 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.5.0
+ * @version 0.6.0
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 

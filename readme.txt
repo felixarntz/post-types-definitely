@@ -8,8 +8,8 @@ Donate link:       http://leaves-and-love.net/wordpress-plugins/
 Contributors:      flixos90
 Requires at least: 4.0 
 Tested up to:      4.4.1
-Stable tag:        0.5.1
-Version:           0.5.1
+Stable tag:        0.6.0
+Version:           0.6.0
 License:           GPL v3
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
 Tags:              wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help tabs
@@ -78,6 +78,16 @@ You can also contribute to the plugin by translating it. Among the plugin files,
 3. PHP code to create the post type screens above
 
 == Changelog ==
+
+= 0.6.0 =
+* Added: term meta is now supported (WordPress 4.4 required)
+* Added: on the term editing screen a UI for term meta is created, consisting of meta boxes, similar to the post editing screen (WordPress 4.4 required)
+* Added: new functions to get related posts / terms / users for a specific post or term, allowing simple object-to-object relationships
+* Added: 4 new actions are available to easily enqueue scripts on specific post type or taxonomy admin pages only
+* Enhanced: terms list table columns can now be customized (WordPress 4.4 required)
+* Enhanced: terms list tables can now have customized row actions and bulk actions (WordPress 4.4 required)
+* Enhanced: the plugin can now easily be used as a must-use plugin or as a library in any plugin or theme
+* Fixed: taxonomy screens are now correctly highlighted in the admin menu when they're active
 
 = 0.5.1 =
 * Fixed: on PHP 5.2 the plugin now terminates appropriately

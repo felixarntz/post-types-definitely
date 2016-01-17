@@ -1,13 +1,13 @@
-# Copyright (c) 2015-2015 Felix Arntz
+# Copyright (c) 2015-2016 Felix Arntz
 msgid ""
 msgstr ""
-"Project-Id-Version: post-types-definitely 0.5.1\n"
+"Project-Id-Version: post-types-definitely 0.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/plugins/post-types-definitely/\n"
-"POT-Creation-Date: 2015-11-18 16:28:23+00:00\n"
+"POT-Creation-Date: 2016-01-17 22:13:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2015-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
 "Language-Team: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
 "X-Generator: grunt-wp-i18n 0.5.3\n"
@@ -22,111 +22,159 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Textdomain-Support: yes\n"
 
-#: inc/WPPTD/App.php:169
+#: inc/WPPTD/Admin.php:424 inc/WPPTD/Admin.php:584 inc/WPPTD/Admin.php:620
+msgid "Update"
+msgstr ""
+
+#: inc/WPPTD/Admin.php:589 inc/WPPTD/Admin.php:591
+msgid "<a href=\"%1$s\">%2$s %3$s</a> available for %4$s %5$s"
+msgstr ""
+
+#: inc/WPPTD/App.php:187
 msgid "This function should never be called manually."
 msgstr ""
 
-#: inc/WPPTD/Components/Field.php:169
+#: inc/WPPTD/App.php:281
+msgid "Guide"
+msgstr ""
+
+#: inc/WPPTD/App.php:325
+msgid "You have just activated %s."
+msgstr ""
+
+#: inc/WPPTD/App.php:327
+msgid "You are running the plugin %s on your site."
+msgstr ""
+
+#: inc/WPPTD/App.php:329
+msgid ""
+"This plugin is framework that developers can leverage to quickly add "
+"extended post types and taxonomies with specific meta boxes and fields."
+msgstr ""
+
+#: inc/WPPTD/App.php:332
+msgid ""
+"For a guide on how to use the framework please read the <a href=\"%s\" "
+"target=\"_blank\">Wiki</a>."
+msgstr ""
+
+#: inc/WPPTD/Components/Field.php:198
 msgid "No value was provided for the required field."
 msgstr ""
 
-#: inc/WPPTD/Components/Field.php:199
+#: inc/WPPTD/Components/Field.php:228
 msgid ""
 "The field type %1$s assigned to the field component %2$s is not a valid "
 "field type."
 msgstr ""
 
-#: inc/WPPTD/Components/Field.php:221
+#: inc/WPPTD/Components/Field.php:253 inc/WPPTD/Components/TermField.php:122
 msgid "Field title"
 msgstr ""
 
-#: inc/WPPTD/Components/Metabox.php:121
+#: inc/WPPTD/Components/Metabox.php:150
+#: inc/WPPTD/Components/TermMetabox.php:119
 msgid ""
 "There are no fields to display for metabox %s. Either add some or provide a "
 "valid callback function instead."
 msgstr ""
 
-#: inc/WPPTD/Components/Metabox.php:166
+#: inc/WPPTD/Components/Metabox.php:210
+#: inc/WPPTD/Components/TermMetabox.php:147
 msgid "Metabox title"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:314
+#: inc/WPPTD/Components/PostType.php:332
 msgid "M j, Y @ H:i"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:367
+#: inc/WPPTD/Components/PostType.php:385
 msgid ""
 "The post type slug %s is forbidden since it would interfere with WordPress "
 "Core functionality."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:372
+#: inc/WPPTD/Components/PostType.php:390
 msgid ""
 "The post type slug %s contains dashes which is discouraged. It will still "
 "work for the most part, but we recommend to adjust the slug if possible."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:412
+#: inc/WPPTD/Components/PostType.php:430
 msgid ""
 "A menu position is unnecessarily provided for the post type %s - the menu "
 "position is already specified by its parent menu."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:416
+#: inc/WPPTD/Components/PostType.php:434
 msgid ""
 "A menu icon is unnecessarily provided for the post type %s - the menu icon "
 "is already specified by its parent menu."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:655
+#: inc/WPPTD/Components/PostType.php:716
 msgid "Some errors occurred while trying to save the following post meta:"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:144
+#: inc/WPPTD/Components/Taxonomy.php:244
 msgid ""
 "The taxonomy slug %s is forbidden since it would interfere with WordPress "
 "Core functionality."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:149
+#: inc/WPPTD/Components/Taxonomy.php:249
 msgid ""
 "The taxonomy slug %s contains dashes which is discouraged. It will still "
 "work for the most part, but we recommend to adjust the slug if possible."
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:590
+#: inc/WPPTD/Components/Taxonomy.php:506
+msgid "Some errors occurred while trying to save the following term meta:"
+msgstr ""
+
+#: inc/WPPTD/PostTableHandler.php:591
 msgid ""
 "The admin table column slug %1$s (for post type %2$s) is invalid. It must "
 "be prefixed with either &quot;meta-&quot;, &quot;taxonomy-&quot; or "
 "&quot;custom-&quot;."
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:661 inc/WPPTD/PostTableHandler.php:681
-#: inc/WPPTD/PostTableHandler.php:701
+#: inc/WPPTD/PostTableHandler.php:662 inc/WPPTD/PostTableHandler.php:682
+#: inc/WPPTD/PostTableHandler.php:702
 msgid "All"
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:683
+#: inc/WPPTD/PostTableHandler.php:684
 msgid "Yes"
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:686
+#: inc/WPPTD/PostTableHandler.php:687
 msgid "No"
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:799
+#: inc/WPPTD/PostTableHandler.php:800 inc/WPPTD/TermTableHandler.php:382
 msgid "The %s was not updated because of missing privileges."
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:802
+#: inc/WPPTD/PostTableHandler.php:803 inc/WPPTD/TermTableHandler.php:385
 msgid "The %s was not updated since an internal error occurred."
 msgstr ""
 
-#: inc/WPPTD/PostTableHandler.php:853
+#: inc/WPPTD/PostTableHandler.php:854 inc/WPPTD/TermTableHandler.php:442
 msgid "The %s were not updated since an internal error occurred."
 msgstr ""
 
-#: inc/WPPTD/Utility.php:239
+#: inc/WPPTD/TermTableHandler.php:322
+msgid ""
+"The admin table column slug %1$s (for taxonomy %2$s) is invalid. It must be "
+"prefixed with either &quot;meta-&quot; or &quot;custom-&quot;."
+msgstr ""
+
+#: inc/WPPTD/TermTableHandler.php:439
+msgid "The %s were not updated because of missing privileges."
+msgstr ""
+
+#: inc/WPPTD/Utility.php:516
 msgid "Help tab title"
 msgstr ""
 
@@ -157,345 +205,345 @@ msgid ""
 "wordpress, plugin, definitely, framework, library, developer, admin, "
 "backend, structured data, ui, api, cms, post-types, posts, "
 "custom-post-type, list table, post filters, row actions, bulk actions, "
-"taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help "
-"tabs"
+"taxonomies, terms, meta, post meta, postmeta, term meta, termmeta, meta "
+"boxes, metaboxes, repeatable, fields, custom fields, help tabs"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:676
+#: inc/WPPTD/Components/PostType.php:737
 msgctxt "all_items label: argument is the plural post type label"
 msgid "All %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:677
+#: inc/WPPTD/Components/PostType.php:738
 msgctxt "add_new label"
 msgid "Add New"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:678
+#: inc/WPPTD/Components/PostType.php:739
 msgctxt "add_new_item label: argument is the singular post type label"
 msgid "Add New %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:679
+#: inc/WPPTD/Components/PostType.php:740
 msgctxt "edit_item label: argument is the singular post type label"
 msgid "Edit %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:680
+#: inc/WPPTD/Components/PostType.php:741
 msgctxt "new_item label: argument is the singular post type label"
 msgid "New %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:681
+#: inc/WPPTD/Components/PostType.php:742
 msgctxt "view_item label: argument is the singular post type label"
 msgid "View %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:682
+#: inc/WPPTD/Components/PostType.php:743
 msgctxt "search_items label: argument is the plural post type label"
 msgid "Search %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:683
+#: inc/WPPTD/Components/PostType.php:744
 msgctxt "not_found label: argument is the plural post type label"
 msgid "No %s found"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:684
+#: inc/WPPTD/Components/PostType.php:745
 msgctxt "not_found_in_trash label: argument is the plural post type label"
 msgid "No %s found in Trash"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:685
+#: inc/WPPTD/Components/PostType.php:746
 msgctxt "parent_item_colon label: argument is the singular post type label"
 msgid "Parent %s:"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:686
+#: inc/WPPTD/Components/PostType.php:747
 msgctxt "featured_image label: argument is the singular post type label"
 msgid "Featured %s Image"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:687
+#: inc/WPPTD/Components/PostType.php:748
 msgctxt "set_featured_image label: argument is the singular post type label"
 msgid "Set featured %s Image"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:688
+#: inc/WPPTD/Components/PostType.php:749
 msgctxt "remove_featured_image label: argument is the singular post type label"
 msgid "Remove featured %s Image"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:689
+#: inc/WPPTD/Components/PostType.php:750
 msgctxt "use_featured_image label: argument is the singular post type label"
 msgid "Use as featured %s Image"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:691
+#: inc/WPPTD/Components/PostType.php:752
 msgctxt "items_list label: argument is the plural post type label"
 msgid "%s list"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:692
+#: inc/WPPTD/Components/PostType.php:753
 msgctxt "items_list_navigation label: argument is the plural post type label"
 msgid "%s list navigation"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:693
+#: inc/WPPTD/Components/PostType.php:754
 msgctxt "filter_items_list label: argument is the plural post type label"
 msgid "Filter %s list"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:695
+#: inc/WPPTD/Components/PostType.php:756
 msgctxt "insert_into_item label: argument is the singular post type label"
 msgid "Insert into %s content"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:696
+#: inc/WPPTD/Components/PostType.php:757
 msgctxt "uploaded_to_this_item label: argument is the singular post type label"
 msgid "Uploaded to this %s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:713
+#: inc/WPPTD/Components/PostType.php:774
 msgctxt "post message: argument is the singular post type label"
 msgid "%1$s updated. <a href=\"%%s\">View %1$s</a>"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:716
+#: inc/WPPTD/Components/PostType.php:777
 msgctxt "post message: argument is the singular post type label"
 msgid "%s updated."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:718
+#: inc/WPPTD/Components/PostType.php:779
 msgctxt "post message: argument is the singular post type label"
 msgid "%1$s published. <a href=\"%%s\">View %1$s</a>"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:719
+#: inc/WPPTD/Components/PostType.php:780
 msgctxt "post message: argument is the singular post type label"
 msgid "%s saved."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:720
+#: inc/WPPTD/Components/PostType.php:781
 msgctxt "post message: argument is the singular post type label"
 msgid "%1$s submitted. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:721
+#: inc/WPPTD/Components/PostType.php:782
 msgctxt "post message: argument is the singular post type label"
 msgid ""
 "%1$s scheduled for: <strong>%%1\\$s</strong>. <a target=\"_blank\" "
 "href=\"%%2\\$s\">Preview %1$s</a>"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:722
+#: inc/WPPTD/Components/PostType.php:783
 msgctxt "post message: argument is the singular post type label"
 msgid "%1$s draft updated. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:714
+#: inc/WPPTD/Components/PostType.php:775
 msgctxt "post message"
 msgid "Custom field updated."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:715
+#: inc/WPPTD/Components/PostType.php:776
 msgctxt "post message"
 msgid "Custom field deleted."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:717
+#: inc/WPPTD/Components/PostType.php:778
 msgctxt ""
 "post message: first argument is the singular post type label, second is the "
 "revision title"
 msgid "%s restored to revision from %%s"
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:739
+#: inc/WPPTD/Components/PostType.php:800
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
 "type label"
 msgid "%%s %s updated."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:743
+#: inc/WPPTD/Components/PostType.php:804
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
 "type label"
 msgid "%%s %s not updated, somebody is editing it."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:747
+#: inc/WPPTD/Components/PostType.php:808
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
 "type label"
 msgid "%%s %s permanently deleted."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:751
+#: inc/WPPTD/Components/PostType.php:812
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
 "type label"
 msgid "%%s %s moved to the Trash."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:755
+#: inc/WPPTD/Components/PostType.php:816
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
 "type label"
 msgid "%%s %s restored from the Trash."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:740
+#: inc/WPPTD/Components/PostType.php:801
 msgctxt ""
 "bulk post message: first argument is a number, second is the plural post "
 "type label"
 msgid "%%s %s updated."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:744
+#: inc/WPPTD/Components/PostType.php:805
 msgctxt ""
 "bulk post message: first argument is a number, second is the plural post "
 "type label"
 msgid "%%s %s not updated, somebody is editing them."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:748
+#: inc/WPPTD/Components/PostType.php:809
 msgctxt ""
 "bulk post message: first argument is a number, second is the plural post "
 "type label"
 msgid "%%s %s permanently deleted."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:752
+#: inc/WPPTD/Components/PostType.php:813
 msgctxt ""
 "bulk post message: first argument is a number, second is the plural post "
 "type label"
 msgid "%%s %s moved to the Trash."
 msgstr ""
 
-#: inc/WPPTD/Components/PostType.php:756
+#: inc/WPPTD/Components/PostType.php:817
 msgctxt ""
 "bulk post message: first argument is a number, second is the plural post "
 "type label"
 msgid "%%s %s restored from the Trash."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:270
+#: inc/WPPTD/Components/Taxonomy.php:526
 msgctxt "all_items label: argument is the plural taxonomy label"
 msgid "All %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:271
+#: inc/WPPTD/Components/Taxonomy.php:527
 msgctxt "add_new_item label: argument is the singular taxonomy label"
 msgid "Add New %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:272
+#: inc/WPPTD/Components/Taxonomy.php:528
 msgctxt "edit_item label: argument is the singular taxonomy label"
 msgid "Edit %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:273
+#: inc/WPPTD/Components/Taxonomy.php:529
 msgctxt "view_item label: argument is the singular taxonomy label"
 msgid "View %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:274
+#: inc/WPPTD/Components/Taxonomy.php:530
 msgctxt "update_item label: argument is the singular taxonomy label"
 msgid "Update %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:275
+#: inc/WPPTD/Components/Taxonomy.php:531
 msgctxt "new_item_name label: argument is the singular taxonomy label"
 msgid "New %s Name"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:276
+#: inc/WPPTD/Components/Taxonomy.php:532
 msgctxt "search_items label: argument is the plural taxonomy label"
 msgid "Search %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:277
+#: inc/WPPTD/Components/Taxonomy.php:533
 msgctxt "popular_items label: argument is the plural taxonomy label"
 msgid "Popular %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:278
+#: inc/WPPTD/Components/Taxonomy.php:534
 msgctxt "not_found label: argument is the plural taxonomy label"
 msgid "No %s found"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:279
+#: inc/WPPTD/Components/Taxonomy.php:535
 msgctxt "no_terms label: argument is the plural taxonomy label"
 msgid "No %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:280
+#: inc/WPPTD/Components/Taxonomy.php:536
 msgctxt "separate_items_with_commas label: argument is the plural taxonomy label"
 msgid "Separate %s with commas"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:281
+#: inc/WPPTD/Components/Taxonomy.php:537
 msgctxt "add_or_remove_items label: argument is the plural taxonomy label"
 msgid "Add or remove %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:282
+#: inc/WPPTD/Components/Taxonomy.php:538
 msgctxt "choose_from_most_used label: argument is the plural taxonomy label"
 msgid "Choose from the most used %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:283
+#: inc/WPPTD/Components/Taxonomy.php:539
 msgctxt "parent_item label: argument is the singular taxonomy label"
 msgid "Parent %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:284
+#: inc/WPPTD/Components/Taxonomy.php:540
 msgctxt "parent_item_colon label: argument is the singular taxonomy label"
 msgid "Parent %s:"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:286
+#: inc/WPPTD/Components/Taxonomy.php:542
 msgctxt "items_list label: argument is the plural taxonomy label"
 msgid "%s list"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:287
+#: inc/WPPTD/Components/Taxonomy.php:543
 msgctxt "items_list_navigation label: argument is the plural taxonomy label"
 msgid "%s list navigation"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:289
+#: inc/WPPTD/Components/Taxonomy.php:545
 msgctxt "filter_by_item label: argument is the singular taxonomy label"
 msgid "Filter by %s"
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:302
+#: inc/WPPTD/Components/Taxonomy.php:558
 msgctxt "term message: argument is the singular taxonomy label"
 msgid "%s added."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:303
+#: inc/WPPTD/Components/Taxonomy.php:559
 msgctxt "term message: argument is the singular taxonomy label"
 msgid "%s deleted."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:304
+#: inc/WPPTD/Components/Taxonomy.php:560
 msgctxt "term message: argument is the singular taxonomy label"
 msgid "%s updated."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:305
+#: inc/WPPTD/Components/Taxonomy.php:561
 msgctxt "term message: argument is the singular taxonomy label"
 msgid "%s not added."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:306
+#: inc/WPPTD/Components/Taxonomy.php:562
 msgctxt "term message: argument is the singular taxonomy label"
 msgid "%s not updated."
 msgstr ""
 
-#: inc/WPPTD/Components/Taxonomy.php:307
+#: inc/WPPTD/Components/Taxonomy.php:563
 msgctxt "bulk term message: argument is the plural taxonomy label"
 msgid "%s deleted."
 msgstr ""
