@@ -82,7 +82,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			add_filter( 'wpptd_term_metabox_validated', array( $this, 'term_metabox_validated' ), 10, 2 );
 
 			add_filter( 'plugin_action_links_' . plugin_basename( self::get_info( 'main_file' ) ), array( $this, 'add_action_link' ) );
-			add_action( 'admin_notices', array( $this, 'add_admin_notice' ) );
+			add_action( 'admin_notices', array( $this, 'display_admin_notice' ) );
 			add_action( 'wp_ajax_wpptd_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
 		}
 
@@ -268,16 +268,34 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			return $this->metabox_validated( $args, $term_metabox );
 		}
 
+		/**
+		 * This filter adds a link to the framework guide to the plugins table.
+		 *
+		 * @internal
+		 * @since 0.6.0
+		 * @param array $links the original links
+		 * @return array the modified links
+		 */
 		public function add_action_link( $links = array() ) {
 			$custom_links = array(
-				'<a href="' . 'https://github.com/felixarntz/post-types-definitely/wiki' . '" target="_blank">' . __( 'Plugin Guide', 'post-types-definitely' ) . '</a>',
+				'<a href="' . 'https://github.com/felixarntz/post-types-definitely/wiki' . '" target="_blank">' . __( 'Guide', 'post-types-definitely' ) . '</a>',
 			);
 
 			return array_merge( $custom_links, $links );
 		}
 
-		public function add_admin_notice() {
-			if ( ! get_option( 'post_types_definitely_notice' ) ) {
+		/**
+		 * This function displays and admin notice that the framework is active.
+		 *
+		 * The notice will only be shown if the corresponding option is set.
+		 * Once the notice is hidden, it will not show again until the plugin is deactivated and then activated again.
+		 *
+		 * @internal
+		 * @since 0.6.0
+		 */
+		public function display_admin_notice() {
+			$setting = get_option( 'post_types_definitely_notice' );
+			if ( ! $setting ) {
 				return;
 			}
 
@@ -290,7 +308,11 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 				jQuery( document ).ready( function( $ ) {
 					$( document ).on( 'click', '#post-types-definitely-notice .notice-dismiss', function( e ) {
 						$.ajax( '<?php echo admin_url( "admin-ajax.php" ); ?>', {
-							action: 'wpptd_dismiss_notice'
+							data: {
+								action: 'wpptd_dismiss_notice'
+							},
+							dataType: 'json',
+							method: 'POST'
 						});
 					});
 				});
@@ -299,24 +321,36 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			</script>
 			<div id="post-types-definitely-notice" class="notice updated is-dismissible hide-if-no-js">
 				<p>
-					<?php printf( __( 'You have successfully activated %s.', 'post-types-definitely' ), '<strong>' . self::get_info( 'name' ) . '</strong>' ); ?>
+					<?php if ( 'activated' === $setting ) : ?>
+						<?php printf( __( 'You have just activated %s.', 'post-types-definitely' ), '<strong>' . self::get_info( 'name' ) . '</strong>' ); ?>
+					<?php else : ?>
+						<?php printf( __( 'You are running the plugin %s on your site.', 'post-types-definitely' ), '<strong>' . self::get_info( 'name' ) . '</strong>' ); ?>
+					<?php endif; ?>
 					<?php _e( 'This plugin is framework that developers can leverage to quickly add extended post types and taxonomies with specific meta boxes and fields.', 'post-types-definitely' ); ?>
 				</p>
 				<p>
-					<?php printf( __( 'For a guide on how to use the framework, please read the <a href="%s" target="_blank">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
+					<?php printf( __( 'For a guide on how to use the framework please read the <a href="%s" target="_blank">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
 				</p>
 			</div>
 			<?php
+
+			if ( 'activated' === $setting ) {
+				update_option( 'post_types_definitely_notice', 'active' );
+			}
 		}
 
+		/**
+		 * This function is an AJAX function that is run when the plugin's admin notice is dismissed.
+		 *
+		 * The function ensures that the notice is dismissed permanently.
+		 *
+		 * @internal
+		 * @since 0.6.0
+		 */
 		public function ajax_dismiss_notice() {
 			delete_option( 'post_types_definitely_notice' );
 
 			wp_send_json_success();
-		}
-
-		public static function activate() {
-			add_option( 'post_types_definitely_notice', '1' );
 		}
 
 		/**
@@ -473,6 +507,18 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 					self::doing_it_wrong( __METHOD__, $term_field->get_error_message(), '0.6.0' );
 				}
 			}
+		}
+
+		/**
+		 * Activation function.
+		 *
+		 * This function is run automatically when the plugin is activated.
+		 *
+		 * @internal
+		 * @since 0.6.0
+		 */
+		public static function activate() {
+			add_option( 'post_types_definitely_notice', 'activated' );
 		}
 	}
 }
