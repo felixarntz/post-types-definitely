@@ -326,7 +326,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 					<?php else : ?>
 						<?php printf( __( 'You are running the plugin %s on your site.', 'post-types-definitely' ), '<strong>' . self::get_info( 'name' ) . '</strong>' ); ?>
 					<?php endif; ?>
-					<?php _e( 'This plugin is framework that developers can leverage to quickly add extended post types and taxonomies with specific meta boxes and fields.', 'post-types-definitely' ); ?>
+					<?php _e( 'This plugin is a framework that developers can leverage to quickly add extended post types and taxonomies with specific meta boxes and fields.', 'post-types-definitely' ); ?>
 				</p>
 				<p>
 					<?php printf( __( 'For a guide on how to use the framework please read the <a href="%s" target="_blank">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
