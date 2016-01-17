@@ -7,7 +7,7 @@ Author:            Felix Arntz
 Donate link:       http://leaves-and-love.net/wordpress-plugins/
 Contributors:      flixos90
 Requires at least: 4.0 
-Tested up to:      4.4-beta3
+Tested up to:      4.4.1
 Stable tag:        0.5.1
 Version:           0.5.1
 License:           GPL v3
@@ -32,7 +32,7 @@ For an extensive list of features, please visit the [Features page in the _Post 
 
 = Usage =
 
-_Post Types Definitely_ is very easy to use. Although you need to be able to write some PHP code to use the library, setting up settings pages with tabs, sections and fields should be quite straightforward. All you need to know is:
+_Post Types Definitely_ is very easy to use. Although you need to be able to write some PHP code to use the library, setting up both post types and taxonomies with meta boxes and fields should be quite straightforward. All you need to know is:
 
 * how to hook into a WordPress action
 * how to call a single class function
