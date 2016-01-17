@@ -80,6 +80,10 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			add_filter( 'wpptd_post_metabox_validated', array( $this, 'metabox_validated' ), 10, 2 );
 			add_filter( 'wpptd_taxonomy_validated', array( $this, 'taxonomy_validated' ), 10, 2 );
 			add_filter( 'wpptd_term_metabox_validated', array( $this, 'term_metabox_validated' ), 10, 2 );
+
+			add_filter( 'plugin_action_links_' . plugin_basename( self::get_info( 'main_file' ) ), array( $this, 'add_action_link' ) );
+			add_action( 'admin_notices', array( $this, 'add_admin_notice' ) );
+			add_action( 'wp_ajax_wpptd_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
 		}
 
 		/**
@@ -262,6 +266,57 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 */
 		public function term_metabox_validated( $args, $term_metabox ) {
 			return $this->metabox_validated( $args, $term_metabox );
+		}
+
+		public function add_action_link( $links = array() ) {
+			$custom_links = array(
+				'<a href="' . 'https://github.com/felixarntz/post-types-definitely/wiki' . '" target="_blank">' . __( 'Plugin Guide', 'post-types-definitely' ) . '</a>',
+			);
+
+			return array_merge( $custom_links, $links );
+		}
+
+		public function add_admin_notice() {
+			if ( ! get_option( 'post_types_definitely_notice' ) ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				return;
+			}
+
+			?>
+			<script type="text/javascript">
+				jQuery( document ).ready( function( $ ) {
+					$( document ).on( 'click', '#post-types-definitely-notice .notice-dismiss', function( e ) {
+						$.ajax( '<?php echo admin_url( "admin-ajax.php" ); ?>', {
+							action: 'wpptd_dismiss_notice'
+						});
+					});
+				});
+			</script>
+
+			</script>
+			<div id="post-types-definitely-notice" class="notice updated is-dismissible hide-if-no-js">
+				<p>
+					<?php printf( __( 'You have successfully activated %s.', 'post-types-definitely' ), '<strong>' . self::get_info( 'name' ) . '</strong>' ); ?>
+					<?php _e( 'This plugin is framework that developers can leverage to quickly add extended post types and taxonomies with specific meta boxes and fields.', 'post-types-definitely' ); ?>
+				</p>
+				<p>
+					<?php printf( __( 'For a guide on how to use the framework, please read the <a href="%s" target="_blank">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
+				</p>
+			</div>
+			<?php
+		}
+
+		public function ajax_dismiss_notice() {
+			delete_option( 'post_types_definitely_notice' );
+
+			wp_send_json_success();
+		}
+
+		public static function activate() {
+			add_option( 'post_types_definitely_notice', '1' );
 		}
 
 		/**
