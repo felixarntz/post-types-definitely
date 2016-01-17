@@ -43,6 +43,24 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		protected $show_in_menu_manually = false;
 
 		/**
+		 * @since 0.6.0
+		 * @var array Stores meta field keys that contain related posts.
+		 */
+		protected $related_posts_fields = array();
+
+		/**
+		 * @since 0.6.0
+		 * @var array Stores meta field keys that contain related terms.
+		 */
+		protected $related_terms_fields = array();
+
+		/**
+		 * @since 0.6.0
+		 * @var array Stores meta field keys that contain related users.
+		 */
+		protected $related_users_fields = array();
+
+		/**
 		 * Class constructor.
 		 *
 		 * @since 0.5.0

@@ -227,6 +227,9 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 				if ( $this->_field === null ) {
 					return new UtilError( 'no_valid_field_type', sprintf( __( 'The field type %1$s assigned to the field component %2$s is not a valid field type.', 'post-types-definitely' ), $this->args['type'], $this->slug ), '', ComponentManager::get_scope() );
 				}
+
+				Utility::maybe_register_related_objects_field( $this->_field, $this->args, $this, $parent );
+
 				if ( null === $this->args['default'] ) {
 					$this->args['default'] = $this->_field->validate();
 				}

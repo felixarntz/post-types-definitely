@@ -7,6 +7,8 @@
 
 namespace WPPTD;
 
+use WPDLib\Components\Manager as ComponentManager;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
@@ -60,6 +62,245 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 			}
 
 			return $meta_value;
+		}
+
+		/**
+		 * This function is a low-level function to get related objects for another specific object.
+		 *
+		 * The base object can either be a post or a term (specified by an ID) while the related objects
+		 * can either be posts, terms or users.
+		 *
+		 * The function looks through the registered meta fields of the base object that possibly
+		 * contain related objects. It is also possible to only return related objects that are stored
+		 * in a specific meta field or that have a specific type (that is post type, taxonomy or user role).
+		 *
+		 * @see wpptd_get_post_related_posts()
+		 * @see wpptd_get_post_related_terms()
+		 * @see wpptd_get_post_related_users()
+		 * @see wpptd_get_term_related_posts()
+		 * @see wpptd_get_term_related_terms()
+		 * @see wpptd_get_term_related_users()
+		 * @since 0.6.0
+		 * @param string $mode mode of the ID specified (for the base object), either 'post' or 'term'
+		 * @param integer $id a post ID or a term ID (depending the $mode parameter)
+		 * @param string $objects_mode mode of the related objects to find, either 'posts', 'terms' or 'users'
+		 * @param string $meta_key an optional meta key to only return objects that are stored in a meta field of that name (default is empty)
+		 * @param string $object_type an optional type to only return objects of that type, either a specific post type, taxonomy or user role depending on the $objects_mode parameter
+		 * @param boolean $single whether to only return a single object (default is false)
+		 * @return WP_Post|WP_Term|WP_User|array|null either an object or null (if $single is true) or an array of objects or empty array otherwise
+		 */
+		public static function get_related_objects( $mode, $id, $objects_mode, $meta_key = '', $object_type = '', $single = false ) {
+			// specify variables depending on the base mode
+			switch ( $mode ) {
+				case 'post':
+					$get_func = 'get_post';
+					$type_field = 'post_type';
+					$component_path = '*.[TYPE]';
+					$class_path = 'WPDLib\Components\Menu.WPPTD\Components\PostType';
+					$meta_func = 'wpptd_get_post_meta_value';
+					break;
+				case 'term':
+					if ( ! wpptd_supports_termmeta() ) {
+						if ( $single ) {
+							return null;
+						}
+						return array();
+					}
+					$get_func = 'get_term';
+					$type_field = 'taxonomy';
+					$component_path = '*.*.[TYPE]';
+					$class_path = 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy';
+					$meta_func = 'wpptd_get_term_meta_value';
+					break;
+				default:
+					if ( $single ) {
+						return null;
+					}
+					return array();
+			}
+
+			// specify variables depending on the objects mode
+			switch ( $objects_mode ) {
+				case 'posts':
+					$objects_related_field = 'related_posts_fields';
+					$objects_get_func = 'get_post';
+					$objects_type_field = 'post_type';
+					break;
+				case 'terms':
+					$objects_related_field = 'related_terms_fields';
+					$objects_get_func = 'get_term';
+					$objects_type_field = 'taxonomy';
+					break;
+				case 'users':
+					$objects_related_field = 'related_users_fields';
+					$objects_get_func = 'get_user_by';
+					$objects_get_func_first_param = 'id';
+					$objects_type_field = 'roles';
+					break;
+				default:
+					if ( $single ) {
+						return null;
+					}
+					return array();
+			}
+
+			// get the base object
+			$obj = call_user_func( $get_func, $id );
+			if ( ! $obj ) {
+				if ( $single ) {
+					return null;
+				}
+				return array();
+			}
+
+			// get the component for the base object
+			$component = ComponentManager::get( str_replace( '[TYPE]', $obj->$type_field, $component_path ), $class_path, true );
+			if ( ! $component ) {
+				if ( $single ) {
+					return null;
+				}
+				return array();
+			}
+
+			// get the necessary meta fields depending on the $meta_key and $object_type parameter
+			$all_fields = $component->$objects_related_field;
+
+			$fields = array();
+
+			if ( ! empty( $meta_key ) && ! empty( $object_type ) ) {
+				if ( isset( $all_fields[ $meta_key ] ) && ( 0 === count( $all_fields[ $meta_key ] ) || in_array( $object_type, $all_fields[ $meta_key ], true ) ) ) {
+					$fields[] = $meta_key;
+				}
+			} elseif ( ! empty( $meta_key ) ) {
+				if ( isset( $all_fields[ $meta_key ] ) ) {
+					$fields[] = $meta_key;
+				}
+			} elseif ( ! empty( $object_type ) ) {
+				foreach ( $all_fields as $field_name => $types ) {
+					if ( 0 === count( $types ) || in_array( $object_type, $types, true ) ) {
+						$fields[] = $field_name;
+					}
+				}
+			} else {
+				$fields = array_keys( $all_fields );
+			}
+
+			if ( 0 === count( $fields ) ) {
+				if ( $single ) {
+					return null;
+				}
+				return array();
+			}
+
+			// get the IDs of the related objects
+			$object_ids = array();
+			foreach ( $fields as $field ) {
+				$val = call_user_func( $meta_func, $id, $field );
+				if ( ! $val ) {
+					continue;
+				} elseif ( is_array( $val ) ) {
+					$object_ids = array_merge( $object_ids, $val );
+				} else {
+					$object_ids[] = $val;
+				}
+			}
+
+			$object_ids = array_filter( array_map( 'absint', $object_ids ) );
+
+			if ( 0 === count( $object_ids ) ) {
+				if ( $single ) {
+					return null;
+				}
+				return array();
+			}
+
+			// get the related objects, also considering the $object_type variable if applicable
+			$objects = array();
+			foreach ( $object_ids as $object_id ) {
+				if ( isset( $objects_get_func_first_param ) ) {
+					$object = call_user_func( $objects_get_func, $objects_get_func_first_param, $object_id );
+				} else {
+					$object = call_user_func( $objects_get_func, $object_id );
+				}
+				if ( ! $object ) {
+					continue;
+				}
+				if ( ! empty( $object_type ) ) {
+					$type = $object->$objects_type_field;
+					if ( is_array( $type ) && ! in_array( $object_type, $type, true ) ) {
+						continue;
+					} elseif ( ! is_array( $type ) && $object_type !== $type ) {
+						continue;
+					}
+				}
+				$objects[] = $object;
+			}
+
+			if ( 0 === count( $objects ) ) {
+				if ( $single ) {
+					return null;
+				}
+				return array();
+			}
+
+			if ( $single ) {
+				return $objects[0];
+			}
+			return $objects;
+		}
+
+		/**
+		 * This function registers a related objects field if applicable for the field parameters.
+		 *
+		 * This is a utility function that should only be called from a field component
+		 * that can provide the required parameters.
+		 *
+		 * A field that is considered a related objects field must have a type of either
+		 * 'radio', 'multibox', 'select' or 'multiselect' and its 'options' argument must contain
+		 * only one element that has the key 'posts', 'terms' or 'users'.
+		 *
+		 * @since 0.6.0
+		 * @param WPDLib\FieldTypes\Base $object the field type object
+		 * @param array $args arguments for the field component
+		 * @param WPDLib\Components\Base $component the field component
+		 * @param WPDLib\Components\Base $component_parent the field component's parent component
+		 */
+		public static function maybe_register_related_objects_field( $object, $args, $component, $component_parent ) {
+			if ( ! isset( $args['options'] ) || ! is_array( $args['options'] ) || 1 !== count( $args['options'] ) ) {
+				return;
+			}
+
+			if ( ! is_a( $object, 'WPDLib\FieldTypes\Radio' ) ) {
+				return;
+			}
+
+			$available_modes = array( 'posts', 'terms', 'users' );
+
+			$property = '';
+			$value = array();
+
+			foreach ( $available_modes as $mode ) {
+				if ( isset( $args['options'][ $mode ] ) ) {
+					$property = 'related_' . $mode . '_fields';
+					if ( ! $args['options'][ $mode ] || 'any' === $args['options'][ $mode ] ) {
+						$value[ $component->slug ] = array();
+					} else {
+						$value[ $component->slug ] = (array) $args['options'][ $mode ];
+					}
+					break;
+				}
+			}
+
+			if ( ! $property ) {
+				return;
+			}
+
+			$component_grandparent = $component_parent->get_parent();
+			if ( ! $component_grandparent ) {
+				return;
+			}
+
+			$component_grandparent->$property = array_merge( $component_grandparent->$property, $value );
 		}
 
 		/**
