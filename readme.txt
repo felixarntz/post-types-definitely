@@ -84,11 +84,16 @@ You can also contribute to the plugin by translating it. Among the plugin files,
 * Added: on the term editing screen a UI for term meta is created, consisting of meta boxes, similar to the post editing screen (WordPress 4.4 required)
 * Added: new functions to get related posts / terms / users for a specific post or term, allowing simple object-to-object relationships
 * Added: 4 new actions are available to easily enqueue scripts on specific post type or taxonomy admin pages only
-* Added: new map field type
+* Added: new field type map (can store either address or latitude and longitude)
 * Enhanced: terms list table columns can now be customized (WordPress 4.4 required)
 * Enhanced: terms list tables can now have customized row actions and bulk actions (WordPress 4.4 required)
 * Enhanced: the plugin can now easily be used as a must-use plugin or as a library in any plugin or theme
+* Enhanced: media field type can now alternatively store URL instead of attachment ID
+* Enhanced: options keys 'terms' and 'users' (for related objects) now accept 'any' as value (similar to 'posts')
 * Fixed: taxonomy screens are now correctly highlighted in the admin menu when they're active
+* Fixed: critical validation bug in WYSIWYG
+* Fixed: step validation for decimal numbers
+* Fixed: images now display correctly in media preview
 
 = 0.5.1 =
 * Fixed: on PHP 5.2 the plugin now terminates appropriately

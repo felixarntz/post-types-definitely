@@ -17,6 +17,7 @@ use WPPTD\Components\TermMetabox as TermMetabox;
 use WPPTD\Components\TermField as TermField;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Menu as Menu;
+use WPDLib\FieldTypes\Manager as FieldManager;
 use LaL_WP_Plugin as Plugin;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,6 +68,8 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.5.0
 		 */
 		protected function run() {
+			FieldManager::init();
+
 			General::instance();
 			if ( is_admin() ) {
 				Admin::instance();
