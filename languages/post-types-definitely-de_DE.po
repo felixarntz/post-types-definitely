@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: post-types-definitely 0.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/plugins/post-types-definitely/\n"
-"POT-Creation-Date: 2016-01-19 22:32:55+00:00\n"
-"PO-Revision-Date: 2016-01-19 23:33+0100\n"
+"POT-Creation-Date: 2016-01-20 13:53:51+00:00\n"
+"PO-Revision-Date: 2016-01-20 15:11+0100\n"
 "Last-Translator: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
 "Language-Team: Felix Arntz <felix-arntz@leaves-and-love.net>\n"
 "Language: de_DE\n"
@@ -93,11 +93,11 @@ msgstr ""
 msgid "Metabox title"
 msgstr "Metabox-Titel"
 
-#: inc/WPPTD/Components/PostType.php:332
+#: inc/WPPTD/Components/PostType.php:333
 msgid "M j, Y @ H:i"
 msgstr "j. M Y @ H:i"
 
-#: inc/WPPTD/Components/PostType.php:385
+#: inc/WPPTD/Components/PostType.php:386
 msgid ""
 "The post type slug %s is forbidden since it would interfere with WordPress "
 "Core functionality."
@@ -105,7 +105,7 @@ msgstr ""
 "Der Beitragstyp-Slug %s ist verboten, da er mit WordPress Core-"
 "Funktionalität kollidiert."
 
-#: inc/WPPTD/Components/PostType.php:390
+#: inc/WPPTD/Components/PostType.php:391
 msgid ""
 "The post type slug %s contains dashes which is discouraged. It will still "
 "work for the most part, but we recommend to adjust the slug if possible."
@@ -114,7 +114,7 @@ msgstr ""
 "größtenteils zwar funktionieren, wir empfehlen aber den Slug wenn möglich "
 "anzupassen. "
 
-#: inc/WPPTD/Components/PostType.php:430
+#: inc/WPPTD/Components/PostType.php:431
 msgid ""
 "A menu position is unnecessarily provided for the post type %s - the menu "
 "position is already specified by its parent menu."
@@ -122,7 +122,7 @@ msgstr ""
 "Für den Beitragstyp %s wurde unnötigerweise eine Menüposition angegeben - "
 "die Menüposition ist bereits durch das Elternmenü festgelegt."
 
-#: inc/WPPTD/Components/PostType.php:434
+#: inc/WPPTD/Components/PostType.php:435
 msgid ""
 "A menu icon is unnecessarily provided for the post type %s - the menu icon "
 "is already specified by its parent menu."
@@ -130,13 +130,13 @@ msgstr ""
 "Für den Beitragstyp %s wurde unnötigerweise ein Menüicon angegeben - das "
 "Menüicon ist bereits durch das Elternmenü festgelegt."
 
-#: inc/WPPTD/Components/PostType.php:716
+#: inc/WPPTD/Components/PostType.php:718
 msgid "Some errors occurred while trying to save the following post meta:"
 msgstr ""
 "Beim Versuch die folgenden Beitrags-Metadaten zu speichern sind Fehler "
 "aufgetreten:"
 
-#: inc/WPPTD/Components/Taxonomy.php:244
+#: inc/WPPTD/Components/Taxonomy.php:245
 msgid ""
 "The taxonomy slug %s is forbidden since it would interfere with WordPress "
 "Core functionality."
@@ -144,7 +144,7 @@ msgstr ""
 "Der Taxonomie-Slug %s ist verboten, da er mit WordPress Core-Funktionalität "
 "kollidiert."
 
-#: inc/WPPTD/Components/Taxonomy.php:249
+#: inc/WPPTD/Components/Taxonomy.php:250
 msgid ""
 "The taxonomy slug %s contains dashes which is discouraged. It will still "
 "work for the most part, but we recommend to adjust the slug if possible."
@@ -153,7 +153,7 @@ msgstr ""
 "größtenteils zwar funktionieren, wir empfehlen aber den Slug wenn möglich "
 "anzupassen. "
 
-#: inc/WPPTD/Components/Taxonomy.php:506
+#: inc/WPPTD/Components/Taxonomy.php:508
 msgid "Some errors occurred while trying to save the following term meta:"
 msgstr ""
 "Beim Versuch die folgenden Term-Metadaten zu speichern sind Fehler "
@@ -248,129 +248,372 @@ msgstr ""
 "meta, post meta, postmeta, term meta, termmeta, meta boxes, metaboxes, "
 "repeatable, fields, custom fields, help tabs"
 
-#: inc/WPPTD/Components/PostType.php:737
-msgctxt "all_items label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:742
+msgctxt "all_items label: argument is the plural post type label (neuter)"
 msgid "All %s"
 msgstr "Alle %s"
 
-#: inc/WPPTD/Components/PostType.php:738
-msgctxt "add_new label"
+#: inc/WPPTD/Components/PostType.php:743
+msgctxt "add_new label (neuter)"
 msgid "Add New"
 msgstr "Neu hinzufügen"
 
-#: inc/WPPTD/Components/PostType.php:739
-msgctxt "add_new_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:744
+msgctxt "add_new_item label: argument is the singular post type label (neuter)"
 msgid "Add New %s"
-msgstr "%s neu hinzufügen"
+msgstr "Neues %s hinzufügen"
 
-#: inc/WPPTD/Components/PostType.php:740
-msgctxt "edit_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:745
+msgctxt "edit_item label: argument is the singular post type label (neuter)"
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: inc/WPPTD/Components/PostType.php:741
-msgctxt "new_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:746
+msgctxt "new_item label: argument is the singular post type label (neuter)"
 msgid "New %s"
-msgstr "Neue/r/s %s"
+msgstr "Neues %s"
 
-#: inc/WPPTD/Components/PostType.php:742
-msgctxt "view_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:747
+msgctxt "view_item label: argument is the singular post type label (neuter)"
 msgid "View %s"
 msgstr "%s ansehen"
 
-#: inc/WPPTD/Components/PostType.php:743
-msgctxt "search_items label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:748
+msgctxt "search_items label: argument is the plural post type label (neuter)"
 msgid "Search %s"
 msgstr "%s durchsuchen"
 
-#: inc/WPPTD/Components/PostType.php:744
-msgctxt "not_found label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:749
+msgctxt "not_found label: argument is the plural post type label (neuter)"
 msgid "No %s found"
 msgstr "Keine %s gefunden"
 
-#: inc/WPPTD/Components/PostType.php:745
-msgctxt "not_found_in_trash label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:750
+msgctxt ""
+"not_found_in_trash label: argument is the plural post type label (neuter)"
 msgid "No %s found in Trash"
 msgstr "Keine %s im Papierkorb gefunden"
 
-#: inc/WPPTD/Components/PostType.php:746
-msgctxt "parent_item_colon label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:751
+msgctxt ""
+"parent_item_colon label: argument is the singular post type label (neuter)"
 msgid "Parent %s:"
 msgstr "Eltern-%s:"
 
-#: inc/WPPTD/Components/PostType.php:747
-msgctxt "featured_image label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:752
+msgctxt ""
+"featured_image label: argument is the singular post type label (neuter)"
 msgid "Featured %s Image"
 msgstr "%s-Beitragsbild"
 
-#: inc/WPPTD/Components/PostType.php:748
-msgctxt "set_featured_image label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:753
+msgctxt ""
+"set_featured_image label: argument is the singular post type label (neuter)"
 msgid "Set featured %s Image"
 msgstr "%s-Beitragsbild festlegen"
 
-#: inc/WPPTD/Components/PostType.php:749
-msgctxt "remove_featured_image label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:754
+msgctxt ""
+"remove_featured_image label: argument is the singular post type label "
+"(neuter)"
 msgid "Remove featured %s Image"
 msgstr "%s-Beitragsbild entfernen"
 
-#: inc/WPPTD/Components/PostType.php:750
-msgctxt "use_featured_image label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:755
+msgctxt ""
+"use_featured_image label: argument is the singular post type label (neuter)"
 msgid "Use as featured %s Image"
 msgstr "Als %s-Beitragsbild verwenden"
 
-#: inc/WPPTD/Components/PostType.php:752
-msgctxt "items_list label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:757
+msgctxt "items_list label: argument is the plural post type label (neuter)"
 msgid "%s list"
 msgstr "%s-Liste"
 
-#: inc/WPPTD/Components/PostType.php:753
-msgctxt "items_list_navigation label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:758
+msgctxt ""
+"items_list_navigation label: argument is the plural post type label (neuter)"
 msgid "%s list navigation"
 msgstr "%s-Listennavigation"
 
-#: inc/WPPTD/Components/PostType.php:754
-msgctxt "filter_items_list label: argument is the plural post type label"
+#: inc/WPPTD/Components/PostType.php:759
+msgctxt ""
+"filter_items_list label: argument is the plural post type label (neuter)"
 msgid "Filter %s list"
 msgstr "%s-Liste filtern"
 
-#: inc/WPPTD/Components/PostType.php:756
-msgctxt "insert_into_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:761
+msgctxt ""
+"insert_into_item label: argument is the singular post type label (neuter)"
 msgid "Insert into %s content"
 msgstr "In %s-Inhalt einfügen"
 
-#: inc/WPPTD/Components/PostType.php:757
-msgctxt "uploaded_to_this_item label: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:762
+msgctxt ""
+"uploaded_to_this_item label: argument is the singular post type label "
+"(neuter)"
 msgid "Uploaded to this %s"
 msgstr "Hochgeladen zu diesem %s"
 
+#: inc/WPPTD/Components/PostType.php:771
+msgctxt "all_items label: argument is the plural post type label (feminine)"
+msgid "All %s"
+msgstr "Alle %s"
+
+#: inc/WPPTD/Components/PostType.php:772
+msgctxt "add_new label (feminine)"
+msgid "Add New"
+msgstr "Neu hinzufügen"
+
+#: inc/WPPTD/Components/PostType.php:773
+msgctxt ""
+"add_new_item label: argument is the singular post type label (feminine)"
+msgid "Add New %s"
+msgstr "Neue %s hinzufügen"
+
 #: inc/WPPTD/Components/PostType.php:774
-msgctxt "post message: argument is the singular post type label"
+msgctxt "edit_item label: argument is the singular post type label (feminine)"
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: inc/WPPTD/Components/PostType.php:775
+msgctxt "new_item label: argument is the singular post type label (feminine)"
+msgid "New %s"
+msgstr "Neue %s"
+
+#: inc/WPPTD/Components/PostType.php:776
+msgctxt "view_item label: argument is the singular post type label (feminine)"
+msgid "View %s"
+msgstr "%s ansehen"
+
+#: inc/WPPTD/Components/PostType.php:777
+msgctxt "search_items label: argument is the plural post type label (feminine)"
+msgid "Search %s"
+msgstr "%s durchsuchen"
+
+#: inc/WPPTD/Components/PostType.php:778
+msgctxt "not_found label: argument is the plural post type label (feminine)"
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: inc/WPPTD/Components/PostType.php:779
+msgctxt ""
+"not_found_in_trash label: argument is the plural post type label (feminine)"
+msgid "No %s found in Trash"
+msgstr "Keine %s im Papierkorb gefunden"
+
+#: inc/WPPTD/Components/PostType.php:780
+msgctxt ""
+"parent_item_colon label: argument is the singular post type label (feminine)"
+msgid "Parent %s:"
+msgstr "Eltern-%s:"
+
+#: inc/WPPTD/Components/PostType.php:781
+msgctxt ""
+"featured_image label: argument is the singular post type label (feminine)"
+msgid "Featured %s Image"
+msgstr "%s-Beitragsbild"
+
+#: inc/WPPTD/Components/PostType.php:782
+msgctxt ""
+"set_featured_image label: argument is the singular post type label (feminine)"
+msgid "Set featured %s Image"
+msgstr "%s-Beitragsbild festlegen"
+
+#: inc/WPPTD/Components/PostType.php:783
+msgctxt ""
+"remove_featured_image label: argument is the singular post type label "
+"(feminine)"
+msgid "Remove featured %s Image"
+msgstr "%s-Beitragsbild entfernen"
+
+#: inc/WPPTD/Components/PostType.php:784
+msgctxt ""
+"use_featured_image label: argument is the singular post type label (feminine)"
+msgid "Use as featured %s Image"
+msgstr "Als %s-Beitragsbild verwenden"
+
+#: inc/WPPTD/Components/PostType.php:786
+msgctxt "items_list label: argument is the plural post type label (feminine)"
+msgid "%s list"
+msgstr "%s-Liste"
+
+#: inc/WPPTD/Components/PostType.php:787
+msgctxt ""
+"items_list_navigation label: argument is the plural post type label "
+"(feminine)"
+msgid "%s list navigation"
+msgstr "%s-Listennavigation"
+
+#: inc/WPPTD/Components/PostType.php:788
+msgctxt ""
+"filter_items_list label: argument is the plural post type label (feminine)"
+msgid "Filter %s list"
+msgstr "%s-Liste filtern"
+
+#: inc/WPPTD/Components/PostType.php:790
+msgctxt ""
+"insert_into_item label: argument is the singular post type label (feminine)"
+msgid "Insert into %s content"
+msgstr "In %s-Inhalt einfügen"
+
+#: inc/WPPTD/Components/PostType.php:791
+msgctxt ""
+"uploaded_to_this_item label: argument is the singular post type label "
+"(feminine)"
+msgid "Uploaded to this %s"
+msgstr "Hochgeladen zu dieser %s"
+
+#: inc/WPPTD/Components/PostType.php:801
+msgctxt "all_items label: argument is the plural post type label (masculine)"
+msgid "All %s"
+msgstr "Alle %s"
+
+#: inc/WPPTD/Components/PostType.php:802
+msgctxt "add_new label (masculine)"
+msgid "Add New"
+msgstr "Neu hinzufügen"
+
+#: inc/WPPTD/Components/PostType.php:803
+msgctxt ""
+"add_new_item label: argument is the singular post type label (masculine)"
+msgid "Add New %s"
+msgstr "Neuen %s hinzufügen"
+
+#: inc/WPPTD/Components/PostType.php:804
+msgctxt "edit_item label: argument is the singular post type label (masculine)"
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: inc/WPPTD/Components/PostType.php:805
+msgctxt "new_item label: argument is the singular post type label (masculine)"
+msgid "New %s"
+msgstr "Neuer %s"
+
+#: inc/WPPTD/Components/PostType.php:806
+msgctxt "view_item label: argument is the singular post type label (masculine)"
+msgid "View %s"
+msgstr "%s ansehen"
+
+#: inc/WPPTD/Components/PostType.php:807
+msgctxt ""
+"search_items label: argument is the plural post type label (masculine)"
+msgid "Search %s"
+msgstr "%s durchsuchen"
+
+#: inc/WPPTD/Components/PostType.php:808
+msgctxt "not_found label: argument is the plural post type label (masculine)"
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: inc/WPPTD/Components/PostType.php:809
+msgctxt ""
+"not_found_in_trash label: argument is the plural post type label (masculine)"
+msgid "No %s found in Trash"
+msgstr "Keine %s im Papierkorb gefunden"
+
+#: inc/WPPTD/Components/PostType.php:810
+msgctxt ""
+"parent_item_colon label: argument is the singular post type label (masculine)"
+msgid "Parent %s:"
+msgstr "Eltern-%s:"
+
+#: inc/WPPTD/Components/PostType.php:811
+msgctxt ""
+"featured_image label: argument is the singular post type label (masculine)"
+msgid "Featured %s Image"
+msgstr "%s-Beitragsbild"
+
+#: inc/WPPTD/Components/PostType.php:812
+msgctxt ""
+"set_featured_image label: argument is the singular post type label "
+"(masculine)"
+msgid "Set featured %s Image"
+msgstr "%s-Beitragsbild festlegen"
+
+#: inc/WPPTD/Components/PostType.php:813
+msgctxt ""
+"remove_featured_image label: argument is the singular post type label "
+"(masculine)"
+msgid "Remove featured %s Image"
+msgstr "%s-Beitragsbild entfernen"
+
+#: inc/WPPTD/Components/PostType.php:814
+msgctxt ""
+"use_featured_image label: argument is the singular post type label "
+"(masculine)"
+msgid "Use as featured %s Image"
+msgstr "Als %s-Beitragsbild verwenden"
+
+#: inc/WPPTD/Components/PostType.php:816
+msgctxt "items_list label: argument is the plural post type label (masculine)"
+msgid "%s list"
+msgstr "%s-Liste"
+
+#: inc/WPPTD/Components/PostType.php:817
+msgctxt ""
+"items_list_navigation label: argument is the plural post type label "
+"(masculine)"
+msgid "%s list navigation"
+msgstr "%s-Listennavigation"
+
+#: inc/WPPTD/Components/PostType.php:818
+msgctxt ""
+"filter_items_list label: argument is the plural post type label (masculine)"
+msgid "Filter %s list"
+msgstr "%s-Liste filtern"
+
+#: inc/WPPTD/Components/PostType.php:820
+msgctxt ""
+"insert_into_item label: argument is the singular post type label (masculine)"
+msgid "Insert into %s content"
+msgstr "In %s-Inhalt einfügen"
+
+#: inc/WPPTD/Components/PostType.php:821
+msgctxt ""
+"uploaded_to_this_item label: argument is the singular post type label "
+"(masculine)"
+msgid "Uploaded to this %s"
+msgstr "Hochgeladen zu diesem %s"
+
+#: inc/WPPTD/Components/PostType.php:842
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%1$s updated. <a href=\"%%s\">View %1$s</a>"
 msgstr "%1$s aktualisiert. <a href=\"%%s\">%1$s ansehen</a>"
 
-#: inc/WPPTD/Components/PostType.php:777
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:843
+msgctxt "post message: argument is the singular post type label (neuter)"
+msgid "Custom %s field updated."
+msgstr "Benutzerdefiniertes %s-Feld aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:844
+msgctxt "post message: argument is the singular post type label (neuter)"
+msgid "Custom %s field deleted."
+msgstr "Benutzerdefiniertes %s-Feld gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:845
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%s updated."
 msgstr "%s aktualisiert."
 
-#: inc/WPPTD/Components/PostType.php:779
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:847
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%1$s published. <a href=\"%%s\">View %1$s</a>"
 msgstr "%1$s veröffentlicht. <a href=\"%%s\">%1$s ansehen</a>"
 
-#: inc/WPPTD/Components/PostType.php:780
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:848
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%s saved."
 msgstr "%s gespeichert."
 
-#: inc/WPPTD/Components/PostType.php:781
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:849
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%1$s submitted. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
 msgstr ""
 "%1$s übertragen. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau ansehen</a>"
 
-#: inc/WPPTD/Components/PostType.php:782
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:850
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid ""
 "%1$s scheduled for: <strong>%%1\\$s</strong>. <a target=\"_blank\" href=\"%"
 "%2\\$s\">Preview %1$s</a>"
@@ -378,220 +621,805 @@ msgstr ""
 "%1$s-Veröffentlichung geplant für: <strong>%%1\\$s</strong>. <a target="
 "\"_blank\" href=\"%%2\\$s\">%1$s-Vorschau ansehen</a>"
 
-#: inc/WPPTD/Components/PostType.php:783
-msgctxt "post message: argument is the singular post type label"
+#: inc/WPPTD/Components/PostType.php:851
+msgctxt "post message: argument is the singular post type label (neuter)"
 msgid "%1$s draft updated. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
 msgstr ""
 "%1$s-Entwurf aktualisiert. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau "
 "ansehen</a>"
 
-#: inc/WPPTD/Components/PostType.php:775
-msgctxt "post message"
-msgid "Custom field updated."
-msgstr "Benutzerdefiniertes Feld aktualisiert."
-
-#: inc/WPPTD/Components/PostType.php:776
-msgctxt "post message"
-msgid "Custom field deleted."
-msgstr "Benutzerdefiniertes Feld gelöscht."
-
-#: inc/WPPTD/Components/PostType.php:778
+#: inc/WPPTD/Components/PostType.php:846
 msgctxt ""
-"post message: first argument is the singular post type label, second is the "
-"revision title"
+"post message: first argument is the singular post type label (neuter), "
+"second is the revision title"
 msgid "%s restored to revision from %%s"
-msgstr "%s aus Überarbeitung vom %%s wiederhergestellt"
+msgstr "%s aus Überarbeitung von %%s wiederhergestellt"
 
-#: inc/WPPTD/Components/PostType.php:800
-msgctxt ""
-"bulk post message: first argument is a number, second is the singular post "
-"type label"
-msgid "%%s %s updated."
+#: inc/WPPTD/Components/PostType.php:857
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%1$s updated. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s aktualisiert. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:858
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "Custom %s field updated."
+msgstr "Benutzerdefiniertes %s-Feld aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:859
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "Custom %s field deleted."
+msgstr "Benutzerdefiniertes %s-Feld gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:860
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%s updated."
 msgstr "%s aktualisiert."
 
-#: inc/WPPTD/Components/PostType.php:804
+#: inc/WPPTD/Components/PostType.php:862
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%1$s published. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s veröffentlicht. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:863
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%s saved."
+msgstr "%s gespeichert."
+
+#: inc/WPPTD/Components/PostType.php:864
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%1$s submitted. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s übertragen. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:865
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid ""
+"%1$s scheduled for: <strong>%%1\\$s</strong>. <a target=\"_blank\" href=\"%"
+"%2\\$s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Veröffentlichung geplant für: <strong>%%1\\$s</strong>. <a target="
+"\"_blank\" href=\"%%2\\$s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:866
+msgctxt "post message: argument is the singular post type label (feminine)"
+msgid "%1$s draft updated. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Entwurf aktualisiert. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau "
+"ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:861
+msgctxt ""
+"post message: first argument is the singular post type label (feminine), "
+"second is the revision title"
+msgid "%s restored to revision from %%s"
+msgstr "%s aus Überarbeitung von %%s wiederhergestellt"
+
+#: inc/WPPTD/Components/PostType.php:873
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%1$s updated. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s aktualisiert. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:874
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "Custom %s field updated."
+msgstr "Benutzerdefiniertes %s-Feld aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:875
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "Custom %s field deleted."
+msgstr "Benutzerdefiniertes %s-Feld gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:876
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%s updated."
+msgstr "%s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:878
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%1$s published. <a href=\"%%s\">View %1$s</a>"
+msgstr "%1$s veröffentlicht. <a href=\"%%s\">%1$s ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:879
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%s saved."
+msgstr "%s gespeichert."
+
+#: inc/WPPTD/Components/PostType.php:880
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%1$s submitted. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s übertragen. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:881
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid ""
+"%1$s scheduled for: <strong>%%1\\$s</strong>. <a target=\"_blank\" href=\"%"
+"%2\\$s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Veröffentlichung geplant für: <strong>%%1\\$s</strong>. <a target="
+"\"_blank\" href=\"%%2\\$s\">%1$s-Vorschau ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:882
+msgctxt "post message: argument is the singular post type label (masculine)"
+msgid "%1$s draft updated. <a target=\"_blank\" href=\"%%s\">Preview %1$s</a>"
+msgstr ""
+"%1$s-Entwurf aktualisiert. <a target=\"_blank\" href=\"%%s\">%1$s-Vorschau "
+"ansehen</a>"
+
+#: inc/WPPTD/Components/PostType.php:877
+msgctxt ""
+"post message: first argument is the singular post type label (masculine), "
+"second is the revision title"
+msgid "%s restored to revision from %%s"
+msgstr "%s aus Überarbeitung von %%s wiederhergestellt"
+
+#: inc/WPPTD/Components/PostType.php:903
 msgctxt ""
 "bulk post message: first argument is a number, second is the singular post "
-"type label"
-msgid "%%s %s not updated, somebody is editing it."
-msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet gerade."
-
-#: inc/WPPTD/Components/PostType.php:808
-msgctxt ""
-"bulk post message: first argument is a number, second is the singular post "
-"type label"
-msgid "%%s %s permanently deleted."
-msgstr "%%s %s dauerhaft gelöscht."
-
-#: inc/WPPTD/Components/PostType.php:812
-msgctxt ""
-"bulk post message: first argument is a number, second is the singular post "
-"type label"
-msgid "%%s %s moved to the Trash."
-msgstr "%%s %s in den Papierkorb verschoben."
-
-#: inc/WPPTD/Components/PostType.php:816
-msgctxt ""
-"bulk post message: first argument is a number, second is the singular post "
-"type label"
-msgid "%%s %s restored from the Trash."
-msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
-
-#: inc/WPPTD/Components/PostType.php:801
-msgctxt ""
-"bulk post message: first argument is a number, second is the plural post "
-"type label"
+"type label (neuter)"
 msgid "%%s %s updated."
 msgstr "%%s %s aktualisiert."
 
-#: inc/WPPTD/Components/PostType.php:805
+#: inc/WPPTD/Components/PostType.php:907
 msgctxt ""
-"bulk post message: first argument is a number, second is the plural post "
-"type label"
-msgid "%%s %s not updated, somebody is editing them."
-msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet gerade."
+"bulk post message: first argument is a number, second is the singular post "
+"type label (neuter)"
+msgid "%%s %s not updated, somebody is editing it."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet es gerade."
 
-#: inc/WPPTD/Components/PostType.php:809
+#: inc/WPPTD/Components/PostType.php:911
 msgctxt ""
-"bulk post message: first argument is a number, second is the plural post "
-"type label"
+"bulk post message: first argument is a number, second is the singular post "
+"type label (neuter)"
 msgid "%%s %s permanently deleted."
 msgstr "%%s %s dauerhaft gelöscht."
 
-#: inc/WPPTD/Components/PostType.php:813
+#: inc/WPPTD/Components/PostType.php:915
 msgctxt ""
-"bulk post message: first argument is a number, second is the plural post "
-"type label"
+"bulk post message: first argument is a number, second is the singular post "
+"type label (neuter)"
 msgid "%%s %s moved to the Trash."
 msgstr "%%s %s in den Papierkorb verschoben."
 
-#: inc/WPPTD/Components/PostType.php:817
+#: inc/WPPTD/Components/PostType.php:919
 msgctxt ""
-"bulk post message: first argument is a number, second is the plural post "
-"type label"
+"bulk post message: first argument is a number, second is the singular post "
+"type label (neuter)"
 msgid "%%s %s restored from the Trash."
 msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
 
-#: inc/WPPTD/Components/Taxonomy.php:526
-msgctxt "all_items label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/PostType.php:904
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (neuter)"
+msgid "%%s %s updated."
+msgstr "%%s %s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:908
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (neuter)"
+msgid "%%s %s not updated, somebody is editing them."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet sie gerade."
+
+#: inc/WPPTD/Components/PostType.php:912
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (neuter)"
+msgid "%%s %s permanently deleted."
+msgstr "%%s %s dauerhaft gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:916
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (neuter)"
+msgid "%%s %s moved to the Trash."
+msgstr "%%s %s in den Papierkorb verschoben."
+
+#: inc/WPPTD/Components/PostType.php:920
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (neuter)"
+msgid "%%s %s restored from the Trash."
+msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#: inc/WPPTD/Components/PostType.php:927
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (feminine)"
+msgid "%%s %s updated."
+msgstr "%%s %s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:931
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (feminine)"
+msgid "%%s %s not updated, somebody is editing it."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet sie gerade."
+
+#: inc/WPPTD/Components/PostType.php:935
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (feminine)"
+msgid "%%s %s permanently deleted."
+msgstr "%%s %s dauerhaft gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:939
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (feminine)"
+msgid "%%s %s moved to the Trash."
+msgstr "%%s %s in den Papierkorb verschoben."
+
+#: inc/WPPTD/Components/PostType.php:943
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (feminine)"
+msgid "%%s %s restored from the Trash."
+msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#: inc/WPPTD/Components/PostType.php:928
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (feminine)"
+msgid "%%s %s updated."
+msgstr "%%s %s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:932
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (feminine)"
+msgid "%%s %s not updated, somebody is editing them."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet sie gerade."
+
+#: inc/WPPTD/Components/PostType.php:936
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (feminine)"
+msgid "%%s %s permanently deleted."
+msgstr "%%s %s dauerhaft gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:940
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (feminine)"
+msgid "%%s %s moved to the Trash."
+msgstr "%%s %s in den Papierkorb verschoben."
+
+#: inc/WPPTD/Components/PostType.php:944
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (feminine)"
+msgid "%%s %s restored from the Trash."
+msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#: inc/WPPTD/Components/PostType.php:952
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (masculine)"
+msgid "%%s %s updated."
+msgstr "%%s %s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:956
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (masculine)"
+msgid "%%s %s not updated, somebody is editing it."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet ihn gerade."
+
+#: inc/WPPTD/Components/PostType.php:960
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (masculine)"
+msgid "%%s %s permanently deleted."
+msgstr "%%s %s dauerhaft gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:964
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (masculine)"
+msgid "%%s %s moved to the Trash."
+msgstr "%%s %s in den Papierkorb verschoben."
+
+#: inc/WPPTD/Components/PostType.php:968
+msgctxt ""
+"bulk post message: first argument is a number, second is the singular post "
+"type label (masculine)"
+msgid "%%s %s restored from the Trash."
+msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#: inc/WPPTD/Components/PostType.php:953
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (masculine)"
+msgid "%%s %s updated."
+msgstr "%%s %s aktualisiert."
+
+#: inc/WPPTD/Components/PostType.php:957
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (masculine)"
+msgid "%%s %s not updated, somebody is editing them."
+msgstr "%%s %s nicht aktualisiert, jemand anders bearbeitet sie gerade."
+
+#: inc/WPPTD/Components/PostType.php:961
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (masculine)"
+msgid "%%s %s permanently deleted."
+msgstr "%%s %s dauerhaft gelöscht."
+
+#: inc/WPPTD/Components/PostType.php:965
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (masculine)"
+msgid "%%s %s moved to the Trash."
+msgstr "%%s %s in den Papierkorb verschoben."
+
+#: inc/WPPTD/Components/PostType.php:969
+msgctxt ""
+"bulk post message: first argument is a number, second is the plural post "
+"type label (masculine)"
+msgid "%%s %s restored from the Trash."
+msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#: inc/WPPTD/Components/Taxonomy.php:531
+msgctxt "all_items label: argument is the plural taxonomy label (neuter)"
 msgid "All %s"
 msgstr "Alle %s"
 
-#: inc/WPPTD/Components/Taxonomy.php:527
-msgctxt "add_new_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:532
+msgctxt "add_new_item label: argument is the singular taxonomy label (neuter)"
 msgid "Add New %s"
-msgstr "%s neu hinzufügen"
+msgstr "Neues %s hinzufügen"
 
-#: inc/WPPTD/Components/Taxonomy.php:528
-msgctxt "edit_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:533
+msgctxt "edit_item label: argument is the singular taxonomy label (neuter)"
 msgid "Edit %s"
 msgstr "%s bearbeiten"
 
-#: inc/WPPTD/Components/Taxonomy.php:529
-msgctxt "view_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:534
+msgctxt "view_item label: argument is the singular taxonomy label (neuter)"
 msgid "View %s"
 msgstr "%s ansehen"
 
-#: inc/WPPTD/Components/Taxonomy.php:530
-msgctxt "update_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:535
+msgctxt "update_item label: argument is the singular taxonomy label (neuter)"
 msgid "Update %s"
 msgstr "%s aktualisieren"
 
-#: inc/WPPTD/Components/Taxonomy.php:531
-msgctxt "new_item_name label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:536
+msgctxt "new_item_name label: argument is the singular taxonomy label (neuter)"
 msgid "New %s Name"
 msgstr "Neuer %s-Name"
 
-#: inc/WPPTD/Components/Taxonomy.php:532
-msgctxt "search_items label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:537
+msgctxt "search_items label: argument is the plural taxonomy label (neuter)"
 msgid "Search %s"
 msgstr "%s durchsuchen"
 
-#: inc/WPPTD/Components/Taxonomy.php:533
-msgctxt "popular_items label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:538
+msgctxt "popular_items label: argument is the plural taxonomy label (neuter)"
 msgid "Popular %s"
 msgstr "Beliebte %s"
 
-#: inc/WPPTD/Components/Taxonomy.php:534
-msgctxt "not_found label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:539
+msgctxt "not_found label: argument is the plural taxonomy label (neuter)"
 msgid "No %s found"
 msgstr "Keine %s gefunden"
 
-#: inc/WPPTD/Components/Taxonomy.php:535
-msgctxt "no_terms label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:540
+msgctxt "no_terms label: argument is the plural taxonomy label (neuter)"
 msgid "No %s"
 msgstr "Keine %s"
 
-#: inc/WPPTD/Components/Taxonomy.php:536
+#: inc/WPPTD/Components/Taxonomy.php:541
 msgctxt ""
-"separate_items_with_commas label: argument is the plural taxonomy label"
+"separate_items_with_commas label: argument is the plural taxonomy label "
+"(neuter)"
 msgid "Separate %s with commas"
 msgstr "%s mit Kommas voneinander trennen"
 
-#: inc/WPPTD/Components/Taxonomy.php:537
-msgctxt "add_or_remove_items label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:542
+msgctxt ""
+"add_or_remove_items label: argument is the plural taxonomy label (neuter)"
 msgid "Add or remove %s"
 msgstr "%s hinzufügen oder entfernen"
 
-#: inc/WPPTD/Components/Taxonomy.php:538
-msgctxt "choose_from_most_used label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:543
+msgctxt ""
+"choose_from_most_used label: argument is the plural taxonomy label (neuter)"
 msgid "Choose from the most used %s"
 msgstr "Wähle aus den meistgenutzten %s"
 
-#: inc/WPPTD/Components/Taxonomy.php:539
-msgctxt "parent_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:544
+msgctxt "parent_item label: argument is the singular taxonomy label (neuter)"
 msgid "Parent %s"
 msgstr "Eltern-%s"
 
-#: inc/WPPTD/Components/Taxonomy.php:540
-msgctxt "parent_item_colon label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:545
+msgctxt ""
+"parent_item_colon label: argument is the singular taxonomy label (neuter)"
 msgid "Parent %s:"
 msgstr "Eltern-%s:"
 
-#: inc/WPPTD/Components/Taxonomy.php:542
-msgctxt "items_list label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:547
+msgctxt "items_list label: argument is the plural taxonomy label (neuter)"
 msgid "%s list"
 msgstr "%s-Liste"
 
-#: inc/WPPTD/Components/Taxonomy.php:543
-msgctxt "items_list_navigation label: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:548
+msgctxt ""
+"items_list_navigation label: argument is the plural taxonomy label (neuter)"
 msgid "%s list navigation"
 msgstr "%s-Listennavigation"
 
-#: inc/WPPTD/Components/Taxonomy.php:545
-msgctxt "filter_by_item label: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:550
+msgctxt ""
+"filter_by_item label: argument is the singular taxonomy label (neuter)"
 msgid "Filter by %s"
 msgstr "Nach %s filtern"
 
 #: inc/WPPTD/Components/Taxonomy.php:558
-msgctxt "term message: argument is the singular taxonomy label"
+msgctxt "all_items label: argument is the plural taxonomy label (feminine)"
+msgid "All %s"
+msgstr "Alle %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:559
+msgctxt ""
+"add_new_item label: argument is the singular taxonomy label (feminine)"
+msgid "Add New %s"
+msgstr "Neue %s hinzufügen"
+
+#: inc/WPPTD/Components/Taxonomy.php:560
+msgctxt "edit_item label: argument is the singular taxonomy label (feminine)"
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: inc/WPPTD/Components/Taxonomy.php:561
+msgctxt "view_item label: argument is the singular taxonomy label (feminine)"
+msgid "View %s"
+msgstr "%s ansehen"
+
+#: inc/WPPTD/Components/Taxonomy.php:562
+msgctxt "update_item label: argument is the singular taxonomy label (feminine)"
+msgid "Update %s"
+msgstr "%s aktualisieren"
+
+#: inc/WPPTD/Components/Taxonomy.php:563
+msgctxt ""
+"new_item_name label: argument is the singular taxonomy label (feminine)"
+msgid "New %s Name"
+msgstr "Neuer %s-Name"
+
+#: inc/WPPTD/Components/Taxonomy.php:564
+msgctxt "search_items label: argument is the plural taxonomy label (feminine)"
+msgid "Search %s"
+msgstr "%s durchsuchen"
+
+#: inc/WPPTD/Components/Taxonomy.php:565
+msgctxt "popular_items label: argument is the plural taxonomy label (feminine)"
+msgid "Popular %s"
+msgstr "Beliebte %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:566
+msgctxt "not_found label: argument is the plural taxonomy label (feminine)"
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: inc/WPPTD/Components/Taxonomy.php:567
+msgctxt "no_terms label: argument is the plural taxonomy label (feminine)"
+msgid "No %s"
+msgstr "Keine %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:568
+msgctxt ""
+"separate_items_with_commas label: argument is the plural taxonomy label "
+"(feminine)"
+msgid "Separate %s with commas"
+msgstr "%s mit Kommas voneinander trennen"
+
+#: inc/WPPTD/Components/Taxonomy.php:569
+msgctxt ""
+"add_or_remove_items label: argument is the plural taxonomy label (feminine)"
+msgid "Add or remove %s"
+msgstr "%s hinzufügen oder entfernen"
+
+#: inc/WPPTD/Components/Taxonomy.php:570
+msgctxt ""
+"choose_from_most_used label: argument is the plural taxonomy label (feminine)"
+msgid "Choose from the most used %s"
+msgstr "Wähle aus den meistgenutzten %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:571
+msgctxt "parent_item label: argument is the singular taxonomy label (feminine)"
+msgid "Parent %s"
+msgstr "Eltern-%s"
+
+#: inc/WPPTD/Components/Taxonomy.php:572
+msgctxt ""
+"parent_item_colon label: argument is the singular taxonomy label (feminine)"
+msgid "Parent %s:"
+msgstr "Eltern-%s:"
+
+#: inc/WPPTD/Components/Taxonomy.php:574
+msgctxt "items_list label: argument is the plural taxonomy label (feminine)"
+msgid "%s list"
+msgstr "%s-Liste"
+
+#: inc/WPPTD/Components/Taxonomy.php:575
+msgctxt ""
+"items_list_navigation label: argument is the plural taxonomy label (feminine)"
+msgid "%s list navigation"
+msgstr "%s-Listennavigation"
+
+#: inc/WPPTD/Components/Taxonomy.php:577
+msgctxt ""
+"filter_by_item label: argument is the singular taxonomy label (feminine)"
+msgid "Filter by %s"
+msgstr "Nach %s filtern"
+
+#: inc/WPPTD/Components/Taxonomy.php:586
+msgctxt "all_items label: argument is the plural taxonomy label (masculine)"
+msgid "All %s"
+msgstr "Alle %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:587
+msgctxt ""
+"add_new_item label: argument is the singular taxonomy label (masculine)"
+msgid "Add New %s"
+msgstr "Neuen %s hinzufügen"
+
+#: inc/WPPTD/Components/Taxonomy.php:588
+msgctxt "edit_item label: argument is the singular taxonomy label (masculine)"
+msgid "Edit %s"
+msgstr "%s bearbeiten"
+
+#: inc/WPPTD/Components/Taxonomy.php:589
+msgctxt "view_item label: argument is the singular taxonomy label (masculine)"
+msgid "View %s"
+msgstr "%s ansehen"
+
+#: inc/WPPTD/Components/Taxonomy.php:590
+msgctxt ""
+"update_item label: argument is the singular taxonomy label (masculine)"
+msgid "Update %s"
+msgstr "%s aktualisieren"
+
+#: inc/WPPTD/Components/Taxonomy.php:591
+msgctxt ""
+"new_item_name label: argument is the singular taxonomy label (masculine)"
+msgid "New %s Name"
+msgstr "Neuer %s-Name"
+
+#: inc/WPPTD/Components/Taxonomy.php:592
+msgctxt "search_items label: argument is the plural taxonomy label (masculine)"
+msgid "Search %s"
+msgstr "%s durchsuchen"
+
+#: inc/WPPTD/Components/Taxonomy.php:593
+msgctxt ""
+"popular_items label: argument is the plural taxonomy label (masculine)"
+msgid "Popular %s"
+msgstr "Beliebte %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:594
+msgctxt "not_found label: argument is the plural taxonomy label (masculine)"
+msgid "No %s found"
+msgstr "Keine %s gefunden"
+
+#: inc/WPPTD/Components/Taxonomy.php:595
+msgctxt "no_terms label: argument is the plural taxonomy label (masculine)"
+msgid "No %s"
+msgstr "Keine %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:596
+msgctxt ""
+"separate_items_with_commas label: argument is the plural taxonomy label "
+"(masculine)"
+msgid "Separate %s with commas"
+msgstr "%s mit Kommas voneinander trennen"
+
+#: inc/WPPTD/Components/Taxonomy.php:597
+msgctxt ""
+"add_or_remove_items label: argument is the plural taxonomy label (masculine)"
+msgid "Add or remove %s"
+msgstr "%s hinzufügen oder entfernen"
+
+#: inc/WPPTD/Components/Taxonomy.php:598
+msgctxt ""
+"choose_from_most_used label: argument is the plural taxonomy label "
+"(masculine)"
+msgid "Choose from the most used %s"
+msgstr "Wähle aus den meistgenutzten %s"
+
+#: inc/WPPTD/Components/Taxonomy.php:599
+msgctxt ""
+"parent_item label: argument is the singular taxonomy label (masculine)"
+msgid "Parent %s"
+msgstr "Eltern-%s"
+
+#: inc/WPPTD/Components/Taxonomy.php:600
+msgctxt ""
+"parent_item_colon label: argument is the singular taxonomy label (masculine)"
+msgid "Parent %s:"
+msgstr "Eltern-%s:"
+
+#: inc/WPPTD/Components/Taxonomy.php:602
+msgctxt "items_list label: argument is the plural taxonomy label (masculine)"
+msgid "%s list"
+msgstr "%s-Liste"
+
+#: inc/WPPTD/Components/Taxonomy.php:603
+msgctxt ""
+"items_list_navigation label: argument is the plural taxonomy label "
+"(masculine)"
+msgid "%s list navigation"
+msgstr "%s-Listennavigation"
+
+#: inc/WPPTD/Components/Taxonomy.php:605
+msgctxt ""
+"filter_by_item label: argument is the singular taxonomy label (masculine)"
+msgid "Filter by %s"
+msgstr "Nach %s filtern"
+
+#: inc/WPPTD/Components/Taxonomy.php:622
+msgctxt "term message: argument is the singular taxonomy label (neuter)"
 msgid "%s added."
 msgstr "%s hinzugefügt."
 
-#: inc/WPPTD/Components/Taxonomy.php:559
-msgctxt "term message: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:623
+msgctxt "term message: argument is the singular taxonomy label (neuter)"
 msgid "%s deleted."
 msgstr "%s gelöscht."
 
-#: inc/WPPTD/Components/Taxonomy.php:560
-msgctxt "term message: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:624
+msgctxt "term message: argument is the singular taxonomy label (neuter)"
 msgid "%s updated."
 msgstr "%s aktualisiert."
 
-#: inc/WPPTD/Components/Taxonomy.php:561
-msgctxt "term message: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:625
+msgctxt "term message: argument is the singular taxonomy label (neuter)"
 msgid "%s not added."
 msgstr "%s nicht hinzugefügt."
 
-#: inc/WPPTD/Components/Taxonomy.php:562
-msgctxt "term message: argument is the singular taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:626
+msgctxt "term message: argument is the singular taxonomy label (neuter)"
 msgid "%s not updated."
 msgstr "%s nicht aktualisiert."
 
-#: inc/WPPTD/Components/Taxonomy.php:563
-msgctxt "bulk term message: argument is the plural taxonomy label"
+#: inc/WPPTD/Components/Taxonomy.php:627
+msgctxt "bulk term message: argument is the plural taxonomy label (neuter)"
 msgid "%s deleted."
 msgstr "%s gelöscht."
+
+#: inc/WPPTD/Components/Taxonomy.php:633
+msgctxt "term message: argument is the singular taxonomy label (feminine)"
+msgid "%s added."
+msgstr "%s hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:634
+msgctxt "term message: argument is the singular taxonomy label (feminine)"
+msgid "%s deleted."
+msgstr "%s gelöscht."
+
+#: inc/WPPTD/Components/Taxonomy.php:635
+msgctxt "term message: argument is the singular taxonomy label (feminine)"
+msgid "%s updated."
+msgstr "%s aktualisiert."
+
+#: inc/WPPTD/Components/Taxonomy.php:636
+msgctxt "term message: argument is the singular taxonomy label (feminine)"
+msgid "%s not added."
+msgstr "%s nicht hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:637
+msgctxt "term message: argument is the singular taxonomy label (feminine)"
+msgid "%s not updated."
+msgstr "%s nicht aktualisiert."
+
+#: inc/WPPTD/Components/Taxonomy.php:638
+msgctxt "bulk term message: argument is the plural taxonomy label (feminine)"
+msgid "%s deleted."
+msgstr "%s gelöscht."
+
+#: inc/WPPTD/Components/Taxonomy.php:645
+msgctxt "term message: argument is the singular taxonomy label (masculine)"
+msgid "%s added."
+msgstr "%s hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:646
+msgctxt "term message: argument is the singular taxonomy label (masculine)"
+msgid "%s deleted."
+msgstr "%s gelöscht."
+
+#: inc/WPPTD/Components/Taxonomy.php:647
+msgctxt "term message: argument is the singular taxonomy label (masculine)"
+msgid "%s updated."
+msgstr "%s aktualisiert."
+
+#: inc/WPPTD/Components/Taxonomy.php:648
+msgctxt "term message: argument is the singular taxonomy label (masculine)"
+msgid "%s not added."
+msgstr "%s nicht hinzugefügt."
+
+#: inc/WPPTD/Components/Taxonomy.php:649
+msgctxt "term message: argument is the singular taxonomy label (masculine)"
+msgid "%s not updated."
+msgstr "%s nicht aktualisiert."
+
+#: inc/WPPTD/Components/Taxonomy.php:650
+msgctxt "bulk term message: argument is the plural taxonomy label (masculine)"
+msgid "%s deleted."
+msgstr "%s gelöscht."
+
+#~ msgctxt ""
+#~ "bulk post message: first argument is a number, second is the plural post "
+#~ "type label"
+#~ msgid "%%s %s updated."
+#~ msgstr "%%s %s aktualisiert."
+
+#~ msgctxt ""
+#~ "bulk post message: first argument is a number, second is the plural post "
+#~ "type label"
+#~ msgid "%%s %s permanently deleted."
+#~ msgstr "%%s %s dauerhaft gelöscht."
+
+#~ msgctxt ""
+#~ "bulk post message: first argument is a number, second is the plural post "
+#~ "type label"
+#~ msgid "%%s %s moved to the Trash."
+#~ msgstr "%%s %s in den Papierkorb verschoben."
+
+#~ msgctxt ""
+#~ "bulk post message: first argument is a number, second is the plural post "
+#~ "type label"
+#~ msgid "%%s %s restored from the Trash."
+#~ msgstr "%%s %s aus dem Papierkorb wiederhergestellt."
+
+#~ msgctxt "all_items label: argument is the plural taxonomy label"
+#~ msgid "All %s"
+#~ msgstr "Alle %s"
+
+#~ msgctxt "add_new_item label: argument is the singular taxonomy label"
+#~ msgid "Add New %s"
+#~ msgstr "%s neu hinzufügen"
+
+#~ msgctxt "edit_item label: argument is the singular taxonomy label"
+#~ msgid "Edit %s"
+#~ msgstr "%s bearbeiten"
+
+#~ msgctxt "view_item label: argument is the singular taxonomy label"
+#~ msgid "View %s"
+#~ msgstr "%s ansehen"
+
+#~ msgctxt "search_items label: argument is the plural taxonomy label"
+#~ msgid "Search %s"
+#~ msgstr "%s durchsuchen"
+
+#~ msgctxt "not_found label: argument is the plural taxonomy label"
+#~ msgid "No %s found"
+#~ msgstr "Keine %s gefunden"
+
+#~ msgctxt "parent_item_colon label: argument is the singular taxonomy label"
+#~ msgid "Parent %s:"
+#~ msgstr "Eltern-%s:"
+
+#~ msgctxt "items_list label: argument is the plural taxonomy label"
+#~ msgid "%s list"
+#~ msgstr "%s-Liste"
+
+#~ msgctxt "items_list_navigation label: argument is the plural taxonomy label"
+#~ msgid "%s list navigation"
+#~ msgstr "%s-Listennavigation"
+
+#~ msgctxt "term message: argument is the singular taxonomy label"
+#~ msgid "%s updated."
+#~ msgstr "%s aktualisiert."
+
+#~ msgctxt "bulk term message: argument is the plural taxonomy label"
+#~ msgid "%s deleted."
+#~ msgstr "%s gelöscht."
 
 #~ msgid ""
 #~ "This plugin is framework that developers can leverage to quickly add "
