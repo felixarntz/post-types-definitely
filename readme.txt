@@ -12,13 +12,13 @@ Stable tag:        0.6.0
 Version:           0.6.0
 License:           GPL v3
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
-Tags:              wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, metaboxes, repeatable, fields, custom fields, help tabs
+Tags:              wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, post meta, postmeta, term meta, termmeta, meta boxes, metaboxes, repeatable, fields, custom fields, help tabs
 
 This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.
 
 == Description ==
 
-_Post Types Definitely_ is a framework for developers that allows them to easily add post types, with taxonomies, metaboxes and meta fields to the WordPress admin so that a user can manage them. You can also customize the post type list tables, for example to display values of a specific meta field in an additional column - sortable and filterable if you like.
+_Post Types Definitely_ is a framework for developers that allows them to easily add post types, with taxonomies, metaboxes and meta fields to the WordPress admin so that a user can manage them. The plugin also supports term meta (if you're running WordPress 4.4 or higher) - you can add metaboxes and fields to terms in the same fashion you can add them to posts. You can also customize the post type and taxonomy list tables, for example to display values of a specific meta field in an additional column - sortable and filterable if you like.
 
 The plugin belongs to the group of _Definitely_ plugins which aim at making adding backend components in WordPress easier and more standardized for developers. All _Definitely_ plugins bundle a custom library that handles functionality which is shared across all these plugins, for example handling the field types and their controls.
 
@@ -60,6 +60,10 @@ You can use the framework anywhere you like, for example in your theme's functio
 = Why don't I see any change after having activated the plugin? =
 
 Options Definitely is a framework plugin which means it does nothing on its own, it just helps other developers getting things done way more quickly.
+
+= How does the plugin handle term meta? =
+
+The plugin creates a UI for term meta on the term editing screen (where you edit a single term). The UI uses WordPress Core CSS classes and looks similar to the one on the post editing screen, with metaboxes and fields - including an "Update" metabox on the right which now contains the "Update" button.
 
 = Where should I submit my support request? =
 
