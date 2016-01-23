@@ -351,7 +351,9 @@ if ( ! function_exists( 'wpptd_get_taxonomy' ) ) {
 	 * @return string|false taxonomy on success, false otherwise
 	 */
 	function wpptd_get_taxonomy( $term ) {
-		if ( $term = get_term( $term ) ) {
+		$term = get_term( $term );
+
+		if ( $term && ! is_wp_error( $term ) ) {
 			return $term->taxonomy;
 		}
 
