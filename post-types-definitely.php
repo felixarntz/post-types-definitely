@@ -9,7 +9,6 @@ Author URI: http://leaves-and-love.net
 License: GNU General Public License v3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: post-types-definitely
-Domain Path: /languages/
 Tags: wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, post meta, postmeta, term meta, termmeta, meta boxes, metaboxes, repeatable, fields, custom fields, help tabs
 */
 /**
@@ -39,13 +38,14 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 }
 
 LaL_WP_Plugin_Loader::load_plugin( array(
-	'slug'				=> 'post-types-definitely',
-	'name'				=> 'Post Types Definitely',
-	'version'			=> '0.6.0',
-	'main_file'			=> __FILE__,
-	'namespace'			=> 'WPPTD',
-	'textdomain'		=> 'post-types-definitely',
+	'slug'					=> 'post-types-definitely',
+	'name'					=> 'Post Types Definitely',
+	'version'				=> '0.6.0',
+	'main_file'				=> __FILE__,
+	'namespace'				=> 'WPPTD',
+	'textdomain'			=> 'post-types-definitely',
+	'use_language_packs'	=> true,
 ), array(
-	'phpversion'		=> '5.3.0',
-	'wpversion'			=> '4.0',
+	'phpversion'			=> '5.3.0',
+	'wpversion'				=> '4.0',
 ) );
