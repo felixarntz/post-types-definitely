@@ -41,6 +41,12 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		protected static $_args = array();
 
 		/**
+		 * @since 0.6.1
+		 * @var boolean Temporarily stores whether the activation is network wide.
+		 */
+		protected static $_temp_network_wide = false;
+
+		/**
 		 * @since 0.5.0
 		 * @var array helper variable to temporarily hold taxonomies and their post type names
 		 */
@@ -85,7 +91,12 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 			add_filter( 'wpptd_term_metabox_validated', array( $this, 'term_metabox_validated' ), 10, 2 );
 
 			add_filter( 'plugin_action_links_' . plugin_basename( self::get_info( 'main_file' ) ), array( $this, 'add_action_link' ) );
+			add_filter( 'network_admin_plugin_action_links_' . plugin_basename( self::get_info( 'main_file' ) ), array( $this, 'add_action_link' ) );
+
 			add_action( 'admin_notices', array( $this, 'display_admin_notice' ) );
+			add_action( 'network_admin_notices', array( $this, 'display_admin_notice' ) );
+
+			// valid for both site and network admin
 			add_action( 'wp_ajax_wpptd_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
 		}
 
@@ -281,7 +292,7 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 */
 		public function add_action_link( $links = array() ) {
 			$custom_links = array(
-				'<a href="' . 'https://github.com/felixarntz/post-types-definitely/wiki' . '" target="_blank">' . __( 'Guide', 'post-types-definitely' ) . '</a>',
+				'<a href="' . 'https://github.com/felixarntz/post-types-definitely/wiki' . '">' . __( 'Guide', 'post-types-definitely' ) . '</a>',
 			);
 
 			return array_merge( $custom_links, $links );
@@ -297,12 +308,15 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.6.0
 		 */
 		public function display_admin_notice() {
-			$setting = get_option( 'post_types_definitely_notice' );
-			if ( ! $setting ) {
-				return;
+			if ( is_network_admin() ) {
+				$setting = get_site_option( 'post_types_definitely_notice' );
+				$permission = 'manage_network_options';
+			} else {
+				$setting = get_option( 'post_types_definitely_notice' );
+				$permission = 'manage_options';
 			}
 
-			if ( ! current_user_can( 'manage_options' ) ) {
+			if ( ! $setting || ! current_user_can( $permission ) ) {
 				return;
 			}
 
@@ -312,7 +326,8 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 					$( document ).on( 'click', '#post-types-definitely-notice .notice-dismiss', function( e ) {
 						$.ajax( '<?php echo admin_url( "admin-ajax.php" ); ?>', {
 							data: {
-								action: 'wpptd_dismiss_notice'
+								action: 'wpptd_dismiss_notice',
+								context: '<?php echo is_network_admin() ? "network" : "site"; ?>'
 							},
 							dataType: 'json',
 							method: 'POST'
@@ -332,13 +347,17 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 					<?php _e( 'This plugin is a framework that developers can leverage to quickly add extended post types and taxonomies with specific meta boxes and fields.', 'post-types-definitely' ); ?>
 				</p>
 				<p>
-					<?php printf( __( 'For a guide on how to use the framework please read the <a href="%s" target="_blank">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
+					<?php printf( __( 'For a guide on how to use the framework please read the <a href="%s">Wiki</a>.', 'post-types-definitely' ), 'https://github.com/felixarntz/post-types-definitely/wiki' ); ?>
 				</p>
 			</div>
 			<?php
 
 			if ( 'activated' === $setting ) {
-				update_option( 'post_types_definitely_notice', 'active' );
+				if ( is_network_admin() ) {
+					update_site_option( 'post_types_definitely_notice', 'active' );
+				} else {
+					update_option( 'post_types_definitely_notice', 'active' );
+				}
 			}
 		}
 
@@ -351,7 +370,11 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.6.0
 		 */
 		public function ajax_dismiss_notice() {
-			delete_option( 'post_types_definitely_notice' );
+			if ( isset( $_REQUEST['context'] ) && 'network' === $_REQUEST['context'] ) {
+				delete_site_option( 'post_types_definitely_notice' );
+			} else {
+				delete_option( 'post_types_definitely_notice' );
+			}
 
 			wp_send_json_success();
 		}
@@ -521,7 +544,27 @@ if ( ! class_exists( 'WPPTD\App' ) ) {
 		 * @since 0.6.0
 		 */
 		public static function activate() {
-			add_option( 'post_types_definitely_notice', 'activated' );
+			if ( ! self::$_temp_network_wide ) {
+				add_option( 'post_types_definitely_notice', 'activated' );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Network activation function.
+		 *
+		 * This function is run automatically when the plugin is activated network wide.
+		 *
+		 * @internal
+		 * @since 0.6.1
+		 */
+		public static function network_activate() {
+			self::$_temp_network_wide = true;
+
+			add_site_option( 'post_types_definitely_notice', 'activated' );
+
+			return true;
 		}
 	}
 }
