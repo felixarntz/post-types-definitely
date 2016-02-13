@@ -23,13 +23,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @since 0.6.1
 		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
 		 */
-		protected $post_type = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var string Holds the slug of the post type component.
-		 */
-		protected $post_type_slug = '';
+		protected $component = null;
 
 		/**
 		 * Class constructor.
@@ -38,8 +32,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
 		 */
 		public function __construct( $post_type ) {
-			$this->post_type = $post_type;
-			$this->post_type_slug = $this->post_type->slug;
+			$this->component = $post_type;
 		}
 
 		/**
@@ -51,7 +44,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @return array the adjusted row actions array
 		 */
 		public function filter_row_actions( $row_actions, $post ) {
-			$table_row_actions = $this->post_type->row_actions;
+			$table_row_actions = $this->component->row_actions;
 
 			if ( ! current_user_can( 'edit_post', $post->ID ) ) {
 				return $row_actions;
@@ -83,7 +76,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @see WPPTD\PostTypeActionHandler::run_row_action()
 		 */
 		public function maybe_run_row_action() {
-			$table_row_actions = $this->post_type->row_actions;
+			$table_row_actions = $this->component->row_actions;
 
 			$row_action = substr( current_action(), strlen( 'admin_action_' ) );
 			if ( ! isset( $table_row_actions[ $row_action ] ) ) {
@@ -115,7 +108,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @see WPPTD\PostTypeActionHandler::run_bulk_action()
 		 */
 		public function maybe_run_bulk_action() {
-			$table_bulk_actions = $this->post_type->bulk_actions;
+			$table_bulk_actions = $this->component->bulk_actions;
 
 			$bulk_action = substr( current_action(), strlen( 'admin_action_' ) );
 			if ( ! isset( $table_bulk_actions[ $bulk_action ] ) ) {
@@ -153,7 +146,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @since 0.6.1
 		 */
 		public function hack_bulk_actions() {
-			$table_bulk_actions = $this->post_type->bulk_actions;
+			$table_bulk_actions = $this->component->bulk_actions;
 
 			?>
 			<script type="text/javascript">
@@ -193,14 +186,14 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 */
 		public function maybe_hack_bulk_message( $bulk_messages, $bulk_counts ) {
 			if ( 0 < $bulk_counts['updated'] ) {
-				$action_message = get_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message' );
+				$action_message = get_transient( 'wpptd_post_' . $this->component->slug . '_bulk_row_action_message' );
 				if ( $action_message ) {
-					delete_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message' );
+					delete_transient( 'wpptd_post_' . $this->component->slug . '_bulk_row_action_message' );
 
-					if ( ! isset( $bulk_messages[ $this->post_type_slug ] ) ) {
-						$bulk_messages[ $this->post_type_slug ] = array();
+					if ( ! isset( $bulk_messages[ $this->component->slug ] ) ) {
+						$bulk_messages[ $this->component->slug ] = array();
 					}
-					$bulk_messages[ $this->post_type_slug ]['updated'] = $action_message;
+					$bulk_messages[ $this->component->slug ]['updated'] = $action_message;
 				}
 			}
 
@@ -222,8 +215,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @param integer $post_id the post ID of the post to perform the action on
 		 */
 		protected function run_row_action( $row_action, $post_id ) {
-			$table_row_actions = $this->post_type->row_actions;
-			$post_type_singular_title = $this->post_type->singular_title;
+			$table_row_actions = $this->component->row_actions;
+			$post_type_singular_title = $this->component->singular_title;
 
 			$sendback = $this->get_sendback_url();
 
@@ -249,7 +242,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 				if ( $error ) {
 					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
 				}
-				set_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_post_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			wp_redirect( add_query_arg( 'updated', 1, $sendback ) );
@@ -271,8 +264,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @param array $post_ids the array of post IDs of the posts to perform the action on
 		 */
 		protected function run_bulk_action( $bulk_action, $post_ids ) {
-			$table_bulk_actions = $this->post_type->bulk_actions;
-			$post_type_title = $this->post_type->title;
+			$table_bulk_actions = $this->component->bulk_actions;
+			$post_type_title = $this->component->title;
 
 			$sendback = wp_get_referer();
 			if ( ! $sendback ) {
@@ -300,7 +293,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 				if ( $error ) {
 					$action_message = '<span class="wpptd-error-hack hidden"></span>' . $action_message;
 				}
-				set_transient( 'wpptd_post_' . $this->post_type_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_post_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			$sendback = remove_query_arg( array( 'action', 'action2', 'tags_input', 'post_author', 'comment_status', 'ping_status', '_status', 'post', 'bulk_edit', 'post_view' ), $sendback );
@@ -317,12 +310,12 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 */
 		protected function get_sendback_url() {
 			$sendback = '';
-			if ( 'attachment' === $this->post_type_slug ) {
+			if ( 'attachment' === $this->component->slug ) {
 				$sendback = admin_url( 'upload.php' );
 			} else {
 				$sendback = admin_url( 'edit.php' );
-				if ( 'post' !== $this->post_type_slug ) {
-					$sendback = add_query_arg( 'post_type', $this->post_type_slug, $sendback );
+				if ( 'post' !== $this->component->slug ) {
+					$sendback = add_query_arg( 'post_type', $this->component->slug, $sendback );
 				}
 			}
 

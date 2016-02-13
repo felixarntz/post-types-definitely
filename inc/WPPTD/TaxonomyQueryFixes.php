@@ -23,13 +23,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyQueryFixes' ) ) {
 		 * @since 0.6.1
 		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
 		 */
-		protected $taxonomy = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var string Holds the slug of the taxonomy component.
-		 */
-		protected $taxonomy_slug = '';
+		protected $component = null;
 
 		/**
 		 * Class constructor.
@@ -38,8 +32,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyQueryFixes' ) ) {
 		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component to use this handler for
 		 */
 		public function __construct( $taxonomy ) {
-			$this->taxonomy = $taxonomy;
-			$this->taxonomy_slug = $this->taxonomy->slug;
+			$this->component = $taxonomy;
 		}
 
 		/**
@@ -51,7 +44,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyQueryFixes' ) ) {
 		 * @return array the fixed arguments
 		 */
 		public function maybe_sort_by_meta_table_column( $args, $taxonomies ) {
-			$table_columns = $this->taxonomy->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( ! isset( $args['orderby'] ) || is_array( $args['orderby'] ) ) {
 				return $args;

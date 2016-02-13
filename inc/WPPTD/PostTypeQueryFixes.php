@@ -23,13 +23,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @since 0.6.1
 		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
 		 */
-		protected $post_type = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var string Holds the slug of the post type component.
-		 */
-		protected $post_type_slug = '';
+		protected $component = null;
 
 		/**
 		 * @since 0.6.1
@@ -44,8 +38,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
 		 */
 		public function __construct( $post_type ) {
-			$this->post_type = $post_type;
-			$this->post_type_slug = $this->post_type->slug;
+			$this->component = $post_type;
 		}
 
 		/**
@@ -66,12 +59,12 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @return array the query vars array including the new ones
 		 */
 		public function register_table_filter_query_vars( $vars ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( is_array( $column_args ) && $column_args['filterable'] ) {
 					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
-						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->post_type_slug, $column_args['taxonomy_slug'] ) ) {
+						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->component->slug, $column_args['taxonomy_slug'] ) ) {
 							$vars[] = $column_slug;
 						}
 					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
@@ -94,7 +87,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @param WP_Query $wp_query the current instance of WP_Query
 		 */
 		public function maybe_filter_by_table_columns( $wp_query ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			$tax_query = array();
 			$meta_query = array();
@@ -142,7 +135,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @param WP_Query $wp_query the current instance of WP_Query
 		 */
 		public function maybe_sort_by_meta_table_column( $wp_query ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( ! isset( $wp_query->query['orderby'] ) || is_array( $wp_query->query['orderby'] ) ) {
 				return;
@@ -181,7 +174,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		public function maybe_sort_by_taxonomy_table_column( $clauses, $wp_query ) {
 			global $wpdb;
 
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( ! isset( $wp_query->query['orderby'] ) || is_array( $wp_query->query['orderby'] ) ) {
 				return $clauses;
@@ -221,7 +214,7 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * @since 0.6.1
 		 */
 		public function maybe_sort_default() {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( isset( $_GET['orderby'] ) ) {
 				return;

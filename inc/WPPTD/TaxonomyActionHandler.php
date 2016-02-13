@@ -23,13 +23,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @since 0.6.1
 		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
 		 */
-		protected $taxonomy = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var string Holds the slug of the taxonomy component.
-		 */
-		protected $taxonomy_slug = '';
+		protected $component = null;
 
 		/**
 		 * Class constructor.
@@ -38,8 +32,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component to use this handler for
 		 */
 		public function __construct( $taxonomy ) {
-			$this->taxonomy = $taxonomy;
-			$this->taxonomy_slug = $this->taxonomy->slug;
+			$this->component = $taxonomy;
 		}
 
 		/**
@@ -51,7 +44,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @return array the adjusted row actions array
 		 */
 		public function filter_row_actions( $row_actions, $term ) {
-			$table_row_actions = $this->taxonomy->row_actions;
+			$table_row_actions = $this->component->row_actions;
 
 			if ( ! current_user_can( 'manage_categories' ) ) {
 				return $row_actions;
@@ -88,7 +81,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @see WPPTD\TaxonomyActionHandler::run_row_action()
 		 */
 		public function maybe_run_row_action() {
-			$table_row_actions = $this->taxonomy->row_actions;
+			$table_row_actions = $this->component->row_actions;
 
 			$row_action = substr( current_action(), strlen( 'admin_action_' ) );
 			if ( ! isset( $table_row_actions[ $row_action ] ) ) {
@@ -118,7 +111,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @see WPPTD\TaxonomyActionHandler::run_bulk_action()
 		 */
 		public function maybe_run_bulk_action() {
-			$table_bulk_actions = $this->taxonomy->bulk_actions;
+			$table_bulk_actions = $this->component->bulk_actions;
 
 			$bulk_action = substr( current_action(), strlen( 'admin_action_' ) );
 			if ( ! isset( $table_bulk_actions[ $bulk_action ] ) ) {
@@ -149,7 +142,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @since 0.6.1
 		 */
 		public function hack_bulk_actions() {
-			$table_bulk_actions = $this->taxonomy->bulk_actions;
+			$table_bulk_actions = $this->component->bulk_actions;
 
 			?>
 			<script type="text/javascript">
@@ -183,14 +176,14 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 			$request_data = $_REQUEST;
 
 			if ( isset( $request_data['updated'] ) && 0 < (int) $request_data['updated'] && isset( $request_data['message'] ) && 1 === (int) $request_data['message'] ) {
-				$action_message = get_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message' );
+				$action_message = get_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message' );
 				if ( $action_message ) {
-					delete_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message' );
+					delete_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message' );
 
-					if ( ! isset( $messages[ $this->taxonomy_slug ] ) ) {
-						$messages[ $this->taxonomy_slug ] = array();
+					if ( ! isset( $messages[ $this->component->slug ] ) ) {
+						$messages[ $this->component->slug ] = array();
 					}
-					$messages[ $this->taxonomy_slug ][1] = $action_message;
+					$messages[ $this->component->slug ][1] = $action_message;
 				}
 				$_SERVER['REQUEST_URI'] = remove_query_arg( 'updated', $_SERVER['REQUEST_URI'] );
 			}
@@ -213,8 +206,8 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @param integer $term_id the term ID of the term to perform the action on
 		 */
 		protected function run_row_action( $row_action, $term_id ) {
-			$table_row_actions = $this->taxonomy->row_actions;
-			$taxonomy_singular_title = $this->taxonomy->singular_title;
+			$table_row_actions = $this->component->row_actions;
+			$taxonomy_singular_title = $this->component->singular_title;
 
 			$sendback = $this->get_sendback_url();
 
@@ -237,7 +230,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 			}
 
 			if ( $action_message && is_string( $action_message ) ) {
-				set_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			$query_args = array(
@@ -267,8 +260,8 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @param array $term_ids the array of term IDs of the terms to perform the action on
 		 */
 		protected function run_bulk_action( $bulk_action, $term_ids ) {
-			$table_bulk_actions = $this->taxonomy->bulk_actions;
-			$taxonomy_title = $this->taxonomy->title;
+			$table_bulk_actions = $this->component->bulk_actions;
+			$taxonomy_title = $this->component->title;
 
 			$sendback = wp_get_referer();
 			if ( ! $sendback ) {
@@ -294,7 +287,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 			}
 
 			if ( $action_message && is_string( $action_message ) ) {
-				set_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
+				set_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			$query_args = array(
@@ -318,7 +311,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @return string the default sendback URL
 		 */
 		protected function get_sendback_url() {
-			$sendback = admin_url( 'edit-tags.php?taxonomy=' . $this->taxonomy_slug );
+			$sendback = admin_url( 'edit-tags.php?taxonomy=' . $this->component->slug );
 			$request_data = $_REQUEST;
 
 			if ( isset( $request_data['post_type'] ) && 'post' !== $request_data['post_type'] ) {

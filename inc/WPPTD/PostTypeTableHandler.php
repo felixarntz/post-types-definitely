@@ -25,13 +25,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @since 0.5.0
 		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
 		 */
-		protected $post_type = null;
-
-		/**
-		 * @since 0.5.0
-		 * @var string Holds the slug of the post type component.
-		 */
-		protected $post_type_slug = '';
+		protected $component = null;
 
 		/**
 		 * @since 0.6.1
@@ -46,20 +40,13 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		protected $action_handler = null;
 
 		/**
-		 * @since 0.5.0
-		 * @var array helper variable to temporarily hold the active filters in the post type list screen
-		 */
-		protected $active_filters = array();
-
-		/**
 		 * Class constructor.
 		 *
 		 * @since 0.5.0
 		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
 		 */
 		public function __construct( $post_type ) {
-			$this->post_type = $post_type;
-			$this->post_type_slug = $this->post_type->slug;
+			$this->component = $post_type;
 			$this->query_fixes = new PostTypeQueryFixes( $post_type );
 			$this->action_handler = new PostTypeActionHandler( $post_type );
 		}
@@ -92,10 +79,10 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @return array the adjusted taxonomy slugs
 		 */
 		public function get_table_taxonomies( $taxonomies ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
-				if ( $column_args && ! empty( $column_args['taxonomy_slug'] ) && is_object_in_taxonomy( $this->post_type_slug, $column_args['taxonomy_slug'] ) ) {
+				if ( $column_args && ! empty( $column_args['taxonomy_slug'] ) && is_object_in_taxonomy( $this->component->slug, $column_args['taxonomy_slug'] ) ) {
 					if ( ! in_array( $column_args['taxonomy_slug'], $taxonomies ) ) {
 						$taxonomies[] = $column_args['taxonomy_slug'];
 					} elseif ( ! $column_args ) {
@@ -128,7 +115,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @return array the adjusted table columns
 		 */
 		public function filter_table_columns( $columns ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( false === $column_args ) {
@@ -136,7 +123,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 						unset( $columns[ $column_slug ] );
 					}
 				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.' . $this->post_type_slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+					$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 					if ( $field ) {
 						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
 					}
@@ -158,7 +145,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @return array the adjusted sortable table columns
 		 */
 		public function filter_table_sortable_columns( $columns ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( false === $column_args ) {
@@ -167,13 +154,13 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 					}
 				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
 					if ( $column_args['sortable'] ) {
-						$field = ComponentManager::get( '*.' . $this->post_type_slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+						$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 						if ( $field ) {
 							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
 						}
 					}
 				} elseif ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
-					if ( $column_args['sortable'] && is_object_in_taxonomy( $this->post_type_slug, $column_args['taxonomy_slug'] ) ) {
+					if ( $column_args['sortable'] && is_object_in_taxonomy( $this->component->slug, $column_args['taxonomy_slug'] ) ) {
 						$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
 					}
 				}
@@ -194,11 +181,11 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @param integer $post_id the post ID for the current row
 		 */
 		public function render_table_column( $column_name, $post_id ) {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( isset( $table_columns[ $column_name ] ) ) {
 				if ( isset( $table_columns[ $column_name ]['meta_key'] ) && ! empty( $table_columns[ $column_name ]['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.' . $this->post_type_slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+					$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 					if ( $field ) {
 						$field->render_table_column( $post_id );
 					}
@@ -216,19 +203,19 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @since 0.5.0
 		 */
 		public function render_table_column_filters() {
-			$table_columns = $this->post_type->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( is_array( $column_args ) && $column_args['filterable'] ) {
 					if ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
-						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->post_type_slug, $column_args['taxonomy_slug'] ) ) {
-							$taxonomy = ComponentManager::get( '*.' . $this->post_type_slug . '.' . $column_args['taxonomy_slug'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+						if ( 'category' !== $column_args['taxonomy_slug'] && is_object_in_taxonomy( $this->component->slug, $column_args['taxonomy_slug'] ) ) {
+							$taxonomy = ComponentManager::get( '*.' . $this->component->slug . '.' . $column_args['taxonomy_slug'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 							if ( $taxonomy ) {
 								$this->render_taxonomy_column_filter( $column_slug, $taxonomy );
 							}
 						}
 					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-						$field = ComponentManager::get( '*.' . $this->post_type_slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+						$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 						if ( $field ) {
 							$this->render_meta_column_filter( $column_slug, $field );
 						}
@@ -314,7 +301,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 				case 'time':
 				case 'color':
 				case 'media':
-					$options = Utility::get_all_meta_values( $field->slug, $this->post_type_slug );
+					$options = Utility::get_all_meta_values( $field->slug, $this->component->slug );
 					if ( count( $options ) > 0 ) {
 						echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
 						echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';

@@ -25,13 +25,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 		 * @since 0.6.0
 		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
 		 */
-		protected $taxonomy = null;
-
-		/**
-		 * @since 0.6.0
-		 * @var string Holds the slug of the taxonomy component.
-		 */
-		protected $taxonomy_slug = '';
+		protected $component = null;
 
 		/**
 		 * @since 0.6.1
@@ -52,8 +46,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component to use this handler for
 		 */
 		public function __construct( $taxonomy ) {
-			$this->taxonomy = $taxonomy;
-			$this->taxonomy_slug = $this->taxonomy->slug;
+			$this->component = $taxonomy;
 			$this->query_fixes = new TaxonomyQueryFixes( $taxonomy );
 			$this->action_handler = new TaxonomyActionHandler( $taxonomy );
 		}
@@ -86,7 +79,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 		 * @return array the adjusted table columns
 		 */
 		public function filter_table_columns( $columns ) {
-			$table_columns = $this->taxonomy->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( false === $column_args ) {
@@ -94,7 +87,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 						unset( $columns[ $column_slug ] );
 					}
 				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.*.' . $this->taxonomy_slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
+					$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
 					if ( $field ) {
 						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
 					}
@@ -116,7 +109,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 		 * @return array the adjusted sortable table columns
 		 */
 		public function filter_table_sortable_columns( $columns ) {
-			$table_columns = $this->taxonomy->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			foreach ( $table_columns as $column_slug => $column_args ) {
 				if ( false === $column_args ) {
@@ -125,7 +118,7 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 					}
 				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
 					if ( $column_args['sortable'] ) {
-						$field = ComponentManager::get( '*.*.' . $this->taxonomy_slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
+						$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
 						if ( $field ) {
 							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
 						}
@@ -149,12 +142,12 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 		 * @return string the actual output for the table column
 		 */
 		public function render_table_column( $output, $column_name, $term_id ) {
-			$table_columns = $this->taxonomy->table_columns;
+			$table_columns = $this->component->table_columns;
 
 			if ( isset( $table_columns[ $column_name ] ) ) {
 				ob_start();
 				if ( isset( $table_columns[ $column_name ]['meta_key'] ) && ! empty( $table_columns[ $column_name ]['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.*.' . $this->taxonomy_slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
+					$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
 					if ( $field ) {
 						$field->render_table_column( $term_id );
 					}
