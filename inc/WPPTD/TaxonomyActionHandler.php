@@ -18,124 +18,9 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 	 * @internal
 	 * @since 0.6.1
 	 */
-	class TaxonomyActionHandler {
+	class TaxonomyActionHandler extends ActionHandler {
 		/**
-		 * @since 0.6.1
-		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
-		 */
-		protected $component = null;
-
-		/**
-		 * Class constructor.
-		 *
-		 * @since 0.6.1
-		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component to use this handler for
-		 */
-		public function __construct( $taxonomy ) {
-			$this->component = $taxonomy;
-		}
-
-		/**
-		 * This filter adjusts the available row actions.
-		 *
-		 * @since 0.6.1
-		 * @param array $row_actions the original array of row actions
-		 * @param WP_Term $term the current term object
-		 * @return array the adjusted row actions array
-		 */
-		public function filter_row_actions( $row_actions, $term ) {
-			$table_row_actions = $this->component->row_actions;
-
-			if ( ! current_user_can( 'manage_categories' ) ) {
-				return $row_actions;
-			}
-
-			foreach ( $table_row_actions as $action_slug => $action_args ) {
-				// do not allow overriding of existing actions
-				if ( isset( $row_actions[ $action_slug ] ) ) {
-					continue;
-				}
-
-				$request_data = $_REQUEST;
-
-				$path = 'edit-tags.php?taxonomy=' . $term->taxonomy;
-				if ( isset( $request_data['post_type'] ) ) {
-					$path .= '&post_type=' . $request_data['post_type'];
-				}
-				$path .= '&tag_ID=' . $term->term_id;
-
-				$base_url = admin_url( $path );
-
-				$row_actions[ $action_slug ] = '<a href="' . esc_url( wp_nonce_url( add_query_arg( 'action', $action_slug, $base_url ), $action_slug . '-term_' . $term->term_id ) ) . '" title="' . esc_attr( $action_args['title'] ) . '">' . esc_html( $action_args['title'] ) . '</a>';
-			}
-
-			return $row_actions;
-		}
-
-		/**
-		 * This action is a general router to check whether a specific row action should be performed.
-		 *
-		 * It also determines the term ID the action should be performed on.
-		 *
-		 * @since 0.6.1
-		 * @see WPPTD\TaxonomyActionHandler::run_row_action()
-		 */
-		public function maybe_run_row_action() {
-			$table_row_actions = $this->component->row_actions;
-
-			$row_action = substr( current_action(), strlen( 'admin_action_' ) );
-			if ( ! isset( $table_row_actions[ $row_action ] ) ) {
-				return;
-			}
-
-			$request_data = $_REQUEST;
-
-			$term_id = 0;
-			if ( isset( $request_data['tag_ID'] ) ) {
-				$term_id = (int) $request_data['tag_ID'];
-			}
-
-			if ( ! $term_id ) {
-				return;
-			}
-
-			$this->run_row_action( $row_action, $term_id );
-		}
-
-		/**
-		 * This action is a general router to check whether a specific bulk action should be performed.
-		 *
-		 * It also determines the term IDs the action should be performed on.
-		 *
-		 * @since 0.6.1
-		 * @see WPPTD\TaxonomyActionHandler::run_bulk_action()
-		 */
-		public function maybe_run_bulk_action() {
-			$table_bulk_actions = $this->component->bulk_actions;
-
-			$bulk_action = substr( current_action(), strlen( 'admin_action_' ) );
-			if ( ! isset( $table_bulk_actions[ $bulk_action ] ) ) {
-				return;
-			}
-
-			$request_data = $_REQUEST;
-
-			$term_ids = array();
-			if ( isset( $request_data['delete_tags'] ) ) {
-				$term_ids = (array) $request_data['delete_tags'];
-			}
-
-			if ( ! $term_ids ) {
-				return;
-			}
-
-			$term_ids = array_map( 'intval', $term_ids );
-
-			$this->run_bulk_action( $bulk_action, $term_ids );
-		}
-
-		/**
-		 * This action is a hack to extend the bulk actions dropdown with custom bulk actions.
+		 * This action is a hack to extend the bulk actions dropdown with custom bulk actions via JavaScript.
 		 *
 		 * WordPress does not natively support this. That's why we need this ugly solution.
 		 *
@@ -169,70 +54,99 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * It is basically a hack to display a custom message for that action instead of the default message.
 		 *
 		 * @since 0.6.1
-		 * @param array $messages the original array of term messages
+		 * @param array $bulk_messages the original array of term messages
 		 * @return array the (temporarily) updated array of term messages
 		 */
-		public function maybe_hack_action_message( $messages ) {
+		public function maybe_hack_action_message( $bulk_messages, $bulk_counts = array() ) {
 			$request_data = $_REQUEST;
 
 			if ( isset( $request_data['updated'] ) && 0 < (int) $request_data['updated'] && isset( $request_data['message'] ) && 1 === (int) $request_data['message'] ) {
-				$action_message = get_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message' );
+				$transient_name = $this->get_message_transient_name();
+				$action_message = get_transient( $transient_name );
 				if ( $action_message ) {
-					delete_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message' );
+					delete_transient( $transient_name );
 
-					if ( ! isset( $messages[ $this->component->slug ] ) ) {
-						$messages[ $this->component->slug ] = array();
+					if ( ! isset( $bulk_messages[ $this->component->slug ] ) ) {
+						$bulk_messages[ $this->component->slug ] = array();
 					}
-					$messages[ $this->component->slug ][1] = $action_message;
+					$bulk_messages[ $this->component->slug ][1] = $action_message;
 				}
 				$_SERVER['REQUEST_URI'] = remove_query_arg( 'updated', $_SERVER['REQUEST_URI'] );
 			}
 
-			return $messages;
+			return $bulk_messages;
 		}
 
 		/**
-		 * Performs a specific row action and redirects back to the list table screen afterwards.
-		 *
-		 * The callback function of every row action must accept exactly one parameter, the term ID.
-		 * It must return (depending on whether the action was successful or not)...
-		 * - either a string to use as the success message
-		 * - a WP_Error object with a custom message to use as the error message
-		 *
-		 * The message is temporarily stored in a transient and printed out after the redirect.
+		 * Returns parameters to pass to `current_user_can()` to check whether the current user can run row actions.
 		 *
 		 * @since 0.6.1
-		 * @param string $row_action the row action slug
-		 * @param integer $term_id the term ID of the term to perform the action on
+		 * @param WP_Term|integer $term a term object or ID
+		 * @return array parameters to pass on to `current_user_can()`
 		 */
-		protected function run_row_action( $row_action, $term_id ) {
-			$table_row_actions = $this->component->row_actions;
-			$taxonomy_singular_title = $this->component->singular_title;
+		protected function get_row_capability_args( $term ) {
+			return array( 'manage_categories' );
+		}
 
-			$sendback = $this->get_sendback_url();
+		/**
+		 * Returns the base admin URL for a term.
+		 *
+		 * @since 0.6.1
+		 * @param WP_Term $term a term object
+		 * @return string base admin URL for this term
+		 */
+		protected function get_row_base_url( $term ) {
+			$request_data = $_REQUEST;
 
-			check_admin_referer( $row_action . '-term_' . $term_id );
+			$path = 'edit-tags.php?taxonomy=' . $term->taxonomy;
+			if ( isset( $request_data['post_type'] ) ) {
+				$path .= '&post_type=' . $request_data['post_type'];
+			}
+			$path .= '&tag_ID=' . $term->term_id;
 
-			$action_message = false;
-			$error = false;
-			if ( ! current_user_can( 'manage_categories' ) ) {
-				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'post-types-definitely' ), $taxonomy_singular_title );
-				$error = true;
-			} elseif ( empty( $table_row_actions[ $row_action ]['callback'] ) || ! is_callable( $table_row_actions[ $row_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s was not updated since an internal error occurred.', 'post-types-definitely' ), $taxonomy_singular_title );
-				$error = true;
-			} else {
-				$action_message = call_user_func( $table_row_actions[ $row_action ]['callback'], $term_id );
-				if ( is_wp_error( $action_message ) ) {
-					$action_message = $action_message->get_error_message();
-					$error = true;
-				}
+			return admin_url( $path );
+		}
+
+		/**
+		 * Returns the name of the nonce that should be used to check for a specific term row action.
+		 *
+		 * @since 0.6.1
+		 * @param string $action_slug the slug of the action to perform
+		 * @param WP_Term|integer $term a term object or ID
+		 * @return string name of the nonce
+		 */
+		protected function get_row_nonce_name( $action_slug, $term ) {
+			if ( is_object( $term ) ) {
+				$term = $term->term_id;
+			}
+			return $action_slug . '-term_' . $term;
+		}
+
+		/**
+		 * Returns the ID of a term that a row action should be performed on.
+		 *
+		 * @since 0.6.1
+		 * @return integer a term ID
+		 */
+		protected function get_row_id() {
+			$request_data = $_REQUEST;
+
+			if ( isset( $request_data['tag_ID'] ) ) {
+				return $request_data['tag_ID'];
 			}
 
-			if ( $action_message && is_string( $action_message ) ) {
-				set_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
-			}
+			return 0;
+		}
 
+		/**
+		 * Returns the sendback URL to return to after a row action has been run.
+		 *
+		 * @since 0.6.1
+		 * @param string $message the resulting notification of the row action
+		 * @param boolean $error whether the message is an error message
+		 * @return string the sendback URL to redirect to
+		 */
+		protected function get_row_sendback_url( $message, $error = false ) {
 			$query_args = array(
 				'updated'	=> 1,
 				'message'	=> 1,
@@ -241,53 +155,58 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 				$query_args['error'] = 1;
 			}
 
-			wp_redirect( add_query_arg( $query_args, $sendback ) );
-			exit();
+			return add_query_arg( $query_args, $this->get_sendback_url() );
 		}
 
 		/**
-		 * Performs a specific bulk action and redirects back to the list table screen afterwards.
-		 *
-		 * The callback function of every bulk action must accept exactly one parameter, an array of term IDs.
-		 * It must return (depending on whether the action was successful or not)...
-		 * - either a string to use as the success message
-		 * - a WP_Error object with a custom message to use as the error message
-		 *
-		 * The message is temporarily stored in a transient and printed out after the redirect.
+		 * Returns parameters to pass to `current_user_can()` to check whether the current user can run bulk actions.
 		 *
 		 * @since 0.6.1
-		 * @param string $bulk_action the bulk action slug
-		 * @param array $term_ids the array of term IDs of the terms to perform the action on
+		 * @return array parameters to pass on to `current_user_can()`
 		 */
-		protected function run_bulk_action( $bulk_action, $term_ids ) {
-			$table_bulk_actions = $this->component->bulk_actions;
-			$taxonomy_title = $this->component->title;
+		protected function get_bulk_capability_args() {
+			return array( 'manage_categories' );
+		}
 
+		/**
+		 * Returns the name of the nonce that should be used to check for a bulk action.
+		 *
+		 * @since 0.6.1
+		 * @return string name of the nonce
+		 */
+		protected function get_bulk_nonce_name() {
+			return 'bulk-tags';
+		}
+
+		/**
+		 * Returns an array of term IDs that a bulk action should be performed on.
+		 *
+		 * @since 0.6.1
+		 * @return array term IDs
+		 */
+		protected function get_bulk_ids() {
+			$request_data = $_REQUEST;
+
+			if ( isset( $request_data['delete_tags'] ) ) {
+				return (array) $request_data['delete_tags'];
+			}
+
+			return array();
+		}
+
+		/**
+		 * Returns the sendback URL to return to after a bulk action has been run.
+		 *
+		 * @since 0.6.1
+		 * @param string $message the resulting notification of the bulk action
+		 * @param boolean $error whether the message is an error message
+		 * @param integer $count the number of terms affected
+		 * @return string the sendback URL to redirect to
+		 */
+		protected function get_bulk_sendback_url( $message, $error = false, $count = 0 ) {
 			$sendback = wp_get_referer();
 			if ( ! $sendback ) {
 				$sendback = $this->get_sendback_url();
-			}
-
-			check_admin_referer( 'bulk-tags' );
-
-			$action_message = false;
-			$error = false;
-			if ( ! current_user_can( 'manage_categories' ) ) {
-				$action_message = sprintf( __( 'The %s were not updated because of missing privileges.', 'post-types-definitely' ), $taxonomy_title );
-				$error = true;
-			} elseif ( empty( $table_bulk_actions[ $bulk_action ]['callback'] ) || ! is_callable( $table_bulk_actions[ $bulk_action ]['callback'] ) ) {
-				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $taxonomy_title );
-				$error = true;
-			} else {
-				$action_message = call_user_func( $table_bulk_actions[ $bulk_action ]['callback'], $term_ids );
-				if ( is_wp_error( $action_message ) ) {
-					$action_message = $action_message->get_error_message();
-					$error = true;
-				}
-			}
-
-			if ( $action_message && is_string( $action_message ) ) {
-				set_transient( 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message', $action_message, MINUTE_IN_SECONDS );
 			}
 
 			$query_args = array(
@@ -300,8 +219,17 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 
 			$sendback = remove_query_arg( array( 'action', 'action2' ), $sendback );
 
-			wp_redirect( add_query_arg( $query_args, $sendback ) );
-			exit();
+			return add_query_arg( $query_args, $sendback );
+		}
+
+		/**
+		 * Returns the name of the transient under which messages should be stored.
+		 *
+		 * @since 0.6.1
+		 * @return string the name of the transient
+		 */
+		protected function get_message_transient_name() {
+			return 'wpptd_term_' . $this->component->slug . '_bulk_row_action_message';
 		}
 
 		/**

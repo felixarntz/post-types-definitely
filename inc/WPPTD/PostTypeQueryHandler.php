@@ -11,35 +11,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
+if ( ! class_exists( 'WPPTD\PostTypeQueryHandler' ) ) {
 	/**
 	 * This class adjusts `WP_Query` for a post type registered with WPPTD.
 	 *
 	 * @internal
 	 * @since 0.6.1
 	 */
-	class PostTypeQueryFixes {
-		/**
-		 * @since 0.6.1
-		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
-		 */
-		protected $component = null;
-
+	class PostTypeQueryHandler extends QueryHandler {
 		/**
 		 * @since 0.6.1
 		 * @var array helper variable to temporarily hold the active filters in the post type list screen
 		 */
 		protected $active_filters = array();
-
-		/**
-		 * Class constructor.
-		 *
-		 * @since 0.6.1
-		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
-		 */
-		public function __construct( $post_type ) {
-			$this->component = $post_type;
-		}
 
 		/**
 		 * Returns the currently active filters.
@@ -82,8 +66,8 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 		 * It builds the 'tax_query' and 'meta_query' keys and appends them to the query.
 		 *
 		 * @since 0.6.1
-		 * @see WPPTD\PostTypeQueryFixes::filter_by_taxonomy()
-		 * @see WPPTD\PostTypeQueryFixes::filter_by_meta()
+		 * @see WPPTD\PostTypeQueryHandler::filter_by_taxonomy()
+		 * @see WPPTD\PostTypeQueryHandler::filter_by_meta()
 		 * @param WP_Query $wp_query the current instance of WP_Query
 		 */
 		public function maybe_filter_by_table_columns( $wp_query ) {
@@ -126,37 +110,6 @@ if ( ! class_exists( 'WPPTD\PostTypeQueryFixes' ) ) {
 				$meta_query = array_merge( $orig_meta_query, $meta_query );
 				$wp_query->set( 'meta_query', $meta_query );
 			}
-		}
-
-		/**
-		 * This action modifies the current query to sort by a specific meta field.
-		 *
-		 * @since 0.6.1
-		 * @param WP_Query $wp_query the current instance of WP_Query
-		 */
-		public function maybe_sort_by_meta_table_column( $wp_query ) {
-			$table_columns = $this->component->table_columns;
-
-			if ( ! isset( $wp_query->query['orderby'] ) || is_array( $wp_query->query['orderby'] ) ) {
-				return;
-			}
-
-			$orderby = $wp_query->query['orderby'];
-
-			if ( ! isset( $table_columns[ $orderby ] ) ) {
-				return;
-			}
-
-			if ( ! $table_columns[ $orderby ]['sortable'] ) {
-				return;
-			}
-
-			if ( ! isset( $table_columns[ $orderby ]['meta_key'] ) || empty( $table_columns[ $orderby ]['meta_key'] ) ) {
-				return;
-			}
-
-			$wp_query->set( 'meta_key', $table_columns[ $orderby ]['meta_key'] );
-			$wp_query->set( 'orderby', 'meta_value' );
 		}
 
 		/**

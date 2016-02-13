@@ -20,144 +20,49 @@ if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 	 * @internal
 	 * @since 0.6.0
 	 */
-	class TaxonomyTableHandler {
-		/**
-		 * @since 0.6.0
-		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
-		 */
-		protected $component = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var WPPTD\TaxonomyQueryFixes Holds the `get_terms()` fix instance for this taxonomy.
-		 */
-		protected $query_fixes = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var WPPTD\TaxonomyActionHandler Holds the action handler for this taxonomy.
-		 */
-		protected $action_handler = null;
-
+	class TaxonomyTableHandler extends TableHandler {
 		/**
 		 * Class constructor.
 		 *
 		 * @since 0.6.0
 		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component to use this handler for
+		 * @param null $query_handler only for parent class, must not be used here
+		 * @param null $action_handler only for parent class, must not be used here
 		 */
-		public function __construct( $taxonomy ) {
-			$this->component = $taxonomy;
-			$this->query_fixes = new TaxonomyQueryFixes( $taxonomy );
-			$this->action_handler = new TaxonomyActionHandler( $taxonomy );
+		public function __construct( $taxonomy, $query_handler = null, $action_handler = null ) {
+			parent::__construct( $taxonomy, new TaxonomyQueryHandler( $taxonomy ), new TaxonomyActionHandler( $taxonomy ) );
 		}
 
 		/**
-		 * Returns the `get_terms()` fix instance for this taxonomy.
+		 * This function filters the output of a list table column.
 		 *
 		 * @since 0.6.1
-		 * @return WPPTD\TaxonomyQueryFixes the `get_terms()` fix instance for this taxonomy
-		 */
-		public function get_query_fixes() {
-			return $this->query_fixes;
-		}
-
-		/**
-		 * Returns the action handler for this taxonomy.
-		 *
-		 * @since 0.6.1
-		 * @return WPPTD\TaxonomyActionHandler the action handler for this taxonomy
-		 */
-		public function get_action_handler() {
-			return $this->action_handler;
-		}
-
-		/**
-		 * This filter adjusts the list table columns.
-		 *
-		 * @since 0.6.0
-		 * @param array $columns the original table columns as $column_slug => $title
-		 * @return array the adjusted table columns
-		 */
-		public function filter_table_columns( $columns ) {
-			$table_columns = $this->component->table_columns;
-
-			foreach ( $table_columns as $column_slug => $column_args ) {
-				if ( false === $column_args ) {
-					if ( isset( $columns[ $column_slug ] ) ) {
-						unset( $columns[ $column_slug ] );
-					}
-				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
-					if ( $field ) {
-						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
-					}
-				} elseif ( isset( $column_args['custom_callback'] ) && ! empty( $column_args['custom_callback'] ) ) {
-					$columns[ $column_slug ] = $column_args['title'];
-				}
-			}
-
-			return $columns;
-		}
-
-		/**
-		 * This filter adjusts the sortable list table columns.
-		 *
-		 * Any column which is `'sortable' => true` will be added to the array.
-		 *
-		 * @since 0.6.0
-		 * @param array $columns the original sortable table columns as $column_slug => array( $sort_by, $desc )
-		 * @return array the adjusted sortable table columns
-		 */
-		public function filter_table_sortable_columns( $columns ) {
-			$table_columns = $this->component->table_columns;
-
-			foreach ( $table_columns as $column_slug => $column_args ) {
-				if ( false === $column_args ) {
-					if ( isset( $columns[ $column_slug ] ) ) {
-						unset( $columns[ $column_slug ] );
-					}
-				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					if ( $column_args['sortable'] ) {
-						$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
-						if ( $field ) {
-							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
-						}
-					}
-				}
-			}
-
-			return $columns;
-		}
-
-		/**
-		 * This function renders a list table column.
-		 *
-		 * For meta value columns, the corresponding field component takes care of rendering.
-		 * For custom columns, the callback to render the column is called.
-		 *
-		 * @since 0.6.0
 		 * @param string $output empty string as default output for the table column
 		 * @param string $column_name the column name of the column that should be rendered
 		 * @param integer $term_id the term ID for the current row
 		 * @return string the actual output for the table column
 		 */
-		public function render_table_column( $output, $column_name, $term_id ) {
+		public function filter_table_column_output( $output, $column_name, $term_id ) {
 			$table_columns = $this->component->table_columns;
 
 			if ( isset( $table_columns[ $column_name ] ) ) {
 				ob_start();
-				if ( isset( $table_columns[ $column_name ]['meta_key'] ) && ! empty( $table_columns[ $column_name ]['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
-					if ( $field ) {
-						$field->render_table_column( $term_id );
-					}
-				} elseif ( $table_columns[ $column_name ]['custom_callback'] && is_callable( $table_columns[ $column_name ]['custom_callback'] ) ) {
-					call_user_func( $table_columns[ $column_name ]['custom_callback'], $term_id );
-				}
+				$this->render_table_column( $column_name, $term_id );
 				$output = ob_get_clean();
 			}
 
 			return $output;
+		}
+
+		/**
+		 * Returns a specific field child component of the taxonomy component.
+		 *
+		 * @since 0.6.1
+		 * @param string $field_slug the slug of the field component to get
+		 * @return WPPTD\Components\TermField the field component with the slug $field_slug
+		 */
+		protected function get_child_field( $field_slug ) {
+			return ComponentManager::get( '*.*.' . $this->component->slug . '.*.' . $field_slug, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy.WPPTD\Components\TermMetabox', true );
 		}
 
 		/**

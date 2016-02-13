@@ -310,7 +310,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 *
 		 * @see WPPTD\Components\PostType
 		 * @see WPPTD\PostTypeTableHandler
-		 * @see WPPTD\PostTypeQueryFixes
+		 * @see WPPTD\PostTypeQueryHandler
 		 * @since 0.5.0
 		 */
 		public function handle_table_filtering_and_sorting() {
@@ -319,15 +319,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type_table_handler = $post_type->get_table_handler();
-				$post_type_query_fixes = $post_type_table_handler->get_query_fixes();
+				$post_type_query_handler = $post_type_table_handler->get_query_handler();
 
-				$post_type_query_fixes->maybe_sort_default();
+				$post_type_query_handler->maybe_sort_default();
 
 				add_action( 'restrict_manage_posts', array( $post_type_table_handler, 'render_table_column_filters' ) );
-				add_filter( 'query_vars', array( $post_type_query_fixes, 'register_table_filter_query_vars' ) );
-				add_action( 'pre_get_posts', array( $post_type_query_fixes, 'maybe_filter_by_table_columns' ), 10, 1 );
-				add_action( 'pre_get_posts', array( $post_type_query_fixes, 'maybe_sort_by_meta_table_column' ), 10, 1 );
-				add_filter( 'posts_clauses', array( $post_type_query_fixes, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
+				add_filter( 'query_vars', array( $post_type_query_handler, 'register_table_filter_query_vars' ) );
+				add_action( 'pre_get_posts', array( $post_type_query_handler, 'maybe_filter_by_table_columns' ), 10, 1 );
+				add_action( 'pre_get_posts', array( $post_type_query_handler, 'maybe_sort_by_meta_table_column' ), 10, 1 );
+				add_filter( 'posts_clauses', array( $post_type_query_handler, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
 			}
 		}
 
@@ -745,7 +745,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 *
 		 * @see WPPTD\Components\Taxonomy
 		 * @see WPPTD\TaxonomyTableHandler
-		 * @see WPPTD\TaxonomyQueryFixes
+		 * @see WPPTD\TaxonomyQueryHandler
 		 * @since 0.6.1
 		 */
 		public function handle_term_table_sorting() {
@@ -759,9 +759,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
 				$taxonomy_table_handler = $taxonomy->get_table_handler();
-				$taxonomy_query_fixes = $taxonomy_table_handler->get_query_fixes();
+				$taxonomy_query_handler = $taxonomy_table_handler->get_query_handler();
 
-				add_filter( 'get_terms_args', array( $taxonomy_query_fixes, 'maybe_sort_by_meta_table_column' ), 10, 2 );
+				add_filter( 'get_terms_args', array( $taxonomy_query_handler, 'maybe_sort_by_meta_table_column' ), 10, 2 );
 			}
 		}
 
@@ -931,7 +931,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 				add_filter( 'manage_edit-' . $taxonomy->slug . '_columns', array( $taxonomy_table_handler, 'filter_table_columns' ) );
 				add_filter( 'manage_edit-' . $taxonomy->slug . '_sortable_columns', array( $taxonomy_table_handler, 'filter_table_sortable_columns' ) );
-				add_filter( 'manage_' . $taxonomy->slug . '_custom_column', array( $taxonomy_table_handler, 'render_table_column' ), 10, 3 );
+				add_filter( 'manage_' . $taxonomy->slug . '_custom_column', array( $taxonomy_table_handler, 'filter_table_column_output' ), 10, 3 );
 
 				add_filter( $taxonomy->slug . '_row_actions', array( $this, 'get_term_row_actions' ), 10, 2 );
 			}

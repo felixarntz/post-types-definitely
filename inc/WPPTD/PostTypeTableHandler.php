@@ -20,55 +20,17 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 	 * @internal
 	 * @since 0.5.0
 	 */
-	class PostTypeTableHandler {
-		/**
-		 * @since 0.5.0
-		 * @var WPPTD\Components\PostType Holds the post type component this table handler should manage.
-		 */
-		protected $component = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var WPPTD\PostTypeQueryFixes Holds the `WP_Query` fix instance for this post type.
-		 */
-		protected $query_fixes = null;
-
-		/**
-		 * @since 0.6.1
-		 * @var WPPTD\PostTypeActionHandler Holds the action handler for this post type.
-		 */
-		protected $action_handler = null;
-
+	class PostTypeTableHandler extends TableHandler {
 		/**
 		 * Class constructor.
 		 *
 		 * @since 0.5.0
 		 * @param WPPTD\Components\PostType $post_type the post type component to use this handler for
+		 * @param null $query_handler only for parent class, must not be used here
+		 * @param null $action_handler only for parent class, must not be used here
 		 */
-		public function __construct( $post_type ) {
-			$this->component = $post_type;
-			$this->query_fixes = new PostTypeQueryFixes( $post_type );
-			$this->action_handler = new PostTypeActionHandler( $post_type );
-		}
-
-		/**
-		 * Returns the `WP_Query` fix instance for this post type.
-		 *
-		 * @since 0.6.1
-		 * @return WPPTD\PostTypeQueryFixes the `WP_Query` fix instance for this post type
-		 */
-		public function get_query_fixes() {
-			return $this->query_fixes;
-		}
-
-		/**
-		 * Returns the action handler for this post type.
-		 *
-		 * @since 0.6.1
-		 * @return WPPTD\PostTypeActionHandler the action handler for this post type
-		 */
-		public function get_action_handler() {
-			return $this->action_handler;
+		public function __construct( $post_type, $query_handler = null, $action_handler = null ) {
+			parent::__construct( $post_type, new PostTypeQueryHandler( $post_type ), new PostTypeActionHandler( $post_type ) );
 		}
 
 		/**
@@ -106,96 +68,6 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		}
 
 		/**
-		 * This filter adjusts the list table columns.
-		 *
-		 * Taxonomy columns are not dealt with here since they are handled by the `get_table_taxonomies()` method.
-		 *
-		 * @since 0.5.0
-		 * @param array $columns the original table columns as $column_slug => $title
-		 * @return array the adjusted table columns
-		 */
-		public function filter_table_columns( $columns ) {
-			$table_columns = $this->component->table_columns;
-
-			foreach ( $table_columns as $column_slug => $column_args ) {
-				if ( false === $column_args ) {
-					if ( isset( $columns[ $column_slug ] ) ) {
-						unset( $columns[ $column_slug ] );
-					}
-				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
-					if ( $field ) {
-						$columns[ $column_slug ] = ! empty( $column_args['title'] ) ? $column_args['title'] : $field->title;
-					}
-				} elseif ( isset( $column_args['custom_callback'] ) && ! empty( $column_args['custom_callback'] ) ) {
-					$columns[ $column_slug ] = $column_args['title'];
-				}
-			}
-
-			return $columns;
-		}
-
-		/**
-		 * This filter adjusts the sortable list table columns.
-		 *
-		 * Any column which is `'sortable' => true` will be added to the array.
-		 *
-		 * @since 0.5.0
-		 * @param array $columns the original sortable table columns as $column_slug => array( $sort_by, $desc )
-		 * @return array the adjusted sortable table columns
-		 */
-		public function filter_table_sortable_columns( $columns ) {
-			$table_columns = $this->component->table_columns;
-
-			foreach ( $table_columns as $column_slug => $column_args ) {
-				if ( false === $column_args ) {
-					if ( isset( $columns[ $column_slug ] ) ) {
-						unset( $columns[ $column_slug ] );
-					}
-				} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-					if ( $column_args['sortable'] ) {
-						$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
-						if ( $field ) {
-							$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
-						}
-					}
-				} elseif ( isset( $column_args['taxonomy_slug'] ) && ! empty( $column_args['taxonomy_slug'] ) ) {
-					if ( $column_args['sortable'] && is_object_in_taxonomy( $this->component->slug, $column_args['taxonomy_slug'] ) ) {
-						$columns[ $column_slug ] = ( is_string( $column_args['sortable'] ) && 'desc' === strtolower( $column_args['sortable'] ) ) ? array( $column_slug, true ) : array( $column_slug, false );
-					}
-				}
-			}
-
-			return $columns;
-		}
-
-		/**
-		 * This function renders a list table column.
-		 *
-		 * For meta value columns, the corresponding field component takes care of rendering.
-		 * For custom columns, the callback to render the column is called.
-		 * Taxonomy columns are not dealt with here since WordPress renders them automatically.
-		 *
-		 * @since 0.5.0
-		 * @param string $column_name the column name of the column that should be rendered
-		 * @param integer $post_id the post ID for the current row
-		 */
-		public function render_table_column( $column_name, $post_id ) {
-			$table_columns = $this->component->table_columns;
-
-			if ( isset( $table_columns[ $column_name ] ) ) {
-				if ( isset( $table_columns[ $column_name ]['meta_key'] ) && ! empty( $table_columns[ $column_name ]['meta_key'] ) ) {
-					$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $table_columns[ $column_name ]['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
-					if ( $field ) {
-						$field->render_table_column( $post_id );
-					}
-				} elseif ( $table_columns[ $column_name ]['custom_callback'] && is_callable( $table_columns[ $column_name ]['custom_callback'] ) ) {
-					call_user_func( $table_columns[ $column_name ]['custom_callback'], $post_id );
-				}
-			}
-		}
-
-		/**
 		 * This function renders the necessary filter dropdowns for taxonomies and meta values.
 		 *
 		 * The taxonomy dropdown for 'category' will never be rendered here because WordPress creates it automatically if needed.
@@ -215,13 +87,35 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 							}
 						}
 					} elseif ( isset( $column_args['meta_key'] ) && ! empty( $column_args['meta_key'] ) ) {
-						$field = ComponentManager::get( '*.' . $this->component->slug . '.*.' . $column_args['meta_key'], 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
+						$field = $this->get_child_field( $column_args['meta_key'] );
 						if ( $field ) {
 							$this->render_meta_column_filter( $column_slug, $field );
 						}
 					}
 				}
 			}
+		}
+
+		/**
+		 * This function returns the sort parameter for a column if this column should be sortable in the table.
+		 *
+		 * @since 0.6.1
+		 * @param string $slug the column slug
+		 * @param array $args the column arguments
+		 * @return string|false either the column sort parameter or false
+		 */
+		protected function filter_table_sortable_column( $slug, $args ) {
+			if ( ! is_array( $args ) ) {
+				return false;
+			}
+
+			if ( isset( $args['taxonomy_slug'] ) && ! empty( $args['taxonomy_slug'] ) ) {
+				if ( $args['sortable'] && is_object_in_taxonomy( $this->component->slug, $args['taxonomy_slug'] ) ) {
+					return ( is_string( $args['sortable'] ) && 'desc' === strtolower( $args['sortable'] ) ) ? array( $slug, true ) : array( $slug, false );
+				}
+			}
+
+			return parent::filter_table_sortable_column( $slug, $args );
 		}
 
 		/**
@@ -232,7 +126,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @param WPPTD\Components\Taxonomy $taxonomy the taxonomy component
 		 */
 		protected function render_taxonomy_column_filter( $column_slug, $taxonomy ) {
-			$active_filters = $this->query_fixes->get_active_filters();
+			$active_filters = $this->query_handler->get_active_filters();
 
 			$labels = $taxonomy->labels;
 			echo '<label class="screen-reader-text" for="' . $column_slug . '">' . $labels['filter_by_item'] . '</label>';
@@ -256,65 +150,111 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @param WPPTD\Components\Field $field the field component
 		 */
 		protected function render_meta_column_filter( $column_slug, $field ) {
-			$active_filters = $this->query_fixes->get_active_filters();
+			$active_filters = $this->query_handler->get_active_filters();
 
 			switch ( $field->type ) {
 				case 'select':
 				case 'multiselect':
 				case 'radio':
 				case 'multibox':
-					echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-					echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-					foreach ( $field->options as $value => $label ) {
-						echo '<option value="' . esc_attr( $value ) . '"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == $value ) ? ' selected="selected"' : '' ) . '>';
-						if ( is_array( $label ) ) {
-							if ( isset( $label['label'] ) && ! empty( $label['label'] ) ) {
-								echo esc_html( $label['label'] );
-							} elseif ( isset( $label['image'] ) ) {
-								echo esc_html( $label['image'] );
-							} elseif ( isset( $label['color'] ) ) {
-								echo esc_html( $label['color'] );
-							}
-						} else {
-							echo esc_html( $label );
-						}
-						echo '</option>';
-					}
-					echo '</select>';
+					$this->render_meta_column_choice_filter( $column_slug, $field, $active_filters )
 					break;
 				case 'checkbox':
-					echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-					echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-					echo '<option value="bool:true"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
-					_e( 'Yes', 'post-types-definitely' );
-					echo '</option>';
-					echo '<option value="bool:false"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
-					_e( 'No', 'post-types-definitely' );
-					echo '</option>';
-					echo '</select>';
+					$this->render_meta_column_bool_filter( $column_slug, $field, $active_filters );
 					break;
-				case 'text':
-				case 'email':
-				case 'url':
 				case 'datetime':
 				case 'date':
 				case 'time':
+				case 'text':
+				case 'email':
+				case 'url':
 				case 'color':
 				case 'media':
-					$options = Utility::get_all_meta_values( $field->slug, $this->component->slug );
-					if ( count( $options ) > 0 ) {
-						echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
-						echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
-						foreach ( $options as $option ) {
-							echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
-							echo $field->_field->parse( $option, true );
-							echo '</option>';
-						}
-						echo '</select>';
-					}
+					$this->render_meta_column_input_filter( $column_slug, $field, $active_filters );
 					break;
 				default:
 			}
+		}
+
+		/**
+		 * Prints a filter dropdown for a meta field with selectable choices.
+		 *
+		 * @since 0.6.1
+		 * @param string $column_slug the slug of the meta field column
+		 * @param WPPTD\Components\Field $field the field component
+		 * @param array $active_filters currently active filters and their values
+		 */
+		protected function render_meta_column_choice_filter( $column_slug, $field, $active_filters ) {
+			echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+			echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+			foreach ( $field->options as $value => $label ) {
+				echo '<option value="' . esc_attr( $value ) . '"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == $value ) ? ' selected="selected"' : '' ) . '>';
+				if ( is_array( $label ) ) {
+					if ( isset( $label['label'] ) && ! empty( $label['label'] ) ) {
+						echo esc_html( $label['label'] );
+					} elseif ( isset( $label['image'] ) ) {
+						echo esc_html( $label['image'] );
+					} elseif ( isset( $label['color'] ) ) {
+						echo esc_html( $label['color'] );
+					}
+				} else {
+					echo esc_html( $label );
+				}
+				echo '</option>';
+			}
+			echo '</select>';
+		}
+
+		/**
+		 * Prints a filter dropdown for a meta field with a Yes/No choice.
+		 *
+		 * @since 0.6.1
+		 * @param string $column_slug the slug of the meta field column
+		 * @param WPPTD\Components\Field $field the field component
+		 * @param array $active_filters currently active filters and their values
+		 */
+		protected function render_meta_column_bool_filter( $column_slug, $field, $active_filters ) {
+			echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+			echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+			echo '<option value="bool:true"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == 'bool:true' ) ? ' selected="selected"' : '' ) . '>';
+			_e( 'Yes', 'post-types-definitely' );
+			echo '</option>';
+			echo '<option value="bool:false"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == 'bool:false' ) ? ' selected="selected"' : '' ) . '>';
+			_e( 'No', 'post-types-definitely' );
+			echo '</option>';
+			echo '</select>';
+		}
+
+		/**
+		 * Prints a filter dropdown for a meta field with flexible input.
+		 *
+		 * @since 0.6.1
+		 * @param string $column_slug the slug of the meta field column
+		 * @param WPPTD\Components\Field $field the field component
+		 * @param array $active_filters currently active filters and their values
+		 */
+		protected function render_meta_column_input_filter( $column_slug, $field, $active_filters ) {
+			$options = Utility::get_all_meta_values( $field->slug, $this->component->slug );
+
+			echo '<select name="' . $column_slug . '" id="' . $column_slug . '" class="postform">';
+			echo '<option value="">' . esc_html( $field->title ) . ': ' . __( 'All', 'post-types-definitely' ) . '</option>';
+			foreach ( $options as $option ) {
+				echo '<option value="' . esc_attr( $option ) . '"' . ( ( isset( $active_filters[ $column_slug ] ) && $active_filters[ $column_slug ] == $option ) ? ' selected="selected"' : '' ) . '>';
+				echo $field->_field->parse( $option, true );
+				echo '</option>';
+			}
+			echo '</select>';
+		}
+
+		/**
+		 * Returns a specific field child component of the post type component.
+		 *
+		 * @since 0.6.1
+		 * @param string $field_slug the slug of the field component to get
+		 * @return WPPTD\Components\Field the field component with the slug $field_slug
+		 */
+		protected function get_child_field( $field_slug ) {
+			return ComponentManager::get( '*.' . $this->component->slug . '.*.' . $field_slug, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Metabox', true );
 		}
 
 		/**
