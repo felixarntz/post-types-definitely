@@ -90,11 +90,13 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 				return;
 			}
 
+			$request_data = $_REQUEST;
+
 			$post_id = 0;
-			if ( isset( $_GET['post'] ) ) {
-				$post_id = (int) $_GET['post'];
-			} elseif ( isset( $_POST['post_ID'] ) ) {
-				$post_id = (int) $_POST['post_ID'];
+			if ( isset( $request_data['post'] ) ) {
+				$post_id = (int) $request_data['post'];
+			} elseif ( isset( $request_data['post_ID'] ) ) {
+				$post_id = (int) $request_data['post_ID'];
 			}
 
 			if ( ! $post_id ) {
@@ -120,13 +122,15 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 				return;
 			}
 
+			$request_data = $_REQUEST;
+
 			$post_ids = array();
-			if ( isset( $_REQUEST['media'] ) ) {
-				$post_ids = (array) $_REQUEST['media'];
-			} elseif ( isset( $_REQUEST['ids'] ) ) {
-				$post_ids = explode( ',', $_REQUEST['ids'] );
-			} elseif ( isset( $_REQUEST['post'] ) && ! empty( $_REQUEST['post'] ) ) {
-				$post_ids = (array) $_REQUEST['post'];
+			if ( isset( $request_data['media'] ) ) {
+				$post_ids = (array) $request_data['media'];
+			} elseif ( isset( $request_data['ids'] ) ) {
+				$post_ids = explode( ',', $request_data['ids'] );
+			} elseif ( isset( $request_data['post'] ) && ! empty( $request_data['post'] ) ) {
+				$post_ids = (array) $request_data['post'];
 			}
 
 			if ( ! $post_ids ) {
@@ -161,7 +165,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 						}
 
 						var options = '';
-						<?php if ( ! isset( $_REQUEST['post_status'] ) || 'trash' != $_REQUEST['post_status'] ) : ?>
+						<?php if ( ! isset( $_GET['post_status'] ) || 'trash' != $_GET['post_status'] ) : ?>
 						<?php foreach ( $table_bulk_actions as $action_slug => $action_args ) : ?>
 						options += '<option value="<?php echo $action_slug; ?>"><?php echo $action_args['title']; ?></option>';
 						<?php endforeach; ?>

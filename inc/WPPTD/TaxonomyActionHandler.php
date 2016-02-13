@@ -63,9 +63,11 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 					continue;
 				}
 
+				$request_data = $_REQUEST;
+
 				$path = 'edit-tags.php?taxonomy=' . $term->taxonomy;
-				if ( isset( $_REQUEST['post_type'] ) ) {
-					$path .= '&post_type=' . $_REQUEST['post_type'];
+				if ( isset( $request_data['post_type'] ) ) {
+					$path .= '&post_type=' . $request_data['post_type'];
 				}
 				$path .= '&tag_ID=' . $term->term_id;
 
@@ -93,9 +95,11 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 				return;
 			}
 
+			$request_data = $_REQUEST;
+
 			$term_id = 0;
-			if ( isset( $_GET['tag_ID'] ) ) {
-				$term_id = (int) $_GET['tag_ID'];
+			if ( isset( $request_data['tag_ID'] ) ) {
+				$term_id = (int) $request_data['tag_ID'];
 			}
 
 			if ( ! $term_id ) {
@@ -121,9 +125,11 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 				return;
 			}
 
+			$request_data = $_REQUEST;
+
 			$term_ids = array();
-			if ( isset( $_REQUEST['delete_tags'] ) ) {
-				$term_ids = (array) $_REQUEST['delete_tags'];
+			if ( isset( $request_data['delete_tags'] ) ) {
+				$term_ids = (array) $request_data['delete_tags'];
 			}
 
 			if ( ! $term_ids ) {
@@ -174,7 +180,9 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 * @return array the (temporarily) updated array of term messages
 		 */
 		public function maybe_hack_action_message( $messages ) {
-			if ( isset( $_REQUEST['updated'] ) && 0 < (int) $_REQUEST['updated'] && isset( $_REQUEST['message'] ) && 1 === (int) $_REQUEST['message'] ) {
+			$request_data = $_REQUEST;
+
+			if ( isset( $request_data['updated'] ) && 0 < (int) $request_data['updated'] && isset( $request_data['message'] ) && 1 === (int) $request_data['message'] ) {
 				$action_message = get_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message' );
 				if ( $action_message ) {
 					delete_transient( 'wpptd_term_' . $this->taxonomy_slug . '_bulk_row_action_message' );
@@ -311,8 +319,10 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 		 */
 		protected function get_sendback_url() {
 			$sendback = admin_url( 'edit-tags.php?taxonomy=' . $this->taxonomy_slug );
-			if ( isset( $_REQUEST['post_type'] ) && 'post' !== $_REQUEST['post_type'] ) {
-				$sendback = add_query_arg( 'post_type', $_REQUEST['post_type'], $sendback );
+			$request_data = $_REQUEST;
+
+			if ( isset( $request_data['post_type'] ) && 'post' !== $request_data['post_type'] ) {
+				$sendback = add_query_arg( 'post_type', $request_data['post_type'], $sendback );
 			}
 
 			return $sendback;
