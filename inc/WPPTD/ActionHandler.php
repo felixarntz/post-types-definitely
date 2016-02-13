@@ -313,7 +313,7 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 			$action_message = false;
 			$error = false;
 			if ( ! call_user_func_array( 'current_user_can', $this->get_bulk_capability_args() ) ) {
-				$action_message = sprintf( __( 'The %s was not updated because of missing privileges.', 'post-types-definitely' ), $component_plural_name );
+				$action_message = sprintf( __( 'The %s were not updated because of missing privileges.', 'post-types-definitely' ), $component_plural_name );
 				$error = true;
 			} elseif ( empty( $bulk_actions[ $bulk_action ]['callback'] ) || ! is_callable( $bulk_actions[ $bulk_action ]['callback'] ) ) {
 				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $component_plural_name );
