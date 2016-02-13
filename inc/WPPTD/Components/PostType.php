@@ -392,16 +392,16 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				// generate titles if not provided
-				$this->args = Utility::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
+				$this->args = Utility::validate_titles( $this->args, $this->slug, 'post_type' );
 
 				// generate post type labels
-				$this->args = Utility::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
+				$this->args = Utility::validate_labels( $this->args, 'labels', 'post_type' );
 
 				// generate post type updated messages
-				$this->args = Utility::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
+				$this->args = Utility::validate_labels( $this->args, 'messages', 'post_type' );
 
 				// generate post type bulk action messages
-				$this->args = Utility::validate_labels( $this->args, $this->get_default_bulk_messages(), 'bulk_messages' );
+				$this->args = Utility::validate_labels( $this->args, 'bulk_messages', 'post_type' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -464,7 +464,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 			$defaults = array(
 				'title'					=> '',
 				'singular_title'		=> '',
-				'title_gender'			=> 'm',
+				'title_gender'			=> 'n',
 				'labels'				=> array(),
 				'messages'				=> array(),
 				'bulk_messages'			=> array(),
@@ -721,254 +721,6 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				}
 
 				set_transient( 'wpptd_post_meta_error_' . $this->slug . '_' . $post_id, $error_text, 120 );
-			}
-		}
-
-		/**
-		 * Returns the default labels for the post type.
-		 *
-		 * @since 0.5.0
-		 * @return array the array of post type labels
-		 */
-		protected function get_default_labels() {
-			switch ( $this->args['title_gender'] ) {
-				case 'neuter':
-				case 'n':
-					return array(
-						'name'					=> $this->args['title'],
-						'singular_name'			=> $this->args['singular_title'],
-						'menu_name'				=> $this->args['title'],
-						'name_admin_bar'		=> $this->args['singular_title'],
-						'all_items'				=> sprintf( _x( 'All %s', 'all_items label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new'				=> _x( 'Add New', 'add_new label (neuter)', 'post-types-definitely' ),
-						'add_new_item'			=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'				=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item'				=> sprintf( _x( 'New %s', 'new_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'				=> sprintf( _x( 'View %s', 'view_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'			=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'				=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found_in_trash'	=> sprintf( _x( 'No %s found in Trash', 'not_found_in_trash label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item_colon'		=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'featured_image'		=> sprintf( _x( 'Featured %s Image', 'featured_image label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'set_featured_image'	=> sprintf( _x( 'Set featured %s Image', 'set_featured_image label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'remove_featured_image'	=> sprintf( _x( 'Remove featured %s Image', 'remove_featured_image label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'use_featured_image'	=> sprintf( _x( 'Use as featured %s Image', 'use_featured_image label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'filter_items_list'		=> sprintf( _x( 'Filter %s list', 'filter_items_list label: argument is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional labels for media library (as of WP 4.4 they are natively supported, in older versions they are handled by the plugin)
-						'insert_into_item'		=> sprintf( _x( 'Insert into %s content', 'insert_into_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'uploaded_to_this_item'	=> sprintf( _x( 'Uploaded to this %s', 'uploaded_to_this_item label: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'feminine':
-				case 'f':
-					return array(
-						'name'					=> $this->args['title'],
-						'singular_name'			=> $this->args['singular_title'],
-						'menu_name'				=> $this->args['title'],
-						'name_admin_bar'		=> $this->args['singular_title'],
-						'all_items'				=> sprintf( _x( 'All %s', 'all_items label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new'				=> _x( 'Add New', 'add_new label (feminine)', 'post-types-definitely' ),
-						'add_new_item'			=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'				=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item'				=> sprintf( _x( 'New %s', 'new_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'				=> sprintf( _x( 'View %s', 'view_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'			=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'				=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found_in_trash'	=> sprintf( _x( 'No %s found in Trash', 'not_found_in_trash label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item_colon'		=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'featured_image'		=> sprintf( _x( 'Featured %s Image', 'featured_image label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'set_featured_image'	=> sprintf( _x( 'Set featured %s Image', 'set_featured_image label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'remove_featured_image'	=> sprintf( _x( 'Remove featured %s Image', 'remove_featured_image label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'use_featured_image'	=> sprintf( _x( 'Use as featured %s Image', 'use_featured_image label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'filter_items_list'		=> sprintf( _x( 'Filter %s list', 'filter_items_list label: argument is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional labels for media library (as of WP 4.4 they are natively supported, in older versions they are handled by the plugin)
-						'insert_into_item'		=> sprintf( _x( 'Insert into %s content', 'insert_into_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'uploaded_to_this_item'	=> sprintf( _x( 'Uploaded to this %s', 'uploaded_to_this_item label: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'masculine':
-				case 'm':
-				default:
-					return array(
-						'name'					=> $this->args['title'],
-						'singular_name'			=> $this->args['singular_title'],
-						'menu_name'				=> $this->args['title'],
-						'name_admin_bar'		=> $this->args['singular_title'],
-						'all_items'				=> sprintf( _x( 'All %s', 'all_items label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new'				=> _x( 'Add New', 'add_new label (masculine)', 'post-types-definitely' ),
-						'add_new_item'			=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'				=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item'				=> sprintf( _x( 'New %s', 'new_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'				=> sprintf( _x( 'View %s', 'view_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'			=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'				=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found_in_trash'	=> sprintf( _x( 'No %s found in Trash', 'not_found_in_trash label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item_colon'		=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'featured_image'		=> sprintf( _x( 'Featured %s Image', 'featured_image label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'set_featured_image'	=> sprintf( _x( 'Set featured %s Image', 'set_featured_image label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'remove_featured_image'	=> sprintf( _x( 'Remove featured %s Image', 'remove_featured_image label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'use_featured_image'	=> sprintf( _x( 'Use as featured %s Image', 'use_featured_image label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'filter_items_list'		=> sprintf( _x( 'Filter %s list', 'filter_items_list label: argument is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional labels for media library (as of WP 4.4 they are natively supported, in older versions they are handled by the plugin)
-						'insert_into_item'		=> sprintf( _x( 'Insert into %s content', 'insert_into_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'uploaded_to_this_item'	=> sprintf( _x( 'Uploaded to this %s', 'uploaded_to_this_item label: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-			}
-		}
-
-		/**
-		 * Returns the default messages for the post type.
-		 *
-		 * Note that some of those messages contain placeholders,
-		 * so they need to be processed before printing them.
-		 *
-		 * @since 0.5.0
-		 * @see WPPTD\Components\PostType::get_updated_messages()
-		 * @return array the array of post type messages
-		 */
-		protected function get_default_messages() {
-			switch ( $this->args['title_gender'] ) {
-				case 'neuter':
-				case 'n':
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%1$s updated. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( 'Custom %s field updated.', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( 'Custom %s field deleted.', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s updated.', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s restored to revision from %%s', 'post message: first argument is the singular post type label (neuter), second is the revision title', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%1$s published. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 7 => sprintf( _x( '%s saved.', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 8 => sprintf( _x( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 9 => sprintf( _x( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						10 => sprintf( _x( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'feminine':
-				case 'f':
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%1$s updated. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( 'Custom %s field updated.', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( 'Custom %s field deleted.', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s updated.', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s restored to revision from %%s', 'post message: first argument is the singular post type label (feminine), second is the revision title', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%1$s published. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 7 => sprintf( _x( '%s saved.', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 8 => sprintf( _x( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 9 => sprintf( _x( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						10 => sprintf( _x( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'masculine':
-				case 'm':
-				default:
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%1$s updated. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( 'Custom %s field updated.', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( 'Custom %s field deleted.', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s updated.', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s restored to revision from %%s', 'post message: first argument is the singular post type label (masculine), second is the revision title', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%1$s published. <a href="%%s">View %1$s</a>', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 7 => sprintf( _x( '%s saved.', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 8 => sprintf( _x( '%1$s submitted. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 9 => sprintf( _x( '%1$s scheduled for: <strong>%%1\$s</strong>. <a target="_blank" href="%%2\$s">Preview %1$s</a>', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						10 => sprintf( _x( '%1$s draft updated. <a target="_blank" href="%%s">Preview %1$s</a>', 'post message: argument is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-			}
-		}
-
-		/**
-		 * Returns the default bulk messages for the post type.
-		 *
-		 * Note that each array key contains both the singular and plural bulk messages,
-		 * so they need to be processed before printing them.
-		 *
-		 * @since 0.5.0
-		 * @see WPPTD\Components\PostType::get_bulk_updated_messages()
-		 * @return array the array of post type bulk messages
-		 */
-		protected function get_default_bulk_messages() {
-			switch ( $this->args['title_gender'] ) {
-				case 'neuter':
-				case 'n':
-					return array(
-						'updated'	=> array(
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'locked'	=> array(
-							sprintf( _x( '%%s %s not updated, somebody is editing it.', 'bulk post message: first argument is a number, second is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s not updated, somebody is editing them.', 'bulk post message: first argument is a number, second is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'deleted'	=> array(
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'trashed'	=> array(
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'untrashed'	=> array(
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-					);
-				case 'feminine':
-				case 'f':
-					return array(
-						'updated'	=> array(
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'locked'	=> array(
-							sprintf( _x( '%%s %s not updated, somebody is editing it.', 'bulk post message: first argument is a number, second is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s not updated, somebody is editing them.', 'bulk post message: first argument is a number, second is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'deleted'	=> array(
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'trashed'	=> array(
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'untrashed'	=> array(
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-					);
-				case 'masculine':
-				case 'm':
-				default:
-					return array(
-						'updated'	=> array(
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s updated.', 'bulk post message: first argument is a number, second is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'locked'	=> array(
-							sprintf( _x( '%%s %s not updated, somebody is editing it.', 'bulk post message: first argument is a number, second is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s not updated, somebody is editing them.', 'bulk post message: first argument is a number, second is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'deleted'	=> array(
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s permanently deleted.', 'bulk post message: first argument is a number, second is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'trashed'	=> array(
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s moved to the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-						'untrashed'	=> array(
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the singular post type label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-							sprintf( _x( '%%s %s restored from the Trash.', 'bulk post message: first argument is a number, second is the plural post type label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						),
-					);
 			}
 		}
 

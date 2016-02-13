@@ -251,13 +251,13 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 
 				// generate titles if not provided
-				$this->args = Utility::validate_post_type_and_taxonomy_titles( $this->args, $this->slug );
+				$this->args = Utility::validate_titles( $this->args, $this->slug, 'taxonomy' );
 
 				// generate taxonomy labels
-				$this->args = Utility::validate_labels( $this->args, $this->get_default_labels(), 'labels' );
+				$this->args = Utility::validate_labels( $this->args, 'labels', 'taxonomy' );
 
 				// generate taxonomy updated messages
-				$this->args = Utility::validate_labels( $this->args, $this->get_default_messages(), 'messages' );
+				$this->args = Utility::validate_labels( $this->args, 'messages', 'taxonomy' );
 
 				// set some defaults
 				if ( null === $this->args['rewrite'] ) {
@@ -302,7 +302,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 			$defaults = array(
 				'title'					=> '',
 				'singular_title'		=> '',
-				'title_gender'			=> 'm',
+				'title_gender'			=> 'n',
 				'labels'				=> array(),
 				'messages'				=> array(),
 				'description'			=> '',
@@ -511,144 +511,6 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				}
 
 				set_transient( 'wpptd_term_meta_error_' . $this->slug . '_' . $term_id, $error_text, 120 );
-			}
-		}
-
-		/**
-		 * Returns the default labels for the taxonomy.
-		 *
-		 * @since 0.5.0
-		 * @return array the array of taxonomy labels
-		 */
-		protected function get_default_labels() {
-			switch ( $this->args['title_gender'] ) {
-				case 'neuter':
-				case 'n':
-					return array(
-						'name'							=> $this->args['title'],
-						'singular_name'					=> $this->args['singular_title'],
-						'menu_name'						=> $this->args['title'],
-						'all_items'						=> sprintf( _x( 'All %s', 'all_items label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new_item'					=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'						=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'						=> sprintf( _x( 'View %s', 'view_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'update_item'					=> sprintf( _x( 'Update %s', 'update_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item_name'					=> sprintf( _x( 'New %s Name', 'new_item_name label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'					=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'popular_items'					=> sprintf( _x( 'Popular %s', 'popular_items label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'						=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'no_terms'						=> sprintf( _x( 'No %s', 'no_terms label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'separate_items_with_commas'	=> sprintf( _x( 'Separate %s with commas', 'separate_items_with_commas label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_or_remove_items'			=> sprintf( _x( 'Add or remove %s', 'add_or_remove_items label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item'					=> sprintf( _x( 'Parent %s', 'parent_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'parent_item_colon'				=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional label for post listings (handled by the plugin)
-						'filter_by_item'				=> sprintf( _x( 'Filter by %s', 'filter_by_item label: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'feminine':
-				case 'f':
-					return array(
-						'name'							=> $this->args['title'],
-						'singular_name'					=> $this->args['singular_title'],
-						'menu_name'						=> $this->args['title'],
-						'all_items'						=> sprintf( _x( 'All %s', 'all_items label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new_item'					=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'						=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'						=> sprintf( _x( 'View %s', 'view_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'update_item'					=> sprintf( _x( 'Update %s', 'update_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item_name'					=> sprintf( _x( 'New %s Name', 'new_item_name label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'					=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'popular_items'					=> sprintf( _x( 'Popular %s', 'popular_items label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'						=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'no_terms'						=> sprintf( _x( 'No %s', 'no_terms label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'separate_items_with_commas'	=> sprintf( _x( 'Separate %s with commas', 'separate_items_with_commas label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_or_remove_items'			=> sprintf( _x( 'Add or remove %s', 'add_or_remove_items label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item'					=> sprintf( _x( 'Parent %s', 'parent_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'parent_item_colon'				=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional label for post listings (handled by the plugin)
-						'filter_by_item'				=> sprintf( _x( 'Filter by %s', 'filter_by_item label: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-				case 'masculine':
-				case 'm':
-				default:
-					return array(
-						'name'							=> $this->args['title'],
-						'singular_name'					=> $this->args['singular_title'],
-						'menu_name'						=> $this->args['title'],
-						'all_items'						=> sprintf( _x( 'All %s', 'all_items label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_new_item'					=> sprintf( _x( 'Add New %s', 'add_new_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'edit_item'						=> sprintf( _x( 'Edit %s', 'edit_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'view_item'						=> sprintf( _x( 'View %s', 'view_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'update_item'					=> sprintf( _x( 'Update %s', 'update_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'new_item_name'					=> sprintf( _x( 'New %s Name', 'new_item_name label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'search_items'					=> sprintf( _x( 'Search %s', 'search_items label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'popular_items'					=> sprintf( _x( 'Popular %s', 'popular_items label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'not_found'						=> sprintf( _x( 'No %s found', 'not_found label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'no_terms'						=> sprintf( _x( 'No %s', 'no_terms label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'separate_items_with_commas'	=> sprintf( _x( 'Separate %s with commas', 'separate_items_with_commas label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'add_or_remove_items'			=> sprintf( _x( 'Add or remove %s', 'add_or_remove_items label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'choose_from_most_used'			=> sprintf( _x( 'Choose from the most used %s', 'choose_from_most_used label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'parent_item'					=> sprintf( _x( 'Parent %s', 'parent_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						'parent_item_colon'				=> sprintf( _x( 'Parent %s:', 'parent_item_colon label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						// new accessibility labels added in WP 4.4
-						'items_list'			=> sprintf( _x( '%s list', 'items_list label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						'items_list_navigation'	=> sprintf( _x( '%s list navigation', 'items_list_navigation label: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-						// additional label for post listings (handled by the plugin)
-						'filter_by_item'				=> sprintf( _x( 'Filter by %s', 'filter_by_item label: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-					);
-			}
-		}
-
-		/**
-		 * Returns the default messages for the taxonomy.
-		 *
-		 * @since 0.5.0
-		 * @return array the array of taxonomy messages
-		 */
-		protected function get_default_messages() {
-			switch ( $this->args['title_gender'] ) {
-				case 'neuter':
-				case 'n':
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%s added.', 'term message: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( '%s deleted.', 'term message: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( '%s updated.', 'term message: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s not added.', 'term message: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s not updated.', 'term message: argument is the singular taxonomy label (neuter)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%s deleted.', 'bulk term message: argument is the plural taxonomy label (neuter)', 'post-types-definitely' ), $this->args['title'] ),
-					);
-				case 'feminine':
-				case 'f':
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%s added.', 'term message: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( '%s deleted.', 'term message: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( '%s updated.', 'term message: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s not added.', 'term message: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s not updated.', 'term message: argument is the singular taxonomy label (feminine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%s deleted.', 'bulk term message: argument is the plural taxonomy label (feminine)', 'post-types-definitely' ), $this->args['title'] ),
-					);
-				case 'masculine':
-				case 'm':
-				default:
-					return array(
-						 0 => '',
-						 1 => sprintf( _x( '%s added.', 'term message: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 2 => sprintf( _x( '%s deleted.', 'term message: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 3 => sprintf( _x( '%s updated.', 'term message: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 4 => sprintf( _x( '%s not added.', 'term message: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 5 => sprintf( _x( '%s not updated.', 'term message: argument is the singular taxonomy label (masculine)', 'post-types-definitely' ), $this->args['singular_title'] ),
-						 6 => sprintf( _x( '%s deleted.', 'bulk term message: argument is the plural taxonomy label (masculine)', 'post-types-definitely' ), $this->args['title'] ),
-					);
 			}
 		}
 

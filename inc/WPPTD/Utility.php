@@ -387,9 +387,10 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 		 * @since 0.5.0
 		 * @param array $args array of arguments
 		 * @param string $slug the component slug
+		 * @param string $mode either 'post_type' or 'taxonomy'
 		 * @return array the validated arguments
 		 */
-		public static function validate_post_type_and_taxonomy_titles( $args, $slug ) {
+		public static function validate_titles( $args, $slug, $mode ) {
 			if ( empty( $args['title'] ) && isset( $args['label'] ) ) {
 				$args['title'] = $args['label'];
 				unset( $args['label'] );
@@ -402,6 +403,9 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 			} elseif ( empty( $args['singular_title'] ) ) {
 				$args['singular_title'] = $args['title'];
 			}
+			if ( empty( $args['title_gender'] ) ) {
+				$args['title_gender'] = 'n';
+			}
 
 			return $args;
 		}
@@ -413,38 +417,46 @@ if ( ! class_exists( 'WPPTD\Utility' ) ) {
 		 * @see WPPTD\Components\Taxonomy
 		 * @since 0.5.0
 		 * @param array $args array of arguments
-		 * @param array $defaults the default labels to use
 		 * @param string $key the name of the argument to validate
+		 * @param string $mode either 'post_type' or 'taxonomy'
 		 * @return array the validated arguments
 		 */
-		public static function validate_labels( $args, $defaults, $key ) {
-			if ( false !== $args[ $key ] ) {
-				if ( ! is_array( $args[ $key ] ) ) {
-					$args[ $key ] = array();
-				}
+		public static function validate_labels( $args, $key, $mode ) {
+			if ( false === $args[ $key ] ) {
+				$args[ $key ] = array();
+				return $args;
+			}
 
-				if ( 'bulk_messages' === $key ) {
-					foreach ( $defaults as $type => $default_labels ) {
-						if ( ! isset( $args[ $key ][ $type ] ) ) {
-							$args[ $key ][ $type ] = $default_labels;
-						} else {
-							if ( ! is_array( $args[ $key ][ $type ] ) ) {
-								$args[ $key ][ $type ] = array( $args[ $key ][ $type ] );
-							}
-							if ( count( $args[ $key ][ $type ] ) < 2 ) {
-								$args[ $key ][ $type ][] = $default_labels[1];
-							}
+			$defaults = array();
+			if ( 'taxonomy' === $mode ) {
+				$defaults = TaxonomyLabelGenerator::generate_labels( $args['title'], $args['singular_title'], $key, $args['title_gender'] );
+			} else {
+				$defaults = PostTypeLabelGenerator::generate_labels( $args['title'], $args['singular_title'], $key, $args['title_gender'] );
+			}
+
+			if ( ! is_array( $args[ $key ] ) ) {
+				$args[ $key ] = array();
+			}
+
+			if ( 'bulk_messages' === $key ) {
+				foreach ( $defaults as $type => $default_labels ) {
+					if ( ! isset( $args[ $key ][ $type ] ) ) {
+						$args[ $key ][ $type ] = $default_labels;
+					} else {
+						if ( ! is_array( $args[ $key ][ $type ] ) ) {
+							$args[ $key ][ $type ] = array( $args[ $key ][ $type ] );
 						}
-					}
-				} else {
-					foreach ( $defaults as $type => $default_label ) {
-						if ( ! isset( $args[ $key ][ $type ] ) ) {
-							$args[ $key ][ $type ] = $default_label;
+						if ( count( $args[ $key ][ $type ] ) < 2 ) {
+							$args[ $key ][ $type ][] = $default_labels[1];
 						}
 					}
 				}
 			} else {
-				$args[ $key ] = array();
+				foreach ( $defaults as $type => $default_label ) {
+					if ( ! isset( $args[ $key ][ $type ] ) ) {
+						$args[ $key ][ $type ] = $default_label;
+					}
+				}
 			}
 
 			return $args;
