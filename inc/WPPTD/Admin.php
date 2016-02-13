@@ -335,7 +335,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * This filter adds the custom row actions for a post type to the row actions array.
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTypeTableHandler
+		 * @see WPPTD\PostTypeActionHandler
 		 * @since 0.5.0
 		 * @param array $actions the original row actions
 		 * @param WP_Post $post the current post
@@ -344,9 +344,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function get_row_actions( $actions, $post ) {
 			$post_type = ComponentManager::get( '*.' . $post->post_type, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$post_type_table_handler = $post_type->get_table_handler();
+				$post_type_action_handler = $post_type->get_table_handler()->get_action_handler();
 
-				$actions = $post_type_table_handler->filter_row_actions( $actions, $post );
+				$actions = $post_type_action_handler->filter_row_actions( $actions, $post );
 			}
 			return $actions;
 		}
@@ -355,7 +355,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the function to handle a certain row action if that row action should be run.
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTypeTableHandler
+		 * @see WPPTD\PostTypeActionHandler
 		 * @since 0.5.0
 		 */
 		public function handle_row_actions() {
@@ -363,10 +363,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$post_type_table_handler = $post_type->get_table_handler();
+				$post_type_action_handler = $post_type->get_table_handler()->get_action_handler();
 
 				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_table_handler, 'maybe_run_row_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_action_handler, 'maybe_run_row_action' ) );
 				}
 			}
 		}
@@ -380,7 +380,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * It has to be hacky because WordPress natively does not support it :(
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTypeTableHandler
+		 * @see WPPTD\PostTypeActionHandler
 		 * @since 0.5.0
 		 */
 		public function handle_bulk_actions() {
@@ -388,16 +388,16 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
-				$post_type_table_handler = $post_type->get_table_handler();
+				$post_type_action_handler = $post_type->get_table_handler()->get_action_handler();
 
 				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
 					$_REQUEST['action'] = $_REQUEST['action2'];
 				}
 				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_table_handler, 'maybe_run_bulk_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_action_handler, 'maybe_run_bulk_action' ) );
 				}
-				add_action( 'admin_head', array( $post_type_table_handler, 'hack_bulk_actions' ), 100 );
-				add_filter( 'bulk_post_updated_messages', array( $post_type_table_handler, 'maybe_hack_bulk_message' ), 100, 2 );
+				add_action( 'admin_head', array( $post_type_action_handler, 'hack_bulk_actions' ), 100 );
+				add_filter( 'bulk_post_updated_messages', array( $post_type_action_handler, 'maybe_hack_bulk_message' ), 100, 2 );
 			}
 		}
 
@@ -769,7 +769,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * This filter adds the custom row actions for a taxonomy to the row actions array.
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TaxonomyTableHandler
+		 * @see WPPTD\TaxonomyActionHandler
 		 * @since 0.6.0
 		 * @param array $actions the original row actions
 		 * @param WP_Term $term the current term
@@ -778,9 +778,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function get_term_row_actions( $actions, $term ) {
 			$taxonomy = ComponentManager::get( '*.*.' . $term->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
-				$taxonomy_table_handler = $taxonomy->get_table_handler();
+				$taxonomy_action_handler = $taxonomy->get_table_handler()->get_action_handler();
 
-				$actions = $taxonomy_table_handler->filter_row_actions( $actions, $term );
+				$actions = $taxonomy_action_handler->filter_row_actions( $actions, $term );
 			}
 			return $actions;
 		}
@@ -789,7 +789,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the function to handle a certain row action if that row action should be run.
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TaxonomyTableHandler
+		 * @see WPPTD\TaxonomyActionHandler
 		 * @since 0.6.0
 		 */
 		public function handle_term_row_actions() {
@@ -802,10 +802,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
-				$taxonomy_table_handler = $taxonomy->get_table_handler();
+				$taxonomy_action_handler = $taxonomy->get_table_handler()->get_action_handler();
 
 				if ( isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_table_handler, 'maybe_run_row_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_action_handler, 'maybe_run_row_action' ) );
 				}
 			}
 		}
@@ -819,7 +819,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * It has to be hacky because WordPress natively does not support it :(
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TaxonomyTableHandler
+		 * @see WPPTD\TaxonomyActionHandler
 		 * @since 0.6.0
 		 */
 		public function handle_term_bulk_actions() {
@@ -832,16 +832,16 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
-				$taxonomy_table_handler = $taxonomy->get_table_handler();
+				$taxonomy_action_handler = $taxonomy->get_table_handler()->get_action_handler();
 
 				if ( ( ! isset( $_REQUEST['action'] ) || -1 == $_REQUEST['action'] ) && isset( $_REQUEST['action2'] ) && -1 != $_REQUEST['action2'] ) {
 					$_REQUEST['action'] = $_REQUEST['action2'];
 				}
 				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
-					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_table_handler, 'maybe_run_bulk_action' ) );
+					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_action_handler, 'maybe_run_bulk_action' ) );
 				}
-				add_action( 'admin_head', array( $taxonomy_table_handler, 'hack_bulk_actions' ), 100 );
-				add_filter( 'term_updated_messages', array( $taxonomy_table_handler, 'maybe_hack_action_message' ), 100 );
+				add_action( 'admin_head', array( $taxonomy_action_handler, 'hack_bulk_actions' ), 100 );
+				add_filter( 'term_updated_messages', array( $taxonomy_action_handler, 'maybe_hack_action_message' ), 100 );
 			}
 		}
 

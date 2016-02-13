@@ -278,7 +278,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 				$this->args = Utility::validate_position_args( $this->args );
 
 				// handle term table
-				$this->args = $this->table_handler->validate_taxonomy_args( $this->args );
+				$this->args = TaxonomyTableHandler::validate_args( $this->args );
 
 				// handle help
 				$this->args = Utility::validate_help_args( $this->args, 'help' );

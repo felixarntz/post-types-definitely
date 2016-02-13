@@ -440,7 +440,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 				$this->args = Utility::validate_position_args( $this->args );
 
 				// handle post table
-				$this->args = $this->table_handler->validate_post_type_args( $this->args );
+				$this->args = PostTypeTableHandler::validate_args( $this->args );
 
 				// handle help
 				$this->args = Utility::validate_help_args( $this->args, 'help' );
