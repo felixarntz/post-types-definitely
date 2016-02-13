@@ -460,8 +460,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * This function is very hacky since it is actually hooked into the form tag itself.
 		 * That is also the reason for the weird-looking HTML (it IS correct though).
 		 *
-		 * Maybe in a future version of WordPress there will be a hook so that this function
-		 * does not need to be used anymore.
+		 * It is only needed on WordPress version 4.4 where the '{$taxonomy}_term_edit_form_top' action did not exist yet.
 		 *
 		 * @since 0.6.0
 		 */
@@ -476,14 +475,20 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			echo '<div id="post-body-content"';
 		}
 
-		// the following should be used if we get something like an `edit_form_top` action
-		/*public function wrap_term_ui_top() {
+		/**
+		 * Wraps the original Edit Term content (top part).
+		 *
+		 * This function is used on WordPress >= 4.5
+		 *
+		 * @since 0.6.1
+		 */
+		public function wrap_term_ui_top() {
 			?>
 			<div id="poststuff">
 				<div id="post-body" class="metabox-holder columns-2">
 					<div id="post-body-content">
 			<?php
-		}*/
+		}
 
 		/**
 		 * Wraps the original Edit Term content (bottom part).
@@ -650,13 +655,10 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		/**
 		 * Displays validation errors for term meta fields if any occurred.
 		 *
-		 * If there was a WordPress function like `add_term_meta_error()`, it would do something like this.
-		 *
 		 * This function is very hacky since it is actually hooked into the form tag itself.
 		 * That is also the reason for the weird-looking HTML (it IS correct though).
 		 *
-		 * Maybe in a future version of WordPress there will be a hook so that this function
-		 * does not need to be used anymore.
+		 * It is only needed on WordPress version 4.4 where the '{$taxonomy}_term_edit_form_top' action did not exist yet.
 		 *
 		 * @since 0.6.0
 		 */
@@ -676,16 +678,24 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			}
 		}
 
-		// the following should be used if we get something like an `edit_form_top` action
-		/*public function display_term_meta_errors( $term ) {
+		/**
+		 * Displays validation errors for term meta fields if any occurred.
+		 *
+		 * This function is used on WordPress >= 4.5
+		 *
+		 * @since 0.6.1
+		 */
+		public function display_term_meta_errors( $term ) {
 			$errors = get_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
 			if ( $errors ) {
-				echo '<div id="wpptd-term-meta-errors" class="notice notice-error is-dismissible"><p>';
-				echo $errors;
-				echo '</p></div>';
+				?>
+				<div id="wpptd-term-meta-errors" class="notice notice-error is-dismissible">
+					<p><?php echo $errors; ?></p>
+				</div>
+				<?php
 				delete_transient( 'wpptd_term_meta_error_' . $term->taxonomy . '_' . $term->term_id );
 			}
-		}*/
+		}
 
 		/**
 		 * Wrapper function to control the addition of help tabs to a taxonomy editing or list screen.
@@ -838,10 +848,18 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 			if ( wpptd_supports_termmeta() ) {
 				$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
+
+				$edit_form_top_hook_suffix = '_term_edit_form_top';
+				$edit_form_top_method_suffix = '';
+				if ( 0 > version_compare( get_bloginfo( 'version' ), '4.5' ) ) {
+					// so hacky (luckily only in WordPress < 4.5)
+					$edit_form_top_hook_suffix = '_term_edit_form_tag';
+					$edit_form_top_method_suffix = '_hack';
+				}
+
 				foreach ( $taxonomies as $taxonomy ) {
-					// so hacky...
-					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'display_term_meta_errors_hack' ), 9998 );
-					add_action( $taxonomy->slug . '_term_edit_form_tag', array( $this, 'wrap_term_ui_top_hack' ), 9999 );
+					add_action( $taxonomy->slug . $edit_form_top_hook_suffix, array( $this, 'display_term_meta_errors' . $edit_form_top_method_suffix ), 9998 );
+					add_action( $taxonomy->slug . $edit_form_top_hook_suffix, array( $this, 'wrap_term_ui_top' . $edit_form_top_method_suffix ), 9999 );
 
 					add_action( $taxonomy->slug . '_edit_form', array( $this, 'wrap_term_ui_bottom' ), 9999, 2 );
 				}
