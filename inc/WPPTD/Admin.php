@@ -739,6 +739,29 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		/**
+		 * Hooks in the functions to handle sorting in the taxonomy list table.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @see WPPTD\TermTableHandler
+		 * @since 0.6.1
+		 */
+		public function handle_term_table_sorting() {
+			global $taxnow;
+
+			// do not run this on a term edit form
+			if ( isset( $_GET['tag_ID'] ) ) {
+				return;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy_table_handler = $taxonomy->get_table_handler();
+
+				add_filter( 'get_terms_args', array( $taxonomy_table_handler, 'maybe_sort_by_meta_table_column' ), 10, 2 );
+			}
+		}
+
+		/**
 		 * This filter adds the custom row actions for a taxonomy to the row actions array.
 		 *
 		 * @see WPPTD\Components\Taxonomy
@@ -908,6 +931,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 
 				add_filter( $taxonomy->slug . '_row_actions', array( $this, 'get_term_row_actions' ), 10, 2 );
 			}
+			add_action( 'load-edit-tags.php', array( $this, 'handle_term_table_sorting' ) );
 
 			add_action( 'load-edit-tags.php', array( $this, 'handle_term_row_actions' ) );
 			add_action( 'load-edit-tags.php', array( $this, 'handle_term_bulk_actions' ) );

@@ -289,7 +289,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 		public function maybe_sort_by_meta_table_column( $wp_query ) {
 			$table_columns = $this->post_type->table_columns;
 
-			if ( ! isset( $wp_query->query['orderby'] ) ) {
+			if ( ! isset( $wp_query->query['orderby'] ) || is_array( $wp_query->query['orderby'] ) ) {
 				return;
 			}
 
@@ -328,7 +328,7 @@ if ( ! class_exists( 'WPPTD\PostTableHandler' ) ) {
 
 			$table_columns = $this->post_type->table_columns;
 
-			if ( ! isset( $wp_query->query['orderby'] ) ) {
+			if ( ! isset( $wp_query->query['orderby'] ) || is_array( $wp_query->query['orderby'] ) ) {
 				return $clauses;
 			}
 
