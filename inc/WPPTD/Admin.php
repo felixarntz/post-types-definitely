@@ -309,7 +309,8 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the functions to handle filtering and sorting in the post type list table.
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTableHandler
+		 * @see WPPTD\PostTypeTableHandler
+		 * @see WPPTD\PostTypeQueryFixes
 		 * @since 0.5.0
 		 */
 		public function handle_table_filtering_and_sorting() {
@@ -318,14 +319,15 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$post_type = ComponentManager::get( '*.' . $typenow, 'WPDLib\Components\Menu.WPPTD\Components\PostType', true );
 			if ( $post_type ) {
 				$post_type_table_handler = $post_type->get_table_handler();
+				$post_type_query_fixes = $post_type_table_handler->get_query_fixes();
 
-				$post_type_table_handler->maybe_sort_default();
+				$post_type_query_fixes->maybe_sort_default();
 
 				add_action( 'restrict_manage_posts', array( $post_type_table_handler, 'render_table_column_filters' ) );
-				add_filter( 'query_vars', array( $post_type_table_handler, 'register_table_filter_query_vars' ) );
-				add_action( 'pre_get_posts', array( $post_type_table_handler, 'maybe_filter_by_table_columns' ), 10, 1 );
-				add_action( 'pre_get_posts', array( $post_type_table_handler, 'maybe_sort_by_meta_table_column' ), 10, 1 );
-				add_filter( 'posts_clauses', array( $post_type_table_handler, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
+				add_filter( 'query_vars', array( $post_type_query_fixes, 'register_table_filter_query_vars' ) );
+				add_action( 'pre_get_posts', array( $post_type_query_fixes, 'maybe_filter_by_table_columns' ), 10, 1 );
+				add_action( 'pre_get_posts', array( $post_type_query_fixes, 'maybe_sort_by_meta_table_column' ), 10, 1 );
+				add_filter( 'posts_clauses', array( $post_type_query_fixes, 'maybe_sort_by_taxonomy_table_column' ), 10, 2 );
 			}
 		}
 
@@ -333,7 +335,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * This filter adds the custom row actions for a post type to the row actions array.
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTableHandler
+		 * @see WPPTD\PostTypeTableHandler
 		 * @since 0.5.0
 		 * @param array $actions the original row actions
 		 * @param WP_Post $post the current post
@@ -353,7 +355,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the function to handle a certain row action if that row action should be run.
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTableHandler
+		 * @see WPPTD\PostTypeTableHandler
 		 * @since 0.5.0
 		 */
 		public function handle_row_actions() {
@@ -378,7 +380,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * It has to be hacky because WordPress natively does not support it :(
 		 *
 		 * @see WPPTD\Components\PostType
-		 * @see WPPTD\PostTableHandler
+		 * @see WPPTD\PostTypeTableHandler
 		 * @since 0.5.0
 		 */
 		public function handle_bulk_actions() {
@@ -742,7 +744,8 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the functions to handle sorting in the taxonomy list table.
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TermTableHandler
+		 * @see WPPTD\TaxonomyTableHandler
+		 * @see WPPTD\TaxonomyQueryFixes
 		 * @since 0.6.1
 		 */
 		public function handle_term_table_sorting() {
@@ -756,8 +759,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( $taxonomy ) {
 				$taxonomy_table_handler = $taxonomy->get_table_handler();
+				$taxonomy_query_fixes = $taxonomy_table_handler->get_query_fixes();
 
-				add_filter( 'get_terms_args', array( $taxonomy_table_handler, 'maybe_sort_by_meta_table_column' ), 10, 2 );
+				add_filter( 'get_terms_args', array( $taxonomy_query_fixes, 'maybe_sort_by_meta_table_column' ), 10, 2 );
 			}
 		}
 
@@ -765,7 +769,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * This filter adds the custom row actions for a taxonomy to the row actions array.
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TermTableHandler
+		 * @see WPPTD\TaxonomyTableHandler
 		 * @since 0.6.0
 		 * @param array $actions the original row actions
 		 * @param WP_Term $term the current term
@@ -785,7 +789,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * Hooks in the function to handle a certain row action if that row action should be run.
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TermTableHandler
+		 * @see WPPTD\TaxonomyTableHandler
 		 * @since 0.6.0
 		 */
 		public function handle_term_row_actions() {
@@ -815,7 +819,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * It has to be hacky because WordPress natively does not support it :(
 		 *
 		 * @see WPPTD\Components\Taxonomy
-		 * @see WPPTD\TermTableHandler
+		 * @see WPPTD\TaxonomyTableHandler
 		 * @since 0.6.0
 		 */
 		public function handle_term_bulk_actions() {

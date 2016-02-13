@@ -9,7 +9,7 @@ namespace WPPTD\Components;
 
 use WPPTD\App as App;
 use WPPTD\Utility as Utility;
-use WPPTD\TermTableHandler as TermTableHandler;
+use WPPTD\TaxonomyTableHandler as TaxonomyTableHandler;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
@@ -32,7 +32,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 
 		/**
 		 * @since 0.6.0
-		 * @var WPPTD\TermTableHandler Holds the list table handler instance for this taxonomy.
+		 * @var WPPTD\TaxonomyTableHandler Holds the list table handler instance for this taxonomy.
 		 */
 		protected $table_handler = null;
 
@@ -69,7 +69,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
-			$this->table_handler = new TermTableHandler( $this );
+			$this->table_handler = new TaxonomyTableHandler( $this );
 			$this->validate_filter = 'wpptd_taxonomy_validated';
 		}
 
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 * Returns the table handler for this taxonomy.
 		 *
 		 * @since 0.6.0
-		 * @return WPPTD\TermTableHandler the list table handler instance for this taxonomy
+		 * @return WPPTD\TaxonomyTableHandler the list table handler instance for this taxonomy
 		 */
 		public function get_table_handler() {
 			return $this->table_handler;

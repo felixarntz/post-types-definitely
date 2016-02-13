@@ -9,7 +9,7 @@ namespace WPPTD\Components;
 
 use WPPTD\App as App;
 use WPPTD\Utility as Utility;
-use WPPTD\PostTableHandler as PostTableHandler;
+use WPPTD\PostTypeTableHandler as PostTypeTableHandler;
 use WPDLib\Components\Manager as ComponentManager;
 use WPDLib\Components\Base as Base;
 use WPDLib\FieldTypes\Manager as FieldManager;
@@ -32,7 +32,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 
 		/**
 		 * @since 0.5.0
-		 * @var WPPTD\PostTableHandler Holds the list table handler instance for this post type.
+		 * @var WPPTD\PostTypeTableHandler Holds the list table handler instance for this post type.
 		 */
 		protected $table_handler = null;
 
@@ -69,7 +69,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 */
 		public function __construct( $slug, $args ) {
 			parent::__construct( $slug, $args );
-			$this->table_handler = new PostTableHandler( $this );
+			$this->table_handler = new PostTypeTableHandler( $this );
 			$this->validate_filter = 'wpptd_post_type_validated';
 		}
 
@@ -77,7 +77,7 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 * Returns the table handler for this post type.
 		 *
 		 * @since 0.5.0
-		 * @return WPPTD\PostTableHandler the list table handler instance for this post type
+		 * @return WPPTD\PostTypeTableHandler the list table handler instance for this post type
 		 */
 		public function get_table_handler() {
 			return $this->table_handler;

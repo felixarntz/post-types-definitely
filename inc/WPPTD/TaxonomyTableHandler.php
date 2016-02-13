@@ -13,14 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die();
 }
 
-if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
+if ( ! class_exists( 'WPPTD\TaxonomyTableHandler' ) ) {
 	/**
 	 * This class handles the term list table for a taxonomy registered with WPPTD.
 	 *
 	 * @internal
 	 * @since 0.6.0
 	 */
-	class TermTableHandler {
+	class TaxonomyTableHandler {
 		/**
 		 * @since 0.6.0
 		 * @var WPPTD\Components\Taxonomy Holds the taxonomy component this table handler should manage.
@@ -34,6 +34,12 @@ if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
 		protected $taxonomy_slug = '';
 
 		/**
+		 * @since 0.6.1
+		 * @var WPPTD\TaxonomyQueryFixes Holds the `get_terms()` fix instance for this taxonomy.
+		 */
+		protected $query_fixes = null;
+
+		/**
 		 * Class constructor.
 		 *
 		 * @since 0.6.0
@@ -42,6 +48,17 @@ if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
 		public function __construct( $taxonomy ) {
 			$this->taxonomy = $taxonomy;
 			$this->taxonomy_slug = $this->taxonomy->slug;
+			$this->query_fixes = new TaxonomyQueryFixes( $taxonomy );
+		}
+
+		/**
+		 * Returns the `get_terms()` fix instance for this taxonomy.
+		 *
+		 * @since 0.6.1
+		 * @return WPPTD\TaxonomyQueryFixes the `get_terms()` fix instance for this taxonomy
+		 */
+		public function get_query_fixes() {
+			return $this->query_fixes;
 		}
 
 		/**
@@ -134,41 +151,6 @@ if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
 		}
 
 		/**
-		 * This action modifies the current `get_terms()` arguments to sort by a specific meta field.
-		 *
-		 * @since 0.6.1
-		 * @param array $args the arguments for `get_terms()`
-		 * @param string|array $taxonomies taxonomies to query terms for
-		 * @return array the fixed arguments
-		 */
-		public function maybe_sort_by_meta_table_column( $args, $taxonomies ) {
-			$table_columns = $this->taxonomy->table_columns;
-
-			if ( ! isset( $args['orderby'] ) || is_array( $args['orderby'] ) ) {
-				return $args;
-			}
-
-			$orderby = $args['orderby'];
-
-			if ( ! isset( $table_columns[ $orderby ] ) ) {
-				return $args;
-			}
-
-			if ( ! $table_columns[ $orderby ]['sortable'] ) {
-				return $args;
-			}
-
-			if ( ! isset( $table_columns[ $orderby ]['meta_key'] ) || empty( $table_columns[ $orderby ]['meta_key'] ) ) {
-				return $args;
-			}
-
-			$args['meta_key'] = $table_columns[ $orderby ]['meta_key'];
-			$args['orderby'] = 'meta_value';
-
-			return $args;
-		}
-
-		/**
 		 * This filter adjusts the available row actions.
 		 *
 		 * @since 0.6.0
@@ -209,7 +191,7 @@ if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
 		 * It also determines the term ID the action should be performed on.
 		 *
 		 * @since 0.6.0
-		 * @see WPPTD\TermTableHandler::run_row_action()
+		 * @see WPPTD\TaxonomyTableHandler::run_row_action()
 		 */
 		public function maybe_run_row_action() {
 			$table_row_actions = $this->taxonomy->row_actions;
@@ -237,7 +219,7 @@ if ( ! class_exists( 'WPPTD\TermTableHandler' ) ) {
 		 * It also determines the term IDs the action should be performed on.
 		 *
 		 * @since 0.6.0
-		 * @see WPPTD\TermTableHandler::run_bulk_action()
+		 * @see WPPTD\TaxonomyTableHandler::run_bulk_action()
 		 */
 		public function maybe_run_bulk_action() {
 			$table_bulk_actions = $this->taxonomy->bulk_actions;
