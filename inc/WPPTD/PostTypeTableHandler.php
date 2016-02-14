@@ -102,7 +102,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 		 * @since 0.6.1
 		 * @param string $slug the column slug
 		 * @param array $args the column arguments
-		 * @return string|false either the column sort parameter or false
+		 * @return string|null|false either the column sort parameter, null for no changes or false to remove the column if it exists
 		 */
 		protected function filter_table_sortable_column( $slug, $args ) {
 			if ( ! is_array( $args ) ) {
@@ -157,7 +157,7 @@ if ( ! class_exists( 'WPPTD\PostTypeTableHandler' ) ) {
 				case 'multiselect':
 				case 'radio':
 				case 'multibox':
-					$this->render_meta_column_choice_filter( $column_slug, $field, $active_filters )
+					$this->render_meta_column_choice_filter( $column_slug, $field, $active_filters );
 					break;
 				case 'checkbox':
 					$this->render_meta_column_bool_filter( $column_slug, $field, $active_filters );

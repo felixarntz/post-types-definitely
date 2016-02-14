@@ -145,7 +145,7 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		 * @param array $bulk_counts the counts of updated posts
 		 * @return array the (temporarily) updated array of bulk messages
 		 */
-		public abstract function maybe_hack_bulk_message( $bulk_messages, $bulk_counts = array() );
+		public abstract function maybe_hack_action_message( $bulk_messages, $bulk_counts = array() );
 
 		/**
 		 * Returns parameters to pass to `current_user_can()` to check whether the current user can run row actions.

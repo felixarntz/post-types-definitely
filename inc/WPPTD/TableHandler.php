@@ -91,7 +91,7 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 					if ( isset( $columns[ $column_slug ] ) ) {
 						unset( $columns[ $column_slug ] );
 					}
-				} else {
+				} elseif ( null !== $column_title ) {
 					$columns[ $column_slug ] = $column_title;
 				}
 			}
@@ -115,8 +115,8 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 					if ( isset( $columns[ $column_slug ] ) ) {
 						unset( $columns[ $column_slug ] );
 					}
-				} else {
-					$columns[ $column_slug ] = $column_sort;
+				} elseif ( null !== $column_sort ) {
+					$columns[ $column_slug ] = $column_sort;
 				}
 			}
 
@@ -154,7 +154,7 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 		 * @since 0.6.1
 		 * @param string $slug the column slug
 		 * @param array $args the column arguments
-		 * @return string|false either the column title or false
+		 * @return string|null|false either the column sort parameter, null for no changes or false to remove the column if it exists
 		 */
 		protected function filter_table_column( $slug, $args ) {
 			if ( ! is_array( $args ) ) {
@@ -170,7 +170,7 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 				return $args['title'];
 			}
 
-			return false;
+			return null;
 		}
 
 		/**
@@ -179,7 +179,7 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 		 * @since 0.6.1
 		 * @param string $slug the column slug
 		 * @param array $args the column arguments
-		 * @return string|false either the column sort parameter or false
+		 * @return string|null|false either the column sort parameter, null for no changes or false to remove the column if it exists
 		 */
 		protected function filter_table_sortable_column( $slug, $args ) {
 			if ( ! is_array( $args ) ) {
@@ -195,7 +195,7 @@ if ( ! class_exists( 'WPPTD\TableHandler' ) ) {
 				}
 			}
 
-			return false;
+			return null;
 		}
 
 		/**

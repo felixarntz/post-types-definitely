@@ -68,7 +68,7 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * @param array $bulk_counts the counts of updated posts
 		 * @return array the (temporarily) updated array of bulk messages
 		 */
-		public function maybe_hack_bulk_message( $bulk_messages, $bulk_counts = array() ) {
+		public function maybe_hack_action_message( $bulk_messages, $bulk_counts = array() ) {
 			if ( 0 < $bulk_counts['updated'] ) {
 				$transient_name = $this->get_message_transient_name();
 				$action_message = get_transient( $transient_name );

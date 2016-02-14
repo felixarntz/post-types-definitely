@@ -397,7 +397,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_action_handler, 'maybe_run_bulk_action' ) );
 				}
 				add_action( 'admin_head', array( $post_type_action_handler, 'hack_bulk_actions' ), 100 );
-				add_filter( 'bulk_post_updated_messages', array( $post_type_action_handler, 'maybe_hack_bulk_message' ), 100, 2 );
+				add_filter( 'bulk_post_updated_messages', array( $post_type_action_handler, 'maybe_hack_action_message' ), 100, 2 );
 			}
 		}
 
