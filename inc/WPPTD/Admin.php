@@ -1,7 +1,7 @@
 <?php
 /**
  * @package WPPTD
- * @version 0.6.0
+ * @version 0.6.1
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
  */
 
@@ -930,7 +930,9 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				$taxonomy_table_handler = $taxonomy->get_table_handler();
 
 				add_filter( 'manage_edit-' . $taxonomy->slug . '_columns', array( $taxonomy_table_handler, 'filter_table_columns' ) );
-				add_filter( 'manage_edit-' . $taxonomy->slug . '_sortable_columns', array( $taxonomy_table_handler, 'filter_table_sortable_columns' ) );
+				if ( 0 <= version_compare( get_bloginfo( 'version' ), '4.5' ) ) {
+					add_filter( 'manage_edit-' . $taxonomy->slug . '_sortable_columns', array( $taxonomy_table_handler, 'filter_table_sortable_columns' ) );
+				}
 				add_filter( 'manage_' . $taxonomy->slug . '_custom_column', array( $taxonomy_table_handler, 'filter_table_column_output' ), 10, 3 );
 
 				add_filter( $taxonomy->slug . '_row_actions', array( $this, 'get_term_row_actions' ), 10, 2 );

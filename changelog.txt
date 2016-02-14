@@ -1,5 +1,15 @@
 == Changelog ==
 
+= 0.6.1 =
+* Enhanced: on WordPress >= 4.5, the rows in a terms list table can now be sorted by term meta columns
+* Tweaked: restructured some classes and created abstract base classes
+* Tweaked: plugin now uses wordpress.org language packs
+* Fixed: `wpptd_get_taxonomy()` now handles `WP_Error` correctly
+* Fixed: on WordPress >= 4.5, the term meta UI is properly outputted using a new core action
+* Fixed: admin notice no longer shows on each site when the plugin is activated network-wide
+* Fixed: numeric validation of floating point numbers
+* Fixed: formatting floating point numbers more precise than 2 digits
+
 = 0.6.0 =
 * Added: term meta is now supported (WordPress 4.4 required)
 * Added: on the term editing screen a UI for term meta is created, consisting of meta boxes, similar to the post editing screen (WordPress 4.4 required)
