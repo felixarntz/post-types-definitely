@@ -4,6 +4,7 @@
 * Enhanced: on WordPress >= 4.5, the rows in a terms list table can now be sorted by term meta columns
 * Tweaked: restructured some classes and created abstract base classes
 * Tweaked: plugin now uses wordpress.org language packs
+* Tweaked: updated plugin initialization library
 * Fixed: `wpptd_get_taxonomy()` now handles `WP_Error` correctly
 * Fixed: on WordPress >= 4.5, the term meta UI is properly outputted using a new core action
 * Fixed: admin notice no longer shows on each site when the plugin is activated network-wide
