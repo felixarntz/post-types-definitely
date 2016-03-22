@@ -7,9 +7,9 @@ Author:            Felix Arntz
 Donate link:       http://leaves-and-love.net/wordpress-plugins/
 Contributors:      flixos90
 Requires at least: 4.0 
-Tested up to:      4.4.2
-Stable tag:        0.6.1
-Version:           0.6.1
+Tested up to:      4.5beta4
+Stable tag:        0.6.2
+Version:           0.6.2
 License:           GPL v3
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
 Tags:              wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, post meta, postmeta, term meta, termmeta, meta boxes, metaboxes, repeatable, fields, custom fields, help tabs
@@ -82,6 +82,15 @@ You can also contribute to the plugin by translating it. Simply visit [translate
 3. PHP code to create the post type screens above
 
 == Changelog ==
+
+= 0.6.2 =
+* Enhanced: Plugin adjusted for single term edit form changes in WordPress >= 4.5
+* Enhanced: WYSIWYG field experience is now more similar to the default post editor, including media and link buttons
+* Tweaked: updated the Select2 and Datetimepicker JavaScript plugins
+* Fixed: the selected value of a multiselect field is now properly displayed
+* Fixed: the `rows` attribute now works correctly for textareas and WYSIWYG
+* Fixed: updated the media picker JavaScript plugin for more flexibility and some bug fixes
+* Fixed: updated the map picker JavaScript plugin for more flexibility and some bug fixes
 
 = 0.6.1 =
 * Enhanced: on WordPress >= 4.5, the rows in a terms list table can now be sorted by term meta columns
