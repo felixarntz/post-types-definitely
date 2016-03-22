@@ -83,7 +83,7 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 			if ( isset( $screen->taxonomy ) && $screen->taxonomy ) {
 				$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 				if ( $taxonomy ) {
-					if ( 'edit-tags' === $screen->base && isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) {
+					if ( ( 0 <= version_compare( get_bloginfo( 'version' ), '4.5' ) && 'term' === $screen->base ) || ( 0 > version_compare( get_bloginfo( 'version' ), '4.5' ) && 'edit-tags' === $screen->base && isset( $_GET['tag_ID'] ) && is_numeric( $_GET['tag_ID'] ) ) ) {
 						if ( wpptd_supports_termmeta() ) {
 							$taxonomy->enqueue_assets();
 						}
@@ -410,16 +410,24 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 */
 		public function initialize_term_ui() {
 			$screen = get_current_screen();
-			if ( ! isset( $screen->taxonomy ) || ! isset( $_REQUEST['tag_ID'] ) ) {
+			if ( ! isset( $_REQUEST['tag_ID'] ) ) {
 				return;
 			}
 
-			$taxonomy = ComponentManager::get( '*.*.' . $screen->taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			$term = get_term( absint( $_REQUEST['tag_ID'] ) );
+			if ( ! is_a( $term, 'WP_Term' ) ) {
+				return;
+			}
+
+			$taxonomy = $screen->taxonomy;
+			if ( empty( $taxonomy ) ) {
+				$taxonomy = $term->taxonomy;
+			}
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxonomy, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
 			if ( ! $taxonomy ) {
 				return;
 			}
-
-			$term = get_term( $_REQUEST['tag_ID'] );
 
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_metabox_scripts' ) );
 
@@ -558,8 +566,17 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		public function term_submit_metabox( $term ) {
 			$screen = get_current_screen();
 
-			$tax = get_taxonomy( $screen->taxonomy );
-			$type = get_post_type_object( $screen->post_type );
+			$tax = $screen->taxonomy;
+			if ( empty( $tax ) ) {
+				$tax = $term->taxonomy;
+			}
+			$tax = get_taxonomy( $tax );
+
+			$type = $screen->post_type;
+			if ( empty( $type ) ) {
+				$type = reset( $tax->object_type );
+			}
+			$type = get_post_type_object( $type );
 
 			$base_url = 'edit.php';
 			$args = array();
@@ -700,7 +717,43 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		}
 
 		/**
+		 * Wrapper function to control the addition of help tabs to a taxonomy editing screen.
+		 *
+		 * This is only used on WordPress >= 4.5.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.6.2
+		 */
+		public function add_term_help() {
+			global $taxnow;
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy->render_help();
+			}
+		}
+
+		/**
+		 * Wrapper function to control the addition of help tabs to a taxonomy list screen.
+		 *
+		 * This is only used on WordPress >= 4.5.
+		 *
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.6.2
+		 */
+		public function add_term_list_help() {
+			global $taxnow;
+
+			$taxonomy = ComponentManager::get( '*.*.' . $taxnow, 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy', true );
+			if ( $taxonomy ) {
+				$taxonomy->render_list_help();
+			}
+		}
+
+		/**
 		 * Wrapper function to control the addition of help tabs to a taxonomy editing or list screen.
+		 *
+		 * This is only used on WordPress < 4.5.
 		 *
 		 * @see WPPTD\Components\Taxonomy
 		 * @since 0.5.0
@@ -870,7 +923,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 		 * @since 0.5.0
 		 */
 		protected function add_taxonomy_hooks() {
-			add_action( 'load-edit-tags.php', array( $this, 'add_term_or_term_list_help' ) );
+			if ( 0 > version_compare( get_bloginfo( 'version' ), '4.5' ) ) {
+				add_action( 'load-edit-tags.php', array( $this, 'add_term_or_term_list_help' ) );
+			} else {
+				add_action( 'load-edit-tags.php', array( $this, 'add_term_list_help' ) );
+				add_action( 'load-term.php', array( $this, 'add_term_help' ) );
+			}
+
 			add_filter( 'term_updated_messages', array( $this, 'get_term_updated_messages' ) );
 
 			if ( wpptd_supports_termmeta() ) {
