@@ -1,6 +1,6 @@
 {
   "name": "post-types-definitely",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.",
   "keywords": [
     "wordpress",
