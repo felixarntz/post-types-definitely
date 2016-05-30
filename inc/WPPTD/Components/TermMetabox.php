@@ -1,8 +1,11 @@
 <?php
 /**
+ * WPPTD\Components\TermMetabox class
+ *
  * @package WPPTD
- * @version 0.6.4
+ * @subpackage Components
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
+ * @since 0.6.0
  */
 
 namespace WPPTD\Components;

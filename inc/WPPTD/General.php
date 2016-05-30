@@ -1,8 +1,10 @@
 <?php
 /**
+ * WPPTD\General class
+ *
  * @package WPPTD
- * @version 0.6.4
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
+ * @since 0.5.0
  */
 
 namespace WPPTD;

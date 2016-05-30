@@ -1,20 +1,22 @@
 <?php
 /*
 Plugin Name: Post Types Definitely
-Plugin URI: https://wordpress.org/plugins/post-types-definitely/
+Plugin URI:  https://wordpress.org/plugins/post-types-definitely/
 Description: This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.
-Version: 0.6.4
-Author: Felix Arntz
-Author URI: http://leaves-and-love.net
-License: GNU General Public License v3
+Version:     0.6.4
+Author:      Felix Arntz
+Author URI:  https://leaves-and-love.net
+License:     GNU General Public License v3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: post-types-definitely
-Tags: wordpress, plugin, definitely, framework, library, developer, admin, backend, structured data, ui, api, cms, post-types, posts, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, terms, meta, post meta, postmeta, term meta, termmeta, meta boxes, metaboxes, repeatable, fields, custom fields, help tabs
+Tags:        definitely, framework, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, post meta, term meta, meta boxes
 */
 /**
+ * Plugin initialization file
+ *
  * @package WPPTD
- * @version 0.6.4
  * @author Felix Arntz <felix-arntz@leaves-and-love.net>
+ * @since 0.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

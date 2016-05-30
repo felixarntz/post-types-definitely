@@ -7,39 +7,20 @@
     "plugin",
     "definitely",
     "framework",
-    "library",
-    "developer",
-    "admin",
-    "backend",
-    "structured data",
-    "ui",
-    "api",
-    "cms",
-    "post-types",
-    "posts",
     "custom-post-type",
     "list table",
     "post filters",
     "row actions",
     "bulk actions",
     "taxonomies",
-    "terms",
-    "meta",
     "post meta",
-    "postmeta",
     "term meta",
-    "termmeta",
-    "meta boxes",
-    "metaboxes",
-    "repeatable",
-    "fields",
-    "custom fields",
-    "help tabs"
+    "meta boxes"
   ],
   "author": {
     "name": "Felix Arntz",
     "email": "felix-arntz@leaves-and-love.net",
-    "url": "http://leaves-and-love.net"
+    "url": "https://leaves-and-love.net"
   },
   "homepage": "https://wordpress.org/plugins/post-types-definitely/",
   "repository": {
@@ -58,8 +39,22 @@
     "node": ">= 0.10.0"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-text-replace": "~0.4.0",
-    "bower": "~1.3.12"
+    "bower": "^1.7.7",
+    "gulp": "^3.9.1",
+    "gulp-banner": "^0.1.3",
+    "gulp-composer": "^0.4.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-csscomb": "^3.0.6",
+    "gulp-install": "^0.6.0",
+    "gulp-jshint": "^2.0.0",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-sass": "^2.2.0",
+    "gulp-sort": "^2.0.0",
+    "gulp-uglify": "^1.5.3",
+    "gulp-util": "^3.0.7",
+    "jshint": "^2.9.1"
   }
 }
