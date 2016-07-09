@@ -71,6 +71,36 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		}
 
 		/**
+		 * Registers the meta for this field.
+		 *
+		 * This method should only be called on WordPress >= 4.6 since it uses the `register_meta()` function
+		 * with the new behavior introduced there.
+		 *
+		 * @since 0.6.5
+		 * @param WPPTD\Components\Metabox $parent_metabox the parent metabox component of this field
+		 * @param WPPTD\Components\PostType $parent_post_type the parent post type component of this field
+		 */
+		public function register( $parent_metabox = null, $parent_post_type = null ) {
+			if ( null === $parent_metabox ) {
+				$parent_metabox = $this->get_parent();
+			}
+			if ( null === $parent_post_type ) {
+				$parent_post_type = $parent_metabox->get_parent();
+			}
+
+			$args = array(
+				'object_subtype'	=> $parent_post_type->slug,
+				'type'				=> $this->get_meta_type(),
+				'description'		=> ( ! empty( $this->args['rest_description'] ) ? $this->args['rest_description'] : $this->args['description'] ),
+				'single'			=> $this->is_meta_single(),
+				'auth_callback'		=> $this->args['rest_auth_callback'],
+				'show_in_rest'		=> $this->args['show_in_rest'],
+			);
+
+			register_meta( 'post', $this->slug, $args );
+		}
+
+		/**
 		 * Renders the post meta field.
 		 *
 		 * This function will show the input field(s) in the post editing screen.
@@ -253,13 +283,16 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'				=> __( 'Field title', 'post-types-definitely' ),
-				'description'		=> '',
-				'type'				=> 'text',
-				'class'				=> '',
-				'default'			=> null,
-				'required'			=> false,
-				'position'			=> null,
+				'title'					=> __( 'Field title', 'post-types-definitely' ),
+				'description'			=> '',
+				'type'					=> 'text',
+				'class'					=> '',
+				'default'				=> null,
+				'required'				=> false,
+				'position'				=> null,
+				'show_in_rest'			=> false,
+				'rest_description'		=> '',
+				'rest_auth_callback'	=> null,
 			);
 
 			if ( has_filter( 'wpptd_field_defaults' ) ) {
@@ -282,6 +315,70 @@ if ( ! class_exists( 'WPPTD\Components\Field' ) ) {
 			 * @param array the associative array of default values
 			 */
 			return apply_filters( 'wpptd_post_field_defaults', $defaults );
+		}
+
+		/**
+		 * Returns the meta type for this field.
+		 *
+		 * The meta type is used for the 'type' argument in the WordPress function `register_meta()`.
+		 *
+		 * @since 0.6.5
+		 * @return string the meta type
+		 */
+		protected function get_meta_type() {
+			$meta_type = 'string';
+
+			switch ( $this->args['type'] ) {
+				case 'checkbox':
+					$meta_type = 'boolean';
+					break;
+				case 'media':
+					if ( isset( $this->args['store'] ) && 'url' === $this->args['store'] ) {
+						$meta_type = 'string';
+					} else {
+						$meta_type = 'integer';
+					}
+					break;
+				case 'range':
+				case 'number':
+					if ( isset( $this->args['step'] ) && is_float( $this->args['step'] ) ) {
+						$meta_type = 'float';
+					} else {
+						$meta_type = 'integer';
+					}
+					break;
+				case 'repeatable':
+					$meta_type = 'array';
+					break;
+			}
+
+			/**
+			 * This filter can be used to adjust the meta type for a field.
+			 *
+			 * The meta type is used in the WordPress function `register_meta()`. This filter allows
+			 * to support custom fields as well.
+			 *
+			 * Note that this filter applies to both post and term meta.
+			 *
+			 * @since 0.6.5
+			 * @param string $meta_type the original meta type detected
+			 * @param WPPTD\Components\Field the field component
+			 */
+			return apply_filters( 'wpptd_field_meta_type', $meta_type, $this );
+		}
+
+		/**
+		 * Returns whether the meta for this field is a single value or not.
+		 *
+		 * This is used for the 'single' argument in the WordPress function `register_meta()`.
+		 *
+		 * @since 0.6.5
+		 * @return boolean whether this meta field has only a single value or not
+		 */
+		protected function is_meta_single() {
+			$type_hint = $this->validate_meta_value( null, true );
+
+			return ! is_array( $type_hint );
 		}
 
 		/**

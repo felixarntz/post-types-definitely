@@ -64,6 +64,9 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 			add_action( 'init', array( $this, 'register_post_types' ), 20 );
 			add_action( 'init', array( $this, 'register_taxonomies' ), 30 );
 			add_action( 'init', array( $this, 'register_connections' ), 40 );
+			if ( version_compare( get_bloginfo( 'version' ), '4.6', '>=' ) ) {
+				add_action( 'init', array( $this, 'register_meta' ), 50 );
+			}
 		}
 
 		/**
@@ -106,6 +109,28 @@ if ( ! class_exists( 'WPPTD\General' ) ) {
 				foreach ( $taxonomies as $taxonomy ) {
 					$status = register_taxonomy_for_object_type( $taxonomy->slug, $post_type->slug );
 				}
+			}
+		}
+
+		/**
+		 * Registers meta for all post types and taxonomies.
+		 *
+		 * Registering metadata with details was introduced in WordPress 4.6. Therefore this
+		 * method is not used in versions below that.
+		 *
+		 * @see WPPTD\Components\PostType
+		 * @see WPPTD\Components\Taxonomy
+		 * @since 0.6.5
+		 */
+		public function register_meta() {
+			$post_types = ComponentManager::get( '*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType' );
+			foreach ( $post_types as $post_type ) {
+				$post_type->register_meta();
+			}
+
+			$taxonomies = ComponentManager::get( '*.*.*', 'WPDLib\Components\Menu.WPPTD\Components\PostType.WPPTD\Components\Taxonomy' );
+			foreach ( $taxonomies as $taxonomy ) {
+				$taxonomy->register_meta();
 			}
 		}
 

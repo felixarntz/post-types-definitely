@@ -146,6 +146,21 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		}
 
 		/**
+		 * Registers the meta for this post type.
+		 *
+		 * This method only works on WordPress >= 4.6 and therefore should only be called there.
+		 *
+		 * @since 0.6.5
+		 */
+		public function register_meta() {
+			foreach ( $this->get_children( 'WPPTD\Components\TermMetabox' ) as $metabox ) {
+				foreach ( $metabox->get_children( 'WPPTD\Components\TermField' ) as $field ) {
+					$field->register( $metabox, $this );
+				}
+			}
+		}
+
+		/**
 		 * Registers the metaboxes for the taxonomy.
 		 *
 		 * @since 0.6.0

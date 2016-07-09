@@ -42,6 +42,36 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 		}
 
 		/**
+		 * Registers the meta for this field.
+		 *
+		 * This method should only be called on WordPress >= 4.6 since it uses the `register_meta()` function
+		 * with the new behavior introduced there.
+		 *
+		 * @since 0.6.5
+		 * @param WPPTD\Components\TermMetabox $parent_metabox the parent metabox component of this field
+		 * @param WPPTD\Components\Taxonomy $parent_taxonomy the parent taxonomy component of this field
+		 */
+		public function register( $parent_metabox = null, $parent_taxonomy = null ) {
+			if ( null === $parent_metabox ) {
+				$parent_metabox = $this->get_parent();
+			}
+			if ( null === $parent_taxonomy ) {
+				$parent_taxonomy = $parent_metabox->get_parent();
+			}
+
+			$args = array(
+				'object_subtype'	=> $parent_taxonomy->slug,
+				'type'				=> $this->get_meta_type(),
+				'description'		=> ( ! empty( $this->args['rest_description'] ) ? $this->args['rest_description'] : $this->args['description'] ),
+				'single'			=> $this->is_meta_single(),
+				'auth_callback'		=> $this->args['rest_auth_callback'],
+				'show_in_rest'		=> $this->args['show_in_rest'],
+			);
+
+			register_meta( 'term', $this->slug, $args );
+		}
+
+		/**
 		 * Renders the term meta field.
 		 *
 		 * This function will show the input field(s) in the term editing screen.
@@ -122,13 +152,16 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'				=> __( 'Field title', 'post-types-definitely' ),
-				'description'		=> '',
-				'type'				=> 'text',
-				'class'				=> '',
-				'default'			=> null,
-				'required'			=> false,
-				'position'			=> null,
+				'title'					=> __( 'Field title', 'post-types-definitely' ),
+				'description'			=> '',
+				'type'					=> 'text',
+				'class'					=> '',
+				'default'				=> null,
+				'required'				=> false,
+				'position'				=> null,
+				'show_in_rest'			=> false,
+				'rest_description'		=> '',
+				'rest_auth_callback'	=> null,
 			);
 
 			/**

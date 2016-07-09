@@ -151,6 +151,21 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		}
 
 		/**
+		 * Registers the meta for this post type.
+		 *
+		 * This method only works on WordPress >= 4.6 and therefore should only be called there.
+		 *
+		 * @since 0.6.5
+		 */
+		public function register_meta() {
+			foreach ( $this->get_children( 'WPPTD\Components\Metabox' ) as $metabox ) {
+				foreach ( $metabox->get_children( 'WPPTD\Components\Field' ) as $field ) {
+					$field->register( $metabox, $this );
+				}
+			}
+		}
+
+		/**
 		 * Adds the post type to the WordPress admin menu.
 		 *
 		 * The function will append the 'Add New' item and the related taxonomy pages to the menu as submenu items.
