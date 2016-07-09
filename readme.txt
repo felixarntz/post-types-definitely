@@ -18,7 +18,7 @@ This framework plugin makes adding post types with taxonomies and meta to WordPr
 
 == Description ==
 
-_Post Types Definitely_ is a framework for developers that allows them to easily add post types, with taxonomies, metaboxes and meta fields to the WordPress admin so that a user can manage them. The plugin also supports term meta (if you're running WordPress 4.4 or higher) - you can add metaboxes and fields to terms in the same fashion you can add them to posts. You can also customize the post type and taxonomy list tables, for example to display values of a specific meta field in an additional column - sortable and filterable if you like.
+_Post Types Definitely_ is a framework for developers that allows them to easily add post types, with taxonomies, metaboxes and meta fields to the WordPress admin so that a user can manage them. The plugin also supports term meta (if you're running WordPress 4.4 or higher) - you can add metaboxes and fields to terms in the same fashion you can add them to posts. You can also customize the post type and taxonomy list tables, for example to display values of a specific meta field in an additional column - sortable and filterable if you like. Starting with WordPress 4.6, the plugin also registers all post and term meta so that this data can be automatically included in the REST API endpoints.
 
 The plugin belongs to the group of _Definitely_ plugins which aim at making adding backend components in WordPress easier and more standardized for developers. All _Definitely_ plugins bundle a custom library that handles functionality which is shared across all these plugins, for example handling the field types and their controls.
 
