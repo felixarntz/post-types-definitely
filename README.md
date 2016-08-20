@@ -1,3 +1,5 @@
+[![WordPress plugin](https://img.shields.io/wordpress/plugin/v/post-types-definitely.svg?maxAge=2592000)](https://wordpress.org/plugins/post-types-definitely/)
+[![WordPress](https://img.shields.io/wordpress/v/post-types-definitely.svg?maxAge=2592000)](https://wordpress.org/plugins/post-types-definitely/)
 [![Code Climate](https://codeclimate.com/github/felixarntz/post-types-definitely/badges/gpa.svg)](https://codeclimate.com/github/felixarntz/post-types-definitely)
 [![Latest Stable Version](https://poser.pugx.org/felixarntz/post-types-definitely/version)](https://packagist.org/packages/felixarntz/post-types-definitely)
 [![License](https://poser.pugx.org/felixarntz/post-types-definitely/license)](https://packagist.org/packages/felixarntz/post-types-definitely)
