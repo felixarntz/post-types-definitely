@@ -1,6 +1,6 @@
 {
   "name": "post-types-definitely",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.",
   "keywords": [
     "wordpress",
@@ -30,11 +30,7 @@
   "bugs": {
     "url" : "https://github.com/felixarntz/post-types-definitely/issues"
   },
-  "license": {
-    "type": "GPL-3.0",
-    "name": "GNU General Public License v3",
-    "url": "http://www.gnu.org/licenses/gpl-3.0.html"
-  },
+  "license": "GPL-3.0",
   "engines": {
     "node": ">= 0.10.0"
   },

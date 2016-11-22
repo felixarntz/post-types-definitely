@@ -3,7 +3,7 @@
 Plugin Name: Post Types Definitely
 Plugin URI:  https://wordpress.org/plugins/post-types-definitely/
 Description: This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.
-Version:     0.6.5
+Version:     0.6.6
 Author:      Felix Arntz
 Author URI:  https://leaves-and-love.net
 License:     GNU General Public License v3
@@ -40,7 +40,7 @@ if ( version_compare( phpversion(), '5.3.0' ) >= 0 && ! class_exists( 'WPPTD\App
 LaL_WP_Plugin_Loader::load_plugin( array(
 	'slug'					=> 'post-types-definitely',
 	'name'					=> 'Post Types Definitely',
-	'version'				=> '0.6.5',
+	'version'				=> '0.6.6',
 	'main_file'				=> __FILE__,
 	'namespace'				=> 'WPPTD',
 	'textdomain'			=> 'post-types-definitely',

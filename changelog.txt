@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 0.6.6 =
+* Fixed: select fields no longer show twice when a placeholder is specified
+
 = 0.6.5 =
 * Enhanced: on WordPress >= 4.6, post and term meta is now registered via `register_meta()`
 * Tweaked: updated the plugin initialization library

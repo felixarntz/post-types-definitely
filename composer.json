@@ -1,7 +1,7 @@
 {
   "name": "felixarntz/post-types-definitely",
   "description": "This framework plugin makes adding post types with taxonomies and meta to WordPress very simple, yet flexible.",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "license": "GPL-3.0",
   "type": "wordpress-plugin",
   "keywords": [
@@ -45,7 +45,7 @@
   },
   "require": {
     "composer/installers": "~1.0",
-    "felixarntz/wpdlib": "0.6.5",
+    "felixarntz/wpdlib": "0.6.6",
     "felixarntz/leavesandlove-wp-plugin-util": "2.0.3"
   },
   "extra": {

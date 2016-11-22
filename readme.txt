@@ -7,9 +7,9 @@ Author URI:        https://leaves-and-love.net
 Contributors:      flixos90
 Donate link:       https://leaves-and-love.net/wordpress-plugins/
 Requires at least: 4.0
-Tested up to:      4.5.3
-Stable tag:        0.6.5
-Version:           0.6.5
+Tested up to:      4.6
+Stable tag:        0.6.6
+Version:           0.6.6
 License:           GNU General Public License v3
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
 Tags:              definitely, framework, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, post meta, term meta, meta boxes
@@ -82,6 +82,9 @@ You can also contribute to the plugin by translating it. Simply visit [translate
 3. PHP code to create the post type screens above
 
 == Changelog ==
+
+= 0.6.6 =
+* Fixed: select fields no longer show twice when a placeholder is specified
 
 = 0.6.5 =
 * Enhanced: on WordPress >= 4.6, post and term meta is now registered via `register_meta()`
