@@ -108,6 +108,63 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		 *
 		 * It will run the action if necessary.
 		 *
+		 * @since 0.6.7
+		 * @access public
+		 *
+		 * @see WPPTD\ActionHandler::handle_bulk_action()
+		 *
+		 * @param string $sendback    Sendback URL to redirect to.
+		 * @param string $bulk_action Slug of the bulk action to handle.
+		 * @param array  $item_ids    Array of item IDs.
+		 * @return string The modified sendback URL.
+		 */
+		public function maybe_handle_bulk_action( $sendback, $bulk_action, $item_ids ) {
+			$table_bulk_actions = $this->component->bulk_actions;
+			if ( ! isset( $table_bulk_actions[ $bulk_action ] ) ) {
+				return $sendback;
+			}
+
+			if ( ! $item_ids ) {
+				return $sendback;
+			}
+
+			$item_ids = array_map( 'intval', $item_ids );
+
+			return $this->handle_bulk_action( $sendback, $bulk_action, $item_ids );
+		}
+
+		/**
+		 * Displays a bulk action result message if necessary.
+		 *
+		 * @since 0.6.7
+		 * @access public
+		 */
+		public function maybe_display_bulk_action_message() {
+			if ( empty( $_GET['message'] ) || ! in_array( $_GET['message'], array( 'wpptd_bulk_action_error', 'wpptd_bulk_action_success' ), true ) ) {
+				return;
+			}
+
+			$class = 'wpptd_bulk_action_error' === $_GET['message'] ? 'error' : 'updated';
+
+			$transient_name = $this->get_message_transient_name();
+
+			$action_message = get_transient( $transient_name );
+			if ( ! $action_message ) {
+				return;
+			}
+
+			delete_transient( $transient_name );
+
+			echo '<div id="message" class="' . $class . ' notice is-dismissible"><p>' . $action_message . '</p></div>';
+		}
+
+		/**
+		 * This action is a general router to check whether a specific bulk action should be performed.
+		 *
+		 * It will run the action if necessary.
+		 *
+		 * This method is only used on WordPress < 4.7.
+		 *
 		 * @since 0.6.1
 		 * @see WPPTD\ActionHandler::run_bulk_action()
 		 */
@@ -144,7 +201,7 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		/**
 		 * A hack to extend the bulk actions dropdown with custom bulk actions via JavaScript.
 		 *
-		 * WordPress does not natively support this. That's why we need this ugly solution.
+		 * WordPress did not natively support this until version 4.7. That's why we need this ugly solution.
 		 *
 		 * @since 0.6.1
 		 */
@@ -152,6 +209,8 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 
 		/**
 		 * A hack to display a custom message for the current action instead of the default message.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @param array $bulk_messages the original array of bulk messages
@@ -217,6 +276,8 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		/**
 		 * Returns the name of the nonce that should be used to check for a bulk action.
 		 *
+		 * This method is only used on WordPress < 4.7.
+		 *
 		 * @since 0.6.1
 		 * @return string name of the nonce
 		 */
@@ -225,6 +286,8 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		/**
 		 * Returns an array of post / term IDs that a bulk action should be performed on.
 		 *
+		 * This method is only used on WordPress < 4.7.
+		 *
 		 * @since 0.6.1
 		 * @return array post or term IDs
 		 */
@@ -232,6 +295,8 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 
 		/**
 		 * Returns the sendback URL to return to after a bulk action has been run.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @param string $message the resulting notification of the bulk action
@@ -304,6 +369,52 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		}
 
 		/**
+		 * Performs a specific bulk action and adjusts the redirect URL accordingly.
+		 *
+		 * The callback function of every bulk action must accept exactly one parameter, an array of post IDs.
+		 * It must return (depending on whether the action was successful or not)...
+		 * - either a string to use as the success message
+		 * - a WP_Error object with a custom message to use as the error message
+		 *
+		 * The message is temporarily stored in a transient to be printed out after the redirect.
+		 *
+		 * @since 0.6.7
+		 * @access protected
+		 *
+		 * @param string $sendback    Sendback URL to redirect to.
+		 * @param string $bulk_action Slug of the bulk action to handle.
+		 * @param array  $item_ids    Array of item IDs.
+		 * @return string The modified sendback URL.
+		 */
+		protected function handle_bulk_action( $sendback, $bulk_action, $item_ids ) {
+			$bulk_actions = $this->component->bulk_actions;
+			$component_plural_name = $this->component->title;
+
+			$action_message = false;
+			$error = false;
+			if ( ! call_user_func_array( 'current_user_can', $this->get_bulk_capability_args() ) ) {
+				$action_message = sprintf( __( 'The %s were not updated because of missing privileges.', 'post-types-definitely' ), $component_plural_name );
+				$error = true;
+			} elseif ( empty( $bulk_actions[ $bulk_action ]['callback'] ) || ! is_callable( $bulk_actions[ $bulk_action ]['callback'] ) ) {
+				$action_message = sprintf( __( 'The %s were not updated since an internal error occurred.', 'post-types-definitely' ), $component_plural_name );
+				$error = true;
+			} else {
+				$action_message = call_user_func( $bulk_actions[ $bulk_action ]['callback'], $item_ids );
+				if ( is_wp_error( $action_message ) ) {
+					$action_message = $action_message->get_error_message();
+					$error = true;
+				}
+			}
+
+			if ( $action_message && is_string( $action_message ) ) {
+				$transient_name = $this->get_message_transient_name();
+				set_transient( $transient_name, $action_message, MINUTE_IN_SECONDS );
+			}
+
+			return add_query_arg( 'message', 'wpptd_bulk_action_' . ( $error ? 'error' : 'success' ), $sendback );
+		}
+
+		/**
 		 * Performs a specific bulk action and redirects back to the list table screen afterwards.
 		 *
 		 * The callback function of every bulk action must accept exactly one parameter, an array of post IDs.
@@ -312,6 +423,8 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		 * - a WP_Error object with a custom message to use as the error message
 		 *
 		 * The message is temporarily stored in a transient to be printed out after the redirect.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @param string $bulk_action the bulk action slug

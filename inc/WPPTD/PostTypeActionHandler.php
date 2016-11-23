@@ -77,6 +77,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		/**
 		 * Hacks around with the bulk action error message if one exists.
 		 *
+		 * This method is only used on WordPress < 4.7.
+		 *
 		 * @since 0.6.7
 		 * @access public
 		 */
@@ -99,6 +101,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		 * This filter adjusts the bulk messages if a custom row/bulk action has just been executed.
 		 *
 		 * It is basically a hack to display a custom message for that action instead of the default message.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @param array $bulk_messages the original array of bulk messages
@@ -205,6 +209,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 		/**
 		 * Returns the name of the nonce that should be used to check for a bulk action.
 		 *
+		 * This method is only used on WordPress < 4.7.
+		 *
 		 * @since 0.6.1
 		 * @return string name of the nonce
 		 */
@@ -214,6 +220,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 
 		/**
 		 * Returns an array of post IDs that a bulk action should be performed on.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @return array post IDs
@@ -234,6 +242,8 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 
 		/**
 		 * Returns the sendback URL to return to after a bulk action has been run.
+		 *
+		 * This method is only used on WordPress < 4.7.
 		 *
 		 * @since 0.6.1
 		 * @param string $message the resulting notification of the bulk action
