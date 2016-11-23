@@ -5,6 +5,9 @@
 * Enhanced: on WordPress 4.7 bulk actions are handled in a clean way using the new infrastructure, without any JavaScript hacks
 * Enhanced: meta fields are provided with proper defaults for registration; registration is discouraged though due to the lack of object subtype handling in WordPress Core
 * Enhanced: new post type labels in WordPress 4.7 are now automatically generated
+* Fixed: datetime and time fields no longer switch the time back by an hour automatically
+* Fixed: in datetime and date fields it is no longer possible to accidentally change the month by scrolling
+* Fixed: datetime and date fields better support locale special characters
 
 = 0.6.6 =
 * Fixed: select fields no longer show twice when a placeholder is specified

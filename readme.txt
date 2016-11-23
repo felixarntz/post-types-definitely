@@ -7,9 +7,9 @@ Author URI:        https://leaves-and-love.net
 Contributors:      flixos90
 Donate link:       https://leaves-and-love.net/wordpress-plugins/
 Requires at least: 4.0
-Tested up to:      4.6
-Stable tag:        0.6.6
-Version:           0.6.6
+Tested up to:      4.7
+Stable tag:        0.6.7
+Version:           0.6.7
 License:           GNU General Public License v3
 License URI:       http://www.gnu.org/licenses/gpl-3.0.html
 Tags:              definitely, framework, custom-post-type, list table, post filters, row actions, bulk actions, taxonomies, post meta, term meta, meta boxes
@@ -82,6 +82,15 @@ You can also contribute to the plugin by translating it. Simply visit [translate
 3. PHP code to create the post type screens above
 
 == Changelog ==
+
+= 0.6.7 =
+* Added: post type and taxonomy endpoints for the WP REST API are now handled automatically depending on their other public-related arguments
+* Enhanced: on WordPress 4.7 bulk actions are handled in a clean way using the new infrastructure, without any JavaScript hacks
+* Enhanced: meta fields are provided with proper defaults for registration; registration is discouraged though due to the lack of object subtype handling in WordPress Core
+* Enhanced: new post type labels in WordPress 4.7 are now automatically generated
+* Fixed: datetime and time fields no longer switch the time back by an hour automatically
+* Fixed: in datetime and date fields it is no longer possible to accidentally change the month by scrolling
+* Fixed: datetime and date fields better support locale special characters
 
 = 0.6.6 =
 * Fixed: select fields no longer show twice when a placeholder is specified
