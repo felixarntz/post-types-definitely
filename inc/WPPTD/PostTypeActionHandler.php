@@ -22,9 +22,28 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 	 */
 	class PostTypeActionHandler extends ActionHandler {
 		/**
+		 * This action adds the custom post type bulk actions.
+		 *
+		 * @since 0.6.7
+		 * @access public
+		 *
+		 * @param array $actions The original bulk actions.
+		 * @return array The modified bulk actions.
+		 */
+		public function add_bulk_actions( $actions ) {
+			$table_bulk_actions = $this->component->bulk_actions;
+
+			foreach ( $table_bulk_actions as $action_slug => $action_args ) {
+				$actions[ $action_slug ] = $action_args['title'];
+			}
+
+			return $actions;
+		}
+
+		/**
 		 * This action is a hack to extend the bulk actions dropdown with custom bulk actions via JavaScript.
 		 *
-		 * WordPress does not natively support this. That's why we need this ugly solution.
+		 * WordPress did not natively support this until version 4.7. That's why we need this ugly solution.
 		 *
 		 * Another thing the function does is checking whether a row/bulk action message outputted by the plugin
 		 * is actually an error message. In that case, the CSS class of it is changed accordingly.
@@ -38,11 +57,6 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 			<script type="text/javascript">
 				if ( typeof jQuery !== 'undefined' ) {
 					jQuery( document ).ready( function( $ ) {
-						if ( $( '#message .wpptd-error-hack' ).length > 0 ) {
-							$( '#message' ).addClass( 'error' ).removeClass( 'updated' );
-							$( '#message .wpptd-error-hack' ).remove();
-						}
-
 						var options = '';
 						<?php if ( ! isset( $_GET['post_status'] ) || 'trash' != $_GET['post_status'] ) : ?>
 						<?php foreach ( $table_bulk_actions as $action_slug => $action_args ) : ?>
@@ -53,6 +67,27 @@ if ( ! class_exists( 'WPPTD\PostTypeActionHandler' ) ) {
 						if ( options ) {
 							$( '#bulk-action-selector-top' ).append( options );
 							$( '#bulk-action-selector-bottom' ).append( options );
+						}
+					});
+				}
+			</script>
+			<?php
+		}
+
+		/**
+		 * Hacks around with the bulk action error message if one exists.
+		 *
+		 * @since 0.6.7
+		 * @access public
+		 */
+		public function hack_bulk_action_error_message() {
+			?>
+			<script type="text/javascript">
+				if ( typeof jQuery !== 'undefined' ) {
+					jQuery( document ).ready( function( $ ) {
+						if ( $( '#message .wpptd-error-hack' ).length > 0 ) {
+							$( '#message' ).addClass( 'error' ).removeClass( 'updated' );
+							$( '#message .wpptd-error-hack' ).remove();
 						}
 					});
 				}

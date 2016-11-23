@@ -22,9 +22,28 @@ if ( ! class_exists( 'WPPTD\TaxonomyActionHandler' ) ) {
 	 */
 	class TaxonomyActionHandler extends ActionHandler {
 		/**
+		 * This action adds the custom taxonomy bulk actions.
+		 *
+		 * @since 0.6.7
+		 * @access public
+		 *
+		 * @param array $actions The original bulk actions.
+		 * @return array The modified bulk actions.
+		 */
+		public function add_bulk_actions( $actions ) {
+			$table_bulk_actions = $this->component->bulk_actions;
+
+			foreach ( $table_bulk_actions as $action_slug => $action_args ) {
+				$actions[ $action_slug ] = $action_args['title'];
+			}
+
+			return $actions;
+		}
+
+		/**
 		 * This action is a hack to extend the bulk actions dropdown with custom bulk actions via JavaScript.
 		 *
-		 * WordPress does not natively support this. That's why we need this ugly solution.
+		 * WordPress did not natively support this until version 4.7. That's why we need this ugly solution.
 		 *
 		 * @since 0.6.1
 		 */

@@ -131,6 +131,17 @@ if ( ! class_exists( 'WPPTD\ActionHandler' ) ) {
 		}
 
 		/**
+		 * This action adds the custom bulk actions.
+		 *
+		 * @since 0.6.7
+		 * @access public
+		 *
+		 * @param array $actions The original bulk actions.
+		 * @return array The modified bulk actions.
+		 */
+		public abstract function add_bulk_actions( $actions );
+
+		/**
 		 * A hack to extend the bulk actions dropdown with custom bulk actions via JavaScript.
 		 *
 		 * WordPress does not natively support this. That's why we need this ugly solution.

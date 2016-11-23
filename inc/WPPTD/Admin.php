@@ -398,7 +398,14 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
 					add_action( 'admin_action_' . $_REQUEST['action'], array( $post_type_action_handler, 'maybe_run_bulk_action' ) );
 				}
-				add_action( 'admin_head', array( $post_type_action_handler, 'hack_bulk_actions' ), 100 );
+
+				if ( version_compare( get_bloginfo( 'version' ), '4.7', '<' ) ) {
+					add_action( 'admin_head', array( $post_type_action_handler, 'hack_bulk_actions' ), 100 );
+				} else {
+					add_filter( 'bulk_actions-edit-' . $post_type->slug, array( $post_type_action_handler, 'add_bulk_actions' ) );
+				}
+
+				add_action( 'admin_head', array( $post_type_action_handler, 'hack_bulk_action_error_message' ), 100 );
 				add_filter( 'bulk_post_updated_messages', array( $post_type_action_handler, 'maybe_hack_action_message' ), 100, 2 );
 			}
 		}
@@ -895,7 +902,13 @@ if ( ! class_exists( 'WPPTD\Admin' ) ) {
 				if ( isset( $_REQUEST['action'] ) && -1 != $_REQUEST['action'] ) {
 					add_action( 'admin_action_' . $_REQUEST['action'], array( $taxonomy_action_handler, 'maybe_run_bulk_action' ) );
 				}
-				add_action( 'admin_head', array( $taxonomy_action_handler, 'hack_bulk_actions' ), 100 );
+
+				if ( version_compare( get_bloginfo( 'version' ), '4.7', '<' ) ) {
+					add_action( 'admin_head', array( $taxonomy_action_handler, 'hack_bulk_actions' ), 100 );
+				} else {
+					add_filter( 'bulk_actions-edit-' . $taxonomy->slug, array( $taxonomy_action_handler, 'add_bulk_actions' ) );
+				}
+
 				add_filter( 'term_updated_messages', array( $taxonomy_action_handler, 'maybe_hack_action_message' ), 100 );
 			}
 		}
