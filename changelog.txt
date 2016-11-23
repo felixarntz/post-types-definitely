@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 0.6.7 =
+* Added: post type and taxonomy endpoints for the WP REST API are now handled automatically depending on their other public-related arguments
+* Enhanced: new post type labels in WordPress 4.7 are now automatically generated
+
 = 0.6.6 =
 * Fixed: select fields no longer show twice when a placeholder is specified
 

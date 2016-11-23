@@ -152,16 +152,16 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'					=> __( 'Field title', 'post-types-definitely' ),
-				'description'			=> '',
-				'type'					=> 'text',
-				'class'					=> '',
-				'default'				=> null,
-				'required'				=> false,
-				'position'				=> null,
-				'show_in_rest'			=> false,
-				'rest_description'		=> '',
-				'rest_auth_callback'	=> null,
+				'title'              => __( 'Field title', 'post-types-definitely' ),
+				'description'        => '',
+				'type'               => 'text',
+				'class'              => '',
+				'default'            => null,
+				'required'           => false,
+				'position'           => null,
+				'show_in_rest'       => false,
+				'rest_description'   => '',
+				'rest_auth_callback' => null,
 			);
 
 			/**

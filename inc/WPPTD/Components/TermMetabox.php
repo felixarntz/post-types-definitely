@@ -147,12 +147,12 @@ if ( ! class_exists( 'WPPTD\Components\TermMetabox' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'			=> __( 'Metabox title', 'post-types-definitely' ),
-				'description'	=> '',
-				'context'		=> null,
-				'priority'		=> null,
-				'position'		=> null,
-				'callback'		=> false, //only used if no fields are attached to this metabox
+				'title'       => __( 'Metabox title', 'post-types-definitely' ),
+				'description' => '',
+				'context'     => null,
+				'priority'    => null,
+				'position'    => null,
+				'callback'    => false, //only used if no fields are attached to this metabox
 			);
 
 			/**

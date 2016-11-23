@@ -434,6 +434,17 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 					}
 				}
 
+				// handle REST API default
+				if ( null === $this->args['show_in_rest'] ) {
+					if ( null !== $this->args['publicly_queryable'] ) {
+						$this->args['show_in_rest'] = $this->args['publicly_queryable'];
+					} elseif ( null !== $this->args['public'] ) {
+						$this->args['show_in_rest'] = $this->args['public'];
+					} else {
+						$this->args['show_in_rest'] = false;
+					}
+				}
+
 				$this->args = Utility::validate_ui_args( $this->args );
 
 				$menu = $this->get_parent();
@@ -480,42 +491,43 @@ if ( ! class_exists( 'WPPTD\Components\PostType' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'					=> '',
-				'singular_title'		=> '',
-				'title_gender'			=> 'n',
-				'labels'				=> array(),
-				'messages'				=> array(),
-				'bulk_messages'			=> array(),
-				'enter_title_here'		=> '',
-				'description'			=> '',
-				'public'				=> false,
-				'exclude_from_search'	=> null,
-				'publicly_queryable'	=> null,
-				'show_ui'				=> null,
-				'show_in_menu'			=> null,
-				'show_add_new_in_menu'	=> true,
-				'show_in_admin_bar'		=> null,
-				'show_in_nav_menus'		=> null,
-				'capability_type'		=> 'post',
-				'capabilities'			=> array(),
-				'map_meta_cap'			=> null,
-				'hierarchical'			=> false,
-				'supports'				=> array( 'title', 'editor' ),
-				'has_archive'			=> false,
-				'rewrite'				=> null,
-				'query_var'				=> true,
-				'can_export'			=> true,
-				'position'				=> null,
-				'table_columns'			=> array(),
-				'row_actions'			=> array(),
-				'bulk_actions'			=> array(),
-				'help'					=> array(
-					'tabs'					=> array(),
-					'sidebar'				=> '',
+				'title'                => '',
+				'singular_title'       => '',
+				'title_gender'         => 'n',
+				'labels'               => array(),
+				'messages'             => array(),
+				'bulk_messages'        => array(),
+				'enter_title_here'     => '',
+				'description'          => '',
+				'public'               => false,
+				'exclude_from_search'  => null,
+				'publicly_queryable'   => null,
+				'show_ui'              => null,
+				'show_in_menu'         => null,
+				'show_add_new_in_menu' => true,
+				'show_in_admin_bar'    => null,
+				'show_in_nav_menus'    => null,
+				'show_in_rest'         => null,
+				'capability_type'      => 'post',
+				'capabilities'         => array(),
+				'map_meta_cap'         => null,
+				'hierarchical'         => false,
+				'supports'             => array( 'title', 'editor' ),
+				'has_archive'          => false,
+				'rewrite'              => null,
+				'query_var'            => true,
+				'can_export'           => true,
+				'position'             => null,
+				'table_columns'        => array(),
+				'row_actions'          => array(),
+				'bulk_actions'         => array(),
+				'help'                 => array(
+					'tabs'                 => array(),
+					'sidebar'              => '',
 				),
-				'list_help'				=> array(
-					'tabs'					=> array(),
-					'sidebar'				=> '',
+				'list_help'            => array(
+					'tabs'                 => array(),
+					'sidebar'              => '',
 				),
 			);
 

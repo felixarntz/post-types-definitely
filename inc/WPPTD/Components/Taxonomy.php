@@ -291,6 +291,15 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 					}
 				}
 
+				// handle REST API default
+				if ( null === $this->args['show_in_rest'] ) {
+					if ( null !== $this->args['public'] ) {
+						$this->args['show_in_rest'] = $this->args['public'];
+					} else {
+						$this->args['show_in_rest'] = false;
+					}
+				}
+
 				$this->args = Utility::validate_ui_args( $this->args );
 
 				$this->args = Utility::validate_position_args( $this->args );
@@ -318,35 +327,36 @@ if ( ! class_exists( 'WPPTD\Components\Taxonomy' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'					=> '',
-				'singular_title'		=> '',
-				'title_gender'			=> 'n',
-				'labels'				=> array(),
-				'messages'				=> array(),
-				'description'			=> '',
-				'public'				=> true,
-				'show_ui'				=> null,
-				'show_in_menu'			=> null,
-				'show_in_nav_menus'		=> null,
-				'show_tagcloud'			=> null,
-				'show_in_quick_edit'	=> null,
-				'show_admin_column'		=> false,
-				'capabilities'			=> array(),
-				'hierarchical'			=> false,
-				'rewrite'				=> null,
-				'query_var'				=> true,
-				'sort'					=> null,
-				'position'				=> null,
-				'table_columns'			=> array(),
-				'row_actions'			=> array(),
-				'bulk_actions'			=> array(),
-				'help'					=> array(
-					'tabs'					=> array(),
-					'sidebar'				=> '',
+				'title'              => '',
+				'singular_title'     => '',
+				'title_gender'       => 'n',
+				'labels'             => array(),
+				'messages'           => array(),
+				'description'        => '',
+				'public'             => true,
+				'show_ui'            => null,
+				'show_in_menu'       => null,
+				'show_in_nav_menus'  => null,
+				'show_tagcloud'      => null,
+				'show_in_quick_edit' => null,
+				'show_in_rest'       => null,
+				'show_admin_column'  => false,
+				'capabilities'       => array(),
+				'hierarchical'       => false,
+				'rewrite'            => null,
+				'query_var'          => true,
+				'sort'               => null,
+				'position'           => null,
+				'table_columns'      => array(),
+				'row_actions'        => array(),
+				'bulk_actions'       => array(),
+				'help'               => array(
+					'tabs'               => array(),
+					'sidebar'            => '',
 				),
-				'list_help'				=> array(
-					'tabs'					=> array(),
-					'sidebar'				=> '',
+				'list_help'          => array(
+					'tabs'               => array(),
+					'sidebar'            => '',
 				),
 			);
 

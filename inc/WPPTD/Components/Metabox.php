@@ -210,12 +210,12 @@ if ( ! class_exists( 'WPPTD\Components\Metabox' ) ) {
 		 */
 		protected function get_defaults() {
 			$defaults = array(
-				'title'			=> __( 'Metabox title', 'post-types-definitely' ),
-				'description'	=> '',
-				'context'		=> null,
-				'priority'		=> null,
-				'callback'		=> false, //only used if no fields are attached to this metabox
-				'position'		=> null,
+				'title'       => __( 'Metabox title', 'post-types-definitely' ),
+				'description' => '',
+				'context'     => null,
+				'priority'    => null,
+				'callback'    => false, //only used if no fields are attached to this metabox
+				'position'    => null,
 			);
 
 			if ( has_filter( 'wpptd_metabox_defaults' ) ) {
