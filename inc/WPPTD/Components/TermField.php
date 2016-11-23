@@ -52,6 +52,11 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 		 * @param WPPTD\Components\Taxonomy $parent_taxonomy the parent taxonomy component of this field
 		 */
 		public function register( $parent_metabox = null, $parent_taxonomy = null ) {
+			// Do not register meta at this point, unless it is specifically enabled for the REST API.
+			if ( ! $this->args['show_in_rest'] ) {
+				return;
+			}
+
 			if ( null === $parent_metabox ) {
 				$parent_metabox = $this->get_parent();
 			}
@@ -59,13 +64,22 @@ if ( ! class_exists( 'WPPTD\Components\TermField' ) ) {
 				$parent_taxonomy = $parent_metabox->get_parent();
 			}
 
+			$show_in_rest = $this->args['show_in_rest'];
+			if ( $show_in_rest && ! is_array( $show_in_rest ) ) {
+				$show_in_rest = array(
+					'name' => $this->args['title'],
+				);
+			}
+
 			$args = array(
-				'object_subtype'	=> $parent_taxonomy->slug,
-				'type'				=> $this->get_meta_type(),
-				'description'		=> ( ! empty( $this->args['rest_description'] ) ? $this->args['rest_description'] : $this->args['description'] ),
-				'single'			=> $this->is_meta_single(),
-				'auth_callback'		=> $this->args['rest_auth_callback'],
-				'show_in_rest'		=> $this->args['show_in_rest'],
+				// The following argument is currently not supported by Core.
+				'object_subtype' => $parent_taxonomy->slug,
+				'type'           => $this->get_meta_type(),
+				'description'    => ( ! empty( $this->args['rest_description'] ) ? $this->args['rest_description'] : $this->args['description'] ),
+				'single'         => $this->is_meta_single(),
+				'auth_callback'  => $this->args['rest_auth_callback'],
+				'show_in_rest'   => $show_in_rest,
+				'default'        => $this->args['default'],
 			);
 
 			register_meta( 'term', $this->slug, $args );

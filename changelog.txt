@@ -2,6 +2,7 @@
 
 = 0.6.7 =
 * Added: post type and taxonomy endpoints for the WP REST API are now handled automatically depending on their other public-related arguments
+* Enhanced: meta fields are provided with proper defaults for registration; registration is discouraged though due to the lack of object subtype handling in WordPress Core
 * Enhanced: new post type labels in WordPress 4.7 are now automatically generated
 
 = 0.6.6 =
